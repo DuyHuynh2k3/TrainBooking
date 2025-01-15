@@ -1,0 +1,90 @@
+/* Styling for the action buttons */
+/* Set min-height for the DataTable */
+.data-table-container {
+    min-height: 500px; /* Thay đổi giá trị tùy ý */
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding-top: 20px;
+  }
+  
+  /* .data-table .rdt_TableBody {
+    min-height: 500px;
+  } */
+  
+  /* Đảm bảo khi không có dữ liệu, vẫn hiển thị vùng bảng */
+  /* .data-table .rdt_Table {
+    min-height: 400px;
+  } */
+  
+  .Btn {
+    padding: 8px 12px;
+    margin: 0 5px;
+    border-radius: 10px;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+  }
+  
+  /* Individual button styles */
+  .readBtn {
+    background-color: #4caf50;
+    color: white;
+  }
+  
+  .editBtn {
+    background-color: #ffa500;
+    color: white;
+  }
+  
+  .deleteBtn {
+    background-color: #f44336;
+    color: white;
+  }
+  
+  /* Add hover effects */
+  .Btn:hover {
+    opacity: 0.8;
+  }
+
+  .modal{
+    margin: 20px auto;
+    width: 800px;
+    height: 900px;
+    background-color: #0f6c585f;
+  }
+  form {
+    display: grid;
+    justify-content: center;
+    padding-top: 30px
+  }
+  form input {
+    display: flex;
+    flex-direction: column;
+    width: 600px;
+    height: 40px;
+  }
+  form label {
+    font-weight: bold;
+    padding-right: 5px;
+    font-size: 20px;
+  }
+  .btn-close-right {
+    float: right;
+    top: -30px;
+    margin-right: 20px;
+    position: relative;
+    background-color: white;
+    border: none;
+  }
+  .btn {
+    display: flex;
+    justify-content: space-between;
+  }
+  .btn-close {
+    border: none;
+    height: 40px;
+    width: 300px;
+    gap: 5px;
+    font-size: 20px;
+  }

@@ -5,7 +5,6 @@ import { RiLockPasswordLine } from "react-icons/ri";
 
 export default function LoginSignup() {
   return (
-    <>
     <div className='container'>
         <div className="header">
             <div className="text">Login</div>
@@ -27,6 +26,5 @@ export default function LoginSignup() {
             <div className="submit">Login</div>
         </div>
     </div>
-    </>
   )
 }
