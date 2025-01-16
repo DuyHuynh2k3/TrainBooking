@@ -3,6 +3,7 @@ import DataTable from "react-data-table-component";
 import "./Table.css"; // Custom CSS for styling
 import Modal from "react-modal";
 import { IoCloseOutline } from "react-icons/io5";
+import { FiSearch } from "react-icons/fi";
 
 // Initial sample data
 const initialData = [
@@ -38,8 +39,6 @@ const initialData = [
   },
 ];
 
-
-
 // Custom styles for DataTable
 const customStyles = {
   headCells: {
@@ -58,68 +57,49 @@ const customStyles = {
   },
 };
 
+// Dropdown Menu Component
+const DropdownMenu = ({ row, onAction }) => {
+  const [isOpen, setIsOpen] = useState(false);
+
+  const toggleMenu = () => setIsOpen(!isOpen);
+
+  const closeMenu = () => setIsOpen(false);
+
+  const handleAction = (action) => {
+    onAction(action, row); // Gọi hàm xử lý hành động
+    closeMenu(); // Đóng menu sau khi chọn
+  };
+
+  return (
+    <div
+      className="dropdown"
+      onMouseLeave={closeMenu} // Đóng menu khi di chuột ra ngoài
+    >
+      <button className="dropdown-button" onClick={toggleMenu}>
+        &#x22EE; {/* Dấu ba chấm dọc */}
+      </button>
+      {isOpen && (
+        <div className="dropdown-menu">
+          <div onClick={() => handleAction("View")} className="dropdown-item">
+            View
+          </div>
+          <div onClick={() => handleAction("Update")} className="dropdown-item">
+            Update
+          </div>
+          <div onClick={() => handleAction("Delete")} className="dropdown-item">
+            Delete
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
 const Table = () => {
-
-  // Table column configuration
-const columns = [
-  {
-    name: "Train Number",
-    selector: (row) => row.trainNumber,
-    sortable: true,
-  },
-  {
-    name: "Train",
-    selector: (row) => row.train,
-    sortable: true,
-  },
-  {
-    name: "Route",
-    selector: (row) => row.route,
-  },
-  {
-    name: "Departure",
-    selector: (row) => row.departure,
-  },
-  {
-    name: "Arrival",
-    selector: (row) => row.arrival,
-  },
-  {
-    name: "Dep. Time",
-    selector: (row) => row.depTime,
-  },
-  {
-    name: "Fare",
-    selector: (row) => row.fare,
-  },
-  {
-    name: "Total Passengers",
-    selector: (row) => row.totalPassengers,
-  },
-  {
-    name: "Actions",
-    cell: (row) => (
-      <div style={{ display: "flex", justifyContent: "space-around" }}>
-        <button className="update-btn" onClick={() => handleUpdate(row)}>
-          Update
-        </button>
-        <button className="delete-btn" onClick={() => handleDelete(row)}>
-          Delete
-        </button>
-        <button className="view-btn" onClick={() => handleView(row)}>
-          View
-        </button>
-      </div>
-    ),
-  },
-];
-
-
   const [data, setData] = useState(initialData);
   const [searchText, setSearchText] = useState(""); // For searching trains
   const [modalIsOpen, setModalIsOpen] = useState(false); // Modal visibility
-  const [modalType, setModalType] = useState(null); // "update" or "view"
-  const [selectedTrain, setSelectedTrain] = useState(null); // Selected train data
+  const [modalType, setModalType] = useState(null); // "add", "update", or "view"
   const [newTrain, setNewTrain] = useState({
     trainNumber: "",
     train: "",
@@ -131,23 +111,91 @@ const columns = [
     totalPassengers: "",
   });
 
-  // Handle updating train information
+  const handleAction = (action, row) => {
+    if (action === "View") {
+      handleView(row);
+    } else if (action === "Update") {
+      handleUpdate(row);
+    } else if (action === "Delete") {
+      handleDelete(row);
+    }
+  };
+
+  // Table column configuration
+  const columns = [
+    {
+      name: "Train Number",
+      selector: (row) => row.trainNumber,
+      sortable: true,
+    },
+    {
+      name: "Train",
+      selector: (row) => row.train,
+      sortable: true,
+    },
+    {
+      name: "Route",
+      selector: (row) => row.route,
+    },
+    {
+      name: "Departure",
+      selector: (row) => row.departure,
+    },
+    {
+      name: "Arrival",
+      selector: (row) => row.arrival,
+    },
+    {
+      name: "Dep. Time",
+      selector: (row) => row.depTime,
+    },
+    {
+      name: "Fare",
+      selector: (row) => row.fare,
+    },
+    {
+      name: "Total Passengers",
+      selector: (row) => row.totalPassengers,
+    },
+    {
+      name: "Actions",
+      cell: (row) => <DropdownMenu row={row} onAction={handleAction} />,
+    },
+  ];
+
+  // Handle adding a new train
+  const handleAdd = () => {
+    setModalType("add");
+    setNewTrain({
+      trainNumber: "",
+      train: "",
+      route: "",
+      departure: "",
+      arrival: "",
+      depTime: "",
+      fare: "",
+      totalPassengers: "",
+    });
+    openModal();
+  };
+
+  // Handle updating a train
   const handleUpdate = (row) => {
-    setSelectedTrain(row);
     setModalType("update");
+    setNewTrain(row);
     openModal();
   };
 
   // Handle viewing train details
   const handleView = (row) => {
-    setSelectedTrain(row);
     setModalType("view");
+    setNewTrain(row);
     openModal();
   };
 
   // Handle deleting a train
   const handleDelete = (row) => {
-    setData(data.filter(train => train.trainNumber !== row.trainNumber));
+    setData(data.filter((train) => train.trainNumber !== row.trainNumber));
   };
 
   // Handle searching for trains
@@ -161,19 +209,9 @@ const columns = [
   // Open modal
   const openModal = () => setModalIsOpen(true);
 
-  // Close modal
-  const closeModal = () => setModalIsOpen(false);
-
-  // Handle input changes in the modal form
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setNewTrain({ ...newTrain, [name]: value });
-  };
-
-  // Add a new train to the list
-  const addNewTrain = () => {
-    setData([...data, newTrain]);
-    closeModal();
+  // Close modal and reset state
+  const closeModal = () => {
+    setModalIsOpen(false);
     setNewTrain({
       trainNumber: "",
       train: "",
@@ -186,6 +224,26 @@ const columns = [
     });
   };
 
+  // Handle input changes in the modal form
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setNewTrain({ ...newTrain, [name]: value });
+  };
+
+  // Save or update train
+  const saveOrUpdateTrain = () => {
+    if (modalType === "add") {
+      setData([...data, newTrain]);
+    } else if (modalType === "update") {
+      setData(
+        data.map((train) =>
+          train.trainNumber === newTrain.trainNumber ? newTrain : train
+        )
+      );
+    }
+    closeModal();
+  };
+
   return (
     <div className="data-table-container">
       {/* Search bar */}
@@ -195,10 +253,20 @@ const columns = [
           placeholder="Search trains..."
           value={searchText}
           onChange={(e) => setSearchText(e.target.value)}
-          style={{ padding: "5px", width: "300px" }}
+          className="search"
         />
-        <button onClick={openModal} style={{ padding: "5px 10px" }}>
-          Add Train
+        <FiSearch className="search-icon" />
+        <button onClick={handleAdd} style={{ padding: "10px 20px",
+        height: "50px",
+        backgroundColor: "#ff6600",
+        color: "#fff",
+        border: "none",
+        borderRadius: "8px",
+        fontSize: "14px",
+        fontWeight: "bold",
+        cursor: "pointer",
+        transition: "background-color 0.3s ease" }}>
+          + Add Train
         </button>
       </div>
 
@@ -214,8 +282,12 @@ const columns = [
 
       {/* Modal for adding or updating train */}
       <Modal isOpen={modalIsOpen} onRequestClose={closeModal} className="modal">
-        <h2 style={{ display: "flex", justifyContent: "center", paddingTop: "30px" }}>
-          {modalType === "update" ? "Update Train Info" : "View Train Info"}
+        <h2 style={{ textAlign: "center", padding: "10px 0" }}>
+          {modalType === "add"
+            ? "Add New Train"
+            : modalType === "update"
+            ? "Update Train Info"
+            : "View Train Info"}
         </h2>
         <button type="button" onClick={closeModal} className="btn-close-right">
           <IoCloseOutline />
@@ -225,7 +297,7 @@ const columns = [
           <input
             type="text"
             name="trainNumber"
-            value={selectedTrain?.trainNumber || ""}
+            value={newTrain.trainNumber}
             onChange={handleInputChange}
             disabled={modalType === "view"}
           />
@@ -234,7 +306,7 @@ const columns = [
           <input
             type="text"
             name="train"
-            value={selectedTrain?.train || ""}
+            value={newTrain.train}
             onChange={handleInputChange}
             disabled={modalType === "view"}
           />
@@ -243,7 +315,7 @@ const columns = [
           <input
             type="text"
             name="route"
-            value={selectedTrain?.route || ""}
+            value={newTrain.route}
             onChange={handleInputChange}
             disabled={modalType === "view"}
           />
@@ -252,7 +324,7 @@ const columns = [
           <input
             type="text"
             name="departure"
-            value={selectedTrain?.departure || ""}
+            value={newTrain.departure}
             onChange={handleInputChange}
             disabled={modalType === "view"}
           />
@@ -261,7 +333,7 @@ const columns = [
           <input
             type="text"
             name="arrival"
-            value={selectedTrain?.arrival || ""}
+            value={newTrain.arrival}
             onChange={handleInputChange}
             disabled={modalType === "view"}
           />
@@ -270,7 +342,7 @@ const columns = [
           <input
             type="text"
             name="depTime"
-            value={selectedTrain?.depTime || ""}
+            value={newTrain.depTime}
             onChange={handleInputChange}
             disabled={modalType === "view"}
           />
@@ -279,7 +351,7 @@ const columns = [
           <input
             type="text"
             name="fare"
-            value={selectedTrain?.fare || ""}
+            value={newTrain.fare}
             onChange={handleInputChange}
             disabled={modalType === "view"}
           />
@@ -288,21 +360,16 @@ const columns = [
           <input
             type="text"
             name="totalPassengers"
-            value={selectedTrain?.totalPassengers || ""}
+            value={newTrain.totalPassengers}
             onChange={handleInputChange}
             disabled={modalType === "view"}
           />
           <br />
-          <div className="btn">
-            {modalType === "update" && (
-              <button type="button" onClick={addNewTrain} className="btn-close" style={{ background: "red" }}>
-                Update
-              </button>
-            )}
-            <button type="button" onClick={closeModal} className="btn-close" style={{ background: "green" }}>
-              Close
+          {modalType !== "view" && (
+            <button type="button" onClick={saveOrUpdateTrain} className="btn-save">
+              {modalType === "add" ? "Add" : "Update"}
             </button>
-          </div>
+          )}
         </form>
       </Modal>
     </div>
