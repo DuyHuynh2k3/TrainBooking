@@ -1,21 +1,12 @@
-/* Styling for the action buttons */
-/* Set min-height for the DataTable */
+/* DataTable Container */
 .data-table-container {
-  min-height: 500px; /* Thay đổi giá trị tùy ý */
+  min-height: 500px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
 }
 
-/* .data-table .rdt_TableBody {
-  min-height: 500px;
-} */
-
-/* Đảm bảo khi không có dữ liệu, vẫn hiển thị vùng bảng */
-/* .data-table .rdt_Table {
-  min-height: 400px;
-} */
-
+/* Buttons */
 .Btn {
   padding: 8px 12px;
   margin: 0 5px;
@@ -25,7 +16,6 @@
   font-size: 14px;
 }
 
-/* Individual button styles */
 .readBtn {
   background-color: #4caf50;
   color: white;
@@ -41,13 +31,13 @@
   color: white;
 }
 
-/* Add hover effects */
 .Btn:hover {
   opacity: 0.8;
 }
 
+/* Dropdown */
 .dropdown {
-  position: relative;
+  position: relative; /* Ensure dropdown-menu is positioned relative to this */
   display: inline-block;
 }
 
@@ -59,14 +49,15 @@
 }
 
 .dropdown-menu {
-  position: absolute;
+  position: absolute; /* Absolute to allow overlap */
   top: 25px;
   right: 0;
   background-color: white;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
   border-radius: 10px;
-  z-index: 1000;
   width: 100px;
+  z-index: 1000; /* High z-index ensures visibility */
+  overflow: visible; /* Prevent hiding child elements */
 }
 
 .dropdown-item {
@@ -74,11 +65,14 @@
   cursor: pointer;
   font-size: 14px;
   text-align: left;
-  border-bottom: 1px black;
+  border-bottom: 1px solid #e0e0e0;
   transition: background-color 0.2s ease;
-  z-index: 3000;
 }
 
 .dropdown-item:hover {
   background-color: #f0f0f0;
+}
+
+.dropdown-menu .dropdown-item {
+  z-index: 1000 !important; /* Override inline styles from libraries if any */
 }

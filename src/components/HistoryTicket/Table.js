@@ -1,7 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import DataTable from "react-data-table-component";
 import { data } from "./data";
 import "./Table.css"; // Thêm CSS để styling dropdown
+import { SContainer, SSSearch, SSSearchIcon } from "./styles";
+import { AiOutlineSearch } from "react-icons/ai";
 
 const customStyles = {
   headCells: {
@@ -29,6 +31,7 @@ const DropdownMenu = ({ row }) => {
     <div
       className="dropdown"
       onMouseLeave={closeMenu} // Tắt menu khi di chuột ra ngoài
+      style={{ position: "relative" }} // Đảm bảo dropdown được định vị đúng
     >
       <button className="dropdown-button" onClick={toggleMenu}>
         &#x22EE; {/* Dấu ba chấm dọc */}
@@ -62,7 +65,7 @@ const columns = [
   {
     name: "Email",
     selector: (row) => row.email,
-    minWidth: "-1px",
+    minWidth: "300px",
   },
   // {
   //   name: "Số điện thoại",
@@ -84,15 +87,48 @@ const columns = [
 ];
 
 const Table = () => {
+  const [records, setRecords] = useState(data); // Move useState here
+  const searchRef = useRef(null);
+
+  const handleChange = (e) => {
+    const query = e.target.value.toLocaleLowerCase(); // Chuyển query về chữ thường
+
+    const newRecords = data.filter((item) => {
+      // Duyệt qua tất cả giá trị của các thuộc tính trong item
+      return Object.values(item)
+        .map((value) => (value ?? "").toString().toLocaleLowerCase()) // Chuyển đổi tất cả giá trị về chuỗi chữ thường
+        .some((value) => value.includes(query)); // Kiểm tra nếu bất kỳ giá trị nào chứa query
+    });
+
+    setRecords(newRecords);
+  };
+
+  const searchClickHandler = () => {
+    searchRef.current.focus();
+  };
+
   return (
-    <div className="data-table-container">
-      <DataTable
-        columns={columns}
-        data={data}
-        customStyles={customStyles}
-        pagination
-      />
-    </div>
+    <SContainer>
+      <SSSearch onClick={searchClickHandler}>
+        <SSSearchIcon>
+          <AiOutlineSearch />
+        </SSSearchIcon>
+        <input
+          type="text"
+          ref={searchRef}
+          placeholder="Search"
+          onChange={handleChange}
+        />
+      </SSSearch>
+      <div className="data-table-container">
+        <DataTable
+          columns={columns}
+          data={records}
+          customStyles={customStyles}
+          pagination
+        />
+      </div>
+    </SContainer>
   );
 };
 

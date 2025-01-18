@@ -247,7 +247,13 @@ const Table = () => {
   return (
     <div className="data-table-container">
       {/* Search bar */}
-      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "10px" }}>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          marginBottom: "10px",
+        }}
+      >
         <input
           type="text"
           placeholder="Search trains..."
@@ -256,16 +262,21 @@ const Table = () => {
           className="search"
         />
         <FiSearch className="search-icon" />
-        <button onClick={handleAdd} style={{ padding: "10px 20px",
-        height: "50px",
-        backgroundColor: "#ff6600",
-        color: "#fff",
-        border: "none",
-        borderRadius: "8px",
-        fontSize: "14px",
-        fontWeight: "bold",
-        cursor: "pointer",
-        transition: "background-color 0.3s ease" }}>
+        <button
+          onClick={handleAdd}
+          style={{
+            padding: "10px 20px",
+            height: "50px",
+            backgroundColor: "#ff6600",
+            color: "#fff",
+            border: "none",
+            borderRadius: "8px",
+            fontSize: "14px",
+            fontWeight: "bold",
+            cursor: "pointer",
+            transition: "background-color 0.3s ease",
+          }}
+        >
           + Add Train
         </button>
       </div>
@@ -366,7 +377,11 @@ const Table = () => {
           />
           <br />
           {modalType !== "view" && (
-            <button type="button" onClick={saveOrUpdateTrain} className="btn-save">
+            <button
+              type="button"
+              onClick={saveOrUpdateTrain}
+              className="btn-save"
+            >
               {modalType === "add" ? "Add" : "Update"}
             </button>
           )}

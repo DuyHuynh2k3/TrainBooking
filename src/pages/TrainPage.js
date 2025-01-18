@@ -1,7 +1,7 @@
 import React from "react";
 import "./style";
 import Table from "../components/Train/Table";
-import { SContainer } from "./style";
+import { SContainer } from "../components/HistoryTicket/styles";
 
 const TrainPage = () => {
   return (
