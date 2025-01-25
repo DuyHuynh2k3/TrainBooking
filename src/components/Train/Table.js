@@ -1,64 +1,21 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import DataTable from "react-data-table-component";
-import "./Table.css"; // Custom CSS for styling
-import Modal from "react-modal";
-import { IoCloseOutline } from "react-icons/io5";
-import { FiSearch } from "react-icons/fi";
+import { data } from "./data";
+import "./Table.css"; // Thêm CSS để styling dropdown
+import { AddTrain, SContainer, SSSearch, SSSearchIcon,ToolContainer,Modal} from "./styles";
+import { AiOutlineSearch } from "react-icons/ai";
 
-// Initial sample data
-const initialData = [
-  {
-    trainNumber: "CA-007",
-    train: "Black Water",
-    route: "Chicago - Carbondale",
-    departure: "Chicago",
-    arrival: "Carbondale",
-    depTime: "7:00 AM",
-    fare: "$33",
-    totalPassengers: 195,
-  },
-  {
-    trainNumber: "CA-107",
-    train: "Colonial",
-    route: "Boston - New York",
-    departure: "Boston",
-    arrival: "New York",
-    depTime: "10:45 AM",
-    fare: "$35",
-    totalPassengers: 255,
-  },
-  {
-    trainNumber: "CA-207",
-    train: "Silver Star",
-    route: "New Orleans - Los Angeles",
-    departure: "New Orleans",
-    arrival: "Los Angeles",
-    depTime: "8:45 AM",
-    fare: "$149",
-    totalPassengers: 190,
-  },
-];
-
-// Custom styles for DataTable
 const customStyles = {
   headCells: {
     style: {
       backgroundColor: "rgb(230,230,230)",
-      fontSize: "16px",
-      fontWeight: "bold",
-      textAlign: "center",
-    },
-  },
-  cells: {
-    style: {
-      fontSize: "14px",
-      textAlign: "center",
+      fontSize: "17px",
+      fontWeight: "bolder",
     },
   },
 };
 
-// Dropdown Menu Component
-const DropdownMenu = ({ row, onAction }) => {
+const DropdownMenu = ({ row }) => {
   const [isOpen, setIsOpen] = useState(false);
 
   const toggleMenu = () => setIsOpen(!isOpen);
@@ -66,25 +23,26 @@ const DropdownMenu = ({ row, onAction }) => {
   const closeMenu = () => setIsOpen(false);
 
   const handleAction = (action) => {
-    onAction(action, row); // Gọi hàm xử lý hành động
-    closeMenu(); // Đóng menu sau khi chọn
+    alert(`${action} clicked for ${row.fullName}`);
+    setIsOpen(false); // Đóng menu sau khi click
   };
 
   return (
     <div
       className="dropdown"
-      onMouseLeave={closeMenu} // Đóng menu khi di chuột ra ngoài
+      onMouseLeave={closeMenu} // Tắt menu khi di chuột ra ngoài
+      style={{ position: "relative" }} // Đảm bảo dropdown được định vị đúng
     >
       <button className="dropdown-button" onClick={toggleMenu}>
         &#x22EE; {/* Dấu ba chấm dọc */}
       </button>
       {isOpen && (
         <div className="dropdown-menu">
-          <div onClick={() => handleAction("View")} className="dropdown-item">
-            View
+          <div onClick={() => handleAction("Read")} className="dropdown-item">
+            Read
           </div>
-          <div onClick={() => handleAction("Update")} className="dropdown-item">
-            Update
+          <div onClick={() => handleAction("Edit")} className="dropdown-item">
+            Edit
           </div>
           <div onClick={() => handleAction("Delete")} className="dropdown-item">
             Delete
@@ -95,300 +53,163 @@ const DropdownMenu = ({ row, onAction }) => {
   );
 };
 
+const columns = [
+  {
+    name: "Số hiệu tàu",
+    selector: (row) => row.TrainNumber,
+    minWidth: "150px", // Độ rộng tối thiểu
+    maxWidth: "150px", // Độ rộng tối đa (tuỳ chọn)
+  },
+  {
+    name: "Tên tàu",
+    selector: (row) => row.Train,
+    minWidth: "150px",
+  },
+  {
+    name: "Lộ trình",
+    selector: (row) => row.Route,
+    minWidth: "150px", // Đặt độ rộng cho cột lớn hơn
+  },
+  {
+    name: "Điểm khởi hành",
+    selector: (row) => row.Departure,
+    minWidth: "150px",
+  },
+  {
+    name: "Điểm đến",
+    selector: (row) => row.Arrival,
+    minWidth: "150px",
+  },
+  {
+    name: "Thời gian khởi hành",
+    selector: (row) => row.DepTime,
+    minWidth: "200px",
+  },
+  {
+    name: "Giá vé",
+    selector: (row) => row.Fare,
+    minWidth: "100px",
+  },
+  {
+    name: "Tổng số hành khách",
+    selector: (row) => row.TotalPassengers,
+    minWidth: "200px",
+  },
+  {
+    name: "Action",
+    cell: (row) => <DropdownMenu row={row} />,
+    minWidth: "100px",
+  },
+];
+
+
 const Table = () => {
-  const [data, setData] = useState(initialData);
-  const [searchText, setSearchText] = useState(""); // For searching trains
-  const [modalIsOpen, setModalIsOpen] = useState(false); // Modal visibility
-  const [modalType, setModalType] = useState(null); // "add", "update", or "view"
-  const [newTrain, setNewTrain] = useState({
-    trainNumber: "",
-    train: "",
-    route: "",
-    departure: "",
-    arrival: "",
-    depTime: "",
-    fare: "",
-    totalPassengers: "",
-  });
+  const [records, setRecords] = useState(data); // Move useState here
+  const searchRef = useRef(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const handleAction = (action, row) => {
-    if (action === "View") {
-      handleView(row);
-    } else if (action === "Update") {
-      handleUpdate(row);
-    } else if (action === "Delete") {
-      handleDelete(row);
-    }
-  };
+  const handleChange = (e) => {
+    const query = e.target.value.toLocaleLowerCase(); // Chuyển query về chữ thường
 
-  // Table column configuration
-  const columns = [
-    {
-      name: "Train Number",
-      selector: (row) => row.trainNumber,
-      sortable: true,
-    },
-    {
-      name: "Train",
-      selector: (row) => row.train,
-      sortable: true,
-    },
-    {
-      name: "Route",
-      selector: (row) => row.route,
-    },
-    {
-      name: "Departure",
-      selector: (row) => row.departure,
-    },
-    {
-      name: "Arrival",
-      selector: (row) => row.arrival,
-    },
-    {
-      name: "Dep. Time",
-      selector: (row) => row.depTime,
-    },
-    {
-      name: "Fare",
-      selector: (row) => row.fare,
-    },
-    {
-      name: "Total Passengers",
-      selector: (row) => row.totalPassengers,
-    },
-    {
-      name: "Actions",
-      cell: (row) => <DropdownMenu row={row} onAction={handleAction} />,
-    },
-  ];
-
-  // Handle adding a new train
-  const handleAdd = () => {
-    setModalType("add");
-    setNewTrain({
-      trainNumber: "",
-      train: "",
-      route: "",
-      departure: "",
-      arrival: "",
-      depTime: "",
-      fare: "",
-      totalPassengers: "",
+    const newRecords = data.filter((item) => {
+      // Duyệt qua tất cả giá trị của các thuộc tính trong item
+      return Object.values(item)
+        .map((value) => (value ?? "").toString().toLocaleLowerCase()) // Chuyển đổi tất cả giá trị về chuỗi chữ thường
+        .some((value) => value.includes(query)); // Kiểm tra nếu bất kỳ giá trị nào chứa query
     });
-    openModal();
+
+    setRecords(newRecords);
   };
 
-  // Handle updating a train
-  const handleUpdate = (row) => {
-    setModalType("update");
-    setNewTrain(row);
-    openModal();
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    const newTrain = Object.fromEntries(formData.entries());
+    console.log(newTrain); // Dữ liệu tàu mới
+    setIsModalOpen(false); // Đóng modal sau khi thêm
   };
+  
 
-  // Handle viewing train details
-  const handleView = (row) => {
-    setModalType("view");
-    setNewTrain(row);
-    openModal();
-  };
-
-  // Handle deleting a train
-  const handleDelete = (row) => {
-    setData(data.filter((train) => train.trainNumber !== row.trainNumber));
-  };
-
-  // Handle searching for trains
-  const filteredData = data.filter(
-    (item) =>
-      item.trainNumber.toLowerCase().includes(searchText.toLowerCase()) ||
-      item.train.toLowerCase().includes(searchText.toLowerCase()) ||
-      item.route.toLowerCase().includes(searchText.toLowerCase())
-  );
-
-  // Open modal
-  const openModal = () => setModalIsOpen(true);
-
-  // Close modal and reset state
-  const closeModal = () => {
-    setModalIsOpen(false);
-    setNewTrain({
-      trainNumber: "",
-      train: "",
-      route: "",
-      departure: "",
-      arrival: "",
-      depTime: "",
-      fare: "",
-      totalPassengers: "",
-    });
-  };
-
-  // Handle input changes in the modal form
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setNewTrain({ ...newTrain, [name]: value });
-  };
-
-  // Save or update train
-  const saveOrUpdateTrain = () => {
-    if (modalType === "add") {
-      setData([...data, newTrain]);
-    } else if (modalType === "update") {
-      setData(
-        data.map((train) =>
-          train.trainNumber === newTrain.trainNumber ? newTrain : train
-        )
-      );
-    }
-    closeModal();
+  const searchClickHandler = () => {
+    searchRef.current.focus();
   };
 
   return (
-    <div className="data-table-container">
-      {/* Search bar */}
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          marginBottom: "10px",
-        }}
-      >
+    <SContainer>
+      <ToolContainer>
+      <SSSearch onClick={searchClickHandler}>
+        <SSSearchIcon>
+          <AiOutlineSearch />
+        </SSSearchIcon>
         <input
           type="text"
-          placeholder="Search trains..."
-          value={searchText}
-          onChange={(e) => setSearchText(e.target.value)}
-          className="search"
+          ref={searchRef}
+          placeholder="Search"
+          onChange={handleChange}
         />
-        <FiSearch className="search-icon" />
-        <button
-          onClick={handleAdd}
-          style={{
-            padding: "10px 20px",
-            height: "50px",
-            backgroundColor: "#ff6600",
-            color: "#fff",
-            border: "none",
-            borderRadius: "8px",
-            fontSize: "14px",
-            fontWeight: "bold",
-            cursor: "pointer",
-            transition: "background-color 0.3s ease",
-          }}
-        >
-          + Add Train
-        </button>
+      </SSSearch>
+      <AddTrain>
+      <button onClick={() => setIsModalOpen(true)} className="btn-add">
+       + ADD
+      </button>
+    </AddTrain>
+      </ToolContainer>
+      <div className="data-table-container">
+        <DataTable
+          columns={columns}
+          data={records}
+          customStyles={customStyles}
+          pagination
+        />
       </div>
-
-      {/* Data table */}
-      <DataTable
-        columns={columns}
-        data={filteredData}
-        customStyles={customStyles}
-        pagination
-        striped
-        highlightOnHover
-      />
-
-      {/* Modal for adding or updating train */}
-      <Modal isOpen={modalIsOpen} onRequestClose={closeModal} className="modal">
-        <h2 style={{ textAlign: "center", padding: "10px 0" }}>
-          {modalType === "add"
-            ? "Add New Train"
-            : modalType === "update"
-            ? "Update Train Info"
-            : "View Train Info"}
-        </h2>
-        <button type="button" onClick={closeModal} className="btn-close-right">
-          <IoCloseOutline />
-        </button>
-        <form>
-          <label>Train Number:</label>
-          <input
-            type="text"
-            name="trainNumber"
-            value={newTrain.trainNumber}
-            onChange={handleInputChange}
-            disabled={modalType === "view"}
-          />
-          <br />
-          <label>Train Name:</label>
-          <input
-            type="text"
-            name="train"
-            value={newTrain.train}
-            onChange={handleInputChange}
-            disabled={modalType === "view"}
-          />
-          <br />
-          <label>Route:</label>
-          <input
-            type="text"
-            name="route"
-            value={newTrain.route}
-            onChange={handleInputChange}
-            disabled={modalType === "view"}
-          />
-          <br />
-          <label>Departure:</label>
-          <input
-            type="text"
-            name="departure"
-            value={newTrain.departure}
-            onChange={handleInputChange}
-            disabled={modalType === "view"}
-          />
-          <br />
-          <label>Arrival:</label>
-          <input
-            type="text"
-            name="arrival"
-            value={newTrain.arrival}
-            onChange={handleInputChange}
-            disabled={modalType === "view"}
-          />
-          <br />
-          <label>Departure Time:</label>
-          <input
-            type="text"
-            name="depTime"
-            value={newTrain.depTime}
-            onChange={handleInputChange}
-            disabled={modalType === "view"}
-          />
-          <br />
-          <label>Fare:</label>
-          <input
-            type="text"
-            name="fare"
-            value={newTrain.fare}
-            onChange={handleInputChange}
-            disabled={modalType === "view"}
-          />
-          <br />
-          <label>Total Passengers:</label>
-          <input
-            type="text"
-            name="totalPassengers"
-            value={newTrain.totalPassengers}
-            onChange={handleInputChange}
-            disabled={modalType === "view"}
-          />
-          <br />
-          {modalType !== "view" && (
-            <button
-              type="button"
-              onClick={saveOrUpdateTrain}
-              className="btn-save"
-            >
-              {modalType === "add" ? "Add" : "Update"}
-            </button>
-          )}
-        </form>
-      </Modal>
+      {isModalOpen && (
+  <Modal>
+    <div className="modal-content">
+      <h2>Thêm Tàu</h2>
+      <form onSubmit={handleSubmit}>
+        <div className="form-group">
+          <label>Số hiệu tàu</label>
+          <input type="text" placeholder="Nhập số hiệu tàu" name="TrainNumber" required />
+        </div>
+        <div className="form-group">
+          <label>Tên tàu</label>
+          <input type="text" placeholder="Nhập tên tàu" name="TrainName" required />
+        </div>
+        <div className="form-group">
+          <label>Lộ trình</label>
+          <input type="text" placeholder="Nhập lộ trình" name="Route" required />
+        </div>
+        <div className="form-group">
+          <label>Điểm khởi hành</label>
+          <input type="text" placeholder="Nhập điểm khởi hành" name="Departure" required />
+        </div>
+        <div className="form-group">
+          <label>Điểm đến</label>
+          <input type="text" placeholder="Nhập điểm đến" name="Arrival" required />
+        </div>
+        <div className="form-group">
+          <label>Thời gian khởi hành</label>
+          <input type="time" name="DepTime" required />
+        </div>
+        <div className="form-group">
+          <label>Giá vé</label>
+          <input type="number" placeholder="Nhập giá vé" name="Fare" required />
+        </div>
+        <div className="form-group">
+          <label>Tổng số hành khách</label>
+          <input type="number" placeholder="Nhập tổng số hành khách" name="TotalPassengers" required />
+        </div>
+        <div className="form-actions">
+          <button type="submit">Lưu</button>
+          <button type="button" onClick={() => setIsModalOpen(false)}>
+            Đóng
+          </button>
+        </div>
+      </form>
     </div>
+  </Modal>
+  )}
+    </SContainer>
   );
 };
-
 export default Table;

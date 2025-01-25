@@ -76,3 +76,13 @@
 .dropdown-menu .dropdown-item {
   z-index: 1000 !important; /* Override inline styles from libraries if any */
 }
+
+.rdt_TableBody .rdt_TableRow {
+  background-color: white; /* Màu nền mặc định */
+  transition: background-color 0.3s ease; /* Hiệu ứng mượt */
+}
+
+.rdt_TableBody .rdt_TableRow:hover {
+  background-color: rgba(0, 123, 255, 0.1); /* Màu nền khi hover */
+  cursor: pointer; /* Thay đổi con trỏ chuột */
+}

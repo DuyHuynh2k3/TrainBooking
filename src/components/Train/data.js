@@ -1,0 +1,55 @@
+ export const data = [
+    {
+      TrainNumber: "101",
+      Train: "Tàu Thống Nhất",
+      Route: "Hà Nội - Hồ Chí Minh",
+      Departure: "Hà Nội",
+      Arrival: "Hồ Chí Minh",
+      DepTime: "06:00 AM",
+      Fare: "500,000 VND",
+      TotalPassengers: 200,
+    },
+    {
+      TrainNumber: "102",
+      Train: "Tàu SE1",
+      Route: "Đà Nẵng - Hà Nội",
+      Departure: "Đà Nẵng",
+      Arrival: "Hà Nội",
+      DepTime: "08:00 AM",
+      Fare: "400,000 VND",
+      TotalPassengers: 180,
+    },
+    {
+      TrainNumber: "103",
+      Train: "Tàu SE2",
+      Route: "Hà Nội - Đà Nẵng",
+      Departure: "Hà Nội",
+      Arrival: "Đà Nẵng",
+      DepTime: "07:00 AM",
+      Fare: "450,000 VND",
+      TotalPassengers: 190,
+    },
+    {
+      TrainNumber: "104",
+      Train: "Tàu TN1",
+      Route: "Hồ Chí Minh - Nha Trang",
+      Departure: "Hồ Chí Minh",
+      Arrival: "Nha Trang",
+      DepTime: "05:00 PM",
+      Fare: "300,000 VND",
+      TotalPassengers: 150,
+    },
+    {
+      TrainNumber: "105",
+      Train: "Tàu TN2",
+      Route: "Hà Nội - Hải Phòng",
+      Departure: "Hà Nội",
+      Arrival: "Hải Phòng",
+      DepTime: "06:30 AM",
+      Fare: "100,000 VND",
+      TotalPassengers: 250,
+    },
+  ];
+  
+
+  
