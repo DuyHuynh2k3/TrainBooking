@@ -1,0 +1,11 @@
+form {
+    padding-top: 15px;
+}
+.text-main {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+input,button {
+    height: 50px;
+}
