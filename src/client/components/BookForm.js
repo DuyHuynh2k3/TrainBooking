@@ -1,6 +1,47 @@
 import React from "react";
 import "../../styles/BookForm.css";
 import { FiAlignJustify } from "react-icons/fi";
+import TextField from "@mui/material/TextField";
+import Stack from "@mui/material/Stack";
+import Autocomplete from "@mui/material/Autocomplete";
+
+// Danh sách các ga tàu
+const stations = [
+  { title: "Lào Cai" },
+  { title: "Phố Lu" },
+  { title: "Bảo Hà" },
+  { title: "Yên Bái" },
+  { title: "Phú Thọ" },
+  { title: "Việt Trì" },
+  { title: "Đông Anh" },
+  { title: "Hà Nội" },
+  { title: "Phủ Lý" },
+  { title: "Nam Định" },
+  { title: "Ninh Bình" },
+  { title: "Bỉm Sơn" },
+  { title: "Thanh Hóa" },
+  { title: "Minh Khôi" },
+  { title: "Chợ Sy" },
+  { title: "Vinh" },
+  { title: "Hồng Lĩnh" },
+  { title: "Đồng Hới" },
+  { title: "Đông Hà" },
+  { title: "Huế" },
+  { title: "Đà Nẵng" },
+  { title: "Tam Kỳ" },
+  { title: "Quảng Ngãi" },
+  { title: "Diêu Trì" },
+  { title: "Tuy Hòa" },
+  { title: "Nha Trang" },
+  { title: "Tháp Chàm" },
+  { title: "Suối Kiết" },
+  { title: "Sông Mao" },
+  { title: "Ma Lâm" },
+  { title: "Long Khánh" },
+  { title: "Dĩ An" },
+  { title: "Biên Hòa" },
+  { title: "Sài Gòn" },
+];
 
 const BookForm = () => {
   return (
@@ -23,18 +64,30 @@ const BookForm = () => {
                 <div className="row mb-3">
                   <div className="col-md-4">
                     <label className="form-label text-primary">Ga đi</label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      placeholder="Biên Hòa"
+                    <Autocomplete
+                      freeSolo
+                      options={stations.map((station) => station.title)}
+                      renderInput={(params) => (
+                        <TextField
+                          {...params}
+                          placeholder="Chọn ga đi"
+                          fullWidth
+                        />
+                      )}
                     />
                   </div>
                   <div className="col-md-4">
                     <label className="form-label text-primary">Ga đến</label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      placeholder="Nha Trang"
+                    <Autocomplete
+                      freeSolo
+                      options={stations.map((station) => station.title)}
+                      renderInput={(params) => (
+                        <TextField
+                          {...params}
+                          placeholder="Chọn ga đến"
+                          fullWidth
+                        />
+                      )}
                     />
                   </div>
                   <div className="col-md-4">
