@@ -2,19 +2,23 @@ import React from "react";
 import "../../styles/BookForm.css";
 import { FiAlignJustify } from "react-icons/fi";
 
-
 const BookForm = () => {
   return (
     <div className="container-fluid mt-2">
       <div className="row d-flex justify-content-center">
-      {/* Carousel on the left */}
-      <div className="col-lg-7 p-0">
-      <div
-            className="card shadow" style={{height:"100%"}}>
-            <div className="card-body">
-              <h5 className="card-title text-primary text-main" style={{ fontWeight: "bold" }}>
-                <i className="bi bi-list"></i> <FiAlignJustify />Thông tin hành trình
+        {/* Carousel on the left */}
+        <div className="col-lg-7 p-0">
+          <div className="card shadow" style={{ height: "100%" }}>
+            <div className="card-header text-primary">
+              <h5
+                className="card-title text- text-main m-0"
+                style={{ fontWeight: "bold" }}
+              >
+                <i className="bi bi-list"></i> <FiAlignJustify />
+                Thông tin hành trình
               </h5>
+            </div>
+            <div className="card-body">
               <form>
                 <div className="row mb-3">
                   <div className="col-md-4">
@@ -55,7 +59,10 @@ const BookForm = () => {
                           id="roundTrip"
                           defaultChecked
                         />
-                        <label className="form-check-label " htmlFor="roundTrip">
+                        <label
+                          className="form-check-label "
+                          htmlFor="roundTrip"
+                        >
                           Khứ hồi
                         </label>
                       </div>
@@ -81,35 +88,50 @@ const BookForm = () => {
             </div>
           </div>
         </div>
-      <div className="col-lg-3 d-flex flex-column">
-     {/* Giỏ vé */}
-     <div className="card mb-3 shadow">
-            <div className="card-body text-center">
-            <h5 className="card-title text-primary text-main" style={{ fontWeight: "bold" }}>
-                <i className="bi bi-list"></i> <FiAlignJustify />Giỏ Vé
+        <div className="col-lg-3 d-flex flex-column">
+          {/* Giỏ vé */}
+          <div className="card mb-3 shadow">
+            <div className="card-header  text-white">
+              <h5
+                className="card-title text-primary text-main m-0"
+                style={{ fontWeight: "bold" }}
+              >
+                <i className="bi bi-list"></i> <FiAlignJustify />
+                Giỏ Vé
               </h5>
-              <h6 className="card-title" style={{ fontWeight: "bold", color: "red",fontSize:"20px" }}>
+            </div>
+            <div className="card-body text-center">
+              <h6
+                className="card-title"
+                style={{ fontWeight: "bold", color: "red", fontSize: "20px" }}
+              >
                 Chưa có vé
               </h6>
               <button className="btn btn-primary w-100">Mua vé</button>
             </div>
           </div>
-
           {/* Đăng ký hội viên */}
           <div className="card shadow">
             <div className="card-body text-center">
-              <h6 className="card-title" style={{ fontWeight: "bold", color: "#007bff",fontSize:"23px"}}>
+              <h6
+                className="card-title"
+                style={{
+                  fontWeight: "bold",
+                  color: "#007bff",
+                  fontSize: "23px",
+                }}
+              >
                 ĐĂNG KÝ HỘI VIÊN
               </h6>
-              <p className="card-text" style={{ fontSize: "17px"}}>
+              <p className="card-text" style={{ fontSize: "17px" }}>
                 Công ty cổ phần vận tải đường sắt Việt Nam
               </p>
               <button className="btn btn-primary w-100">Đăng ký</button>
             </div>
           </div>
         </div>
-        </div>
       </div>
+    </div>
   );
 };
 

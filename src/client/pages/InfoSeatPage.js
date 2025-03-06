@@ -1,24 +1,22 @@
 import React from "react";
 import Header from "../components/Header";
-import BookingForm from "../components/BookForm";
-import Policies from "../components/Policies";
 import Footer from "../components/Footer";
 import Carousel from "../components/Carousel";
+import InfoSeat from "../components/InfoSeat";
 import "bootstrap/dist/css/bootstrap.min.css";
 
-const HomePage = () => {
+const InfoSeatPage = () => {
   return (
     <div className="d-flex flex-column" style={{backgroundColor:"#f7f7f7"}}>
       <Header />
       <Carousel />
-      <main className="">
-        <BookingForm />
-        <Policies />
-      </main>
+      <main className="mt-4">
+        <InfoSeat />
+       </main>
       <Footer />
     </div>
   );
 };
 
 
-export default HomePage;
+export default InfoSeatPage;

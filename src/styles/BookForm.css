@@ -9,3 +9,6 @@ form {
 input,button {
     height: 50px;
 }
+.card-header {
+    background-color: #f7f7f7 !important;
+}

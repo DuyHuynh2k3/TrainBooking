@@ -12,7 +12,11 @@ const Carousel = () => {
       <div className="row d-flex justify-content-center">
         {/* Carousel on the left */}
         <div className="col-lg-7 p-0">
-          <div id="carouselExampleIndicators" className="carousel slide" data-bs-ride="carousel">
+          <div
+            id="carouselExampleIndicators"
+            className="carousel slide"
+            data-bs-ride="carousel"
+          >
             <div className="carousel-indicators">
               <button
                 type="button"
@@ -37,21 +41,25 @@ const Carousel = () => {
             </div>
             <div className="carousel-inner">
               <div className="carousel-item active">
-                <img src={image1} 
-                alt="Slide 1"
-                style={{height:"310px",width:"100%"}}  
+                <img
+                  src={image1}
+                  alt="Slide 1"
+                  style={{ height: "310px", width: "100%" }}
                 />
               </div>
               <div className="carousel-item">
-                <img src={image2} 
-                alt="Slide 2" 
-                style={{height:"310px",width:"100%"}}  
+                <img
+                  src={image2}
+                  alt="Slide 2"
+                  style={{ height: "310px", width: "100%" }}
                 />
               </div>
               <div className="carousel-item">
-                <img src={image3} 
-                alt="Slide 3" 
-                style={{height:"310px",width:"100%"}}  />
+                <img
+                  src={image3}
+                  alt="Slide 3"
+                  style={{ height: "310px", width: "100%" }}
+                />
               </div>
             </div>
             <button
@@ -60,7 +68,10 @@ const Carousel = () => {
               data-bs-target="#carouselExampleIndicators"
               data-bs-slide="prev"
             >
-              <span className="carousel-control-prev-icon" aria-hidden="true"></span>
+              <span
+                className="carousel-control-prev-icon"
+                aria-hidden="true"
+              ></span>
               <span className="visually-hidden">Previous</span>
             </button>
             <button
@@ -69,7 +80,10 @@ const Carousel = () => {
               data-bs-target="#carouselExampleIndicators"
               data-bs-slide="next"
             >
-              <span className="carousel-control-next-icon" aria-hidden="true"></span>
+              <span
+                className="carousel-control-next-icon"
+                aria-hidden="true"
+              ></span>
               <span className="visually-hidden">Next</span>
             </button>
           </div>
@@ -78,10 +92,20 @@ const Carousel = () => {
         {/* Banners on the right */}
         <div className="col-lg-3 d-flex flex-column">
           <div className="mb-2">
-            <img src={bn1} className="img-fluid" alt="Banner 1" style={{width:"100%",height:"150px"}}/>
+            <img
+              src={bn1}
+              className="img-fluid"
+              alt="Banner 1"
+              style={{ width: "100%", height: "150px" }}
+            />
           </div>
           <div>
-            <img src={bn2} className="img-fluid" alt="Banner 2" style={{width:"100%",height:"150px"}}/>
+            <img
+              src={bn2}
+              className="img-fluid"
+              alt="Banner 2"
+              style={{ width: "100%", height: "150px" }}
+            />
           </div>
         </div>
       </div>

@@ -1,0 +1,14 @@
+
+.breadcrumb-item+.breadcrumb-item::before {
+  float: none;
+
+}
+/* CSS trong file Breadcrum.css */
+.breadcrumb-item a {
+    color: black;
+}
+
+.breadcrumb-item a:hover {
+  color:blue;
+  background-color: transparent; /* Tắt màu nền khi hover */
+}
