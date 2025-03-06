@@ -16,7 +16,7 @@ const PromotionDetailPage = () => {
         <div className="d-flex justify-content-center">
           <div className="container-fluid">
             <div className="row justify-content-center text-start mt-3 mb-2">
-              <div className="col-7">
+              <div className="col-9">
                 <h1>
                   Thông Báo: Lịch Tàu Cao Tốc Lightning 68 Xuân Ất Tỵ 2025
                 </h1>
@@ -26,7 +26,7 @@ const PromotionDetailPage = () => {
                 </span>
                 <p>Hotline hỗ trợ: 1900599997</p>
               </div>
-              <div className="col-7">
+              <div className="col-9">
                 <img
                   src={img1}
                   alt="Promotion 1"

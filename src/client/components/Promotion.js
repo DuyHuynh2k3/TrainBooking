@@ -14,7 +14,7 @@ const Promotion = () => {
     <div className="d-flex justify-content-center">
       <div className="container-fluid">
         <div className="row justify-content-center text-center">
-          <div className="col-4 border-bottom mb-2 p-0 ">
+          <div className="col-6 border-bottom mb-2 p-0 ">
             <Link to="/promotion-detail">
               <img
                 src={promotion1}
@@ -30,7 +30,7 @@ const Promotion = () => {
               Lightning 68 dịp Tết Xuân Ất Tỵ 2025 như sau:
             </span>
           </div>
-          <div className="col-2 text-start  border-bottom mb-2">
+          <div className="col-3 text-start  border-bottom mb-2">
             <img
               src={bn3}
               alt="Slide 1"
@@ -39,7 +39,7 @@ const Promotion = () => {
           </div>
         </div>
         <div className="row justify-content-center text-center">
-          <div className="col-2 p-0">
+          <div className="col-3 p-0">
             <Link to="/promotion-detail-1">
               <img
                 src={promotion2}
@@ -63,7 +63,7 @@ const Promotion = () => {
               Trưng Trắc từ Phan Thiết đi Phú Quý như sau:
             </span>
           </div>
-          <div className="col-2 ">
+          <div className="col-3 ">
             <Link to="/promotion-detail-2">
               <img
                 src={promotion3}
@@ -89,7 +89,7 @@ const Promotion = () => {
               tiết chương trình ưu đãi, hãy cùng tham khảo bài viết sau.
             </span>
           </div>
-          <div className="col-2 p-0">
+          <div className="col-3 p-0">
             <Link to="/promotion-detail-3">
               <img
                 src={promotion4}
@@ -118,7 +118,7 @@ const Promotion = () => {
           </div>
         </div>
         <div className="row justify-content-center text-center mt-2 ">
-          <div className="col-2 border-bottom p-0">
+          <div className="col-3 border-bottom p-0">
             <Link to="/promotion-detail-3">
               <img
                 src={promotion5}
@@ -144,7 +144,7 @@ const Promotion = () => {
               liên hệ quý khách qua zalo, số điện thoai, gmail.
             </span>
           </div>
-          <div className="col-2 border-bottom ">
+          <div className="col-3 border-bottom ">
             <Link to="/promotion-detail-3">
               <img
                 src={promotion6}
@@ -170,7 +170,7 @@ const Promotion = () => {
               phục vụ nhu cầu đi lại của hành khách từ ngày 16/10/2024
             </span>
           </div>
-          <div className="col-2 border-bottom p-0">
+          <div className="col-3 border-bottom p-0">
             <Link to="/promotion-detail-3">
               <img
                 src={promotion7}

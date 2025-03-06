@@ -10,7 +10,7 @@ export default function Breadcrumb() {
       style={{
         height:"50px"
       }}>
-        <div className="col-lg-6 mt-2">
+        <div className="col-lg-9 mt-2">
           <nav aria-label="breadcrumb">
             <ol className="breadcrumb">
               <li className="breadcrumb-item">

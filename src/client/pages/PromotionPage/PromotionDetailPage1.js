@@ -15,7 +15,7 @@ const PromotionDetailPage1 = () => {
         <div className="d-flex justify-content-center">
           <div className="container-fluid">
             <div className="row justify-content-center text-start mt-3 mb-2">
-              <div className="col-7">
+              <div className="col-9">
                 <h1>
                   Thông Báo: Lịch Chạy Tết 2025 Tàu Trưng Trắc Phan Thiết - Phú
                   Quý
@@ -31,7 +31,7 @@ const PromotionDetailPage1 = () => {
                 </span>
                 <p>Hotline hỗ trợ: 1900599997</p>
               </div>
-              <div className="col-7">
+              <div className="col-9">
                 <img
                   src={img1}
                   alt="Promotion 1"
