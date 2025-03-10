@@ -10,7 +10,7 @@ export default function Breadcrumb() {
       style={{
         height:"50px"
       }}>
-        <div className="col-lg-9 mt-2">
+        <div className="col-lg-9  mt-2">
           <nav aria-label="breadcrumb">
             <ol className="breadcrumb">
               <li className="breadcrumb-item">
@@ -19,7 +19,7 @@ export default function Breadcrumb() {
                 </a>
               </li>
               <li className="breadcrumb-item">
-                <a href="/promotion" style={{ textDecoration: "none" }}>
+                <a href="/homeblogpage" style={{ textDecoration: "none" }}>
                   Khuyến mãi
                 </a>
               </li>

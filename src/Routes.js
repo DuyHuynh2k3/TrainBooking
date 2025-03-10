@@ -4,11 +4,14 @@ import HomePage from "./client/pages/Homepage";
 import InfoSeatPage from "./client/pages/InfoSeatPage";
 import ReturnTicketPage from "./client/pages/ReturnTicketPage";
 import RulesPage from './client/pages/RulesPage';
+import ContactPage from './client/pages/ContactPage';
 import TimeTicketTrainPage from './client/pages/TimeTicketTrainPage';
 import GoTrain from './client/pages/GoTrainPage';
-import PromotionPage from "./client/pages/PromotionPage/PromotionPage";
-import PromotionDetailPage from "./client/pages/PromotionPage/PromotionDetailPage";
-import PromotionDetailPage1 from "./client/pages/PromotionPage/PromotionDetailPage1";
+import FindBillPage from './client/pages/FindBillPage';
+// import PromotionPage from "./client/pages/PromotionPage/PromotionPage";
+// import PromotionDetail from "./client/pages/PromotionPage/[...id]/PromotionDetail";
+import HomeBlogPage from "./client/pages/BlogPage/HomeBlogPage";
+import BlogDetailPage from "./client/pages/BlogPage/BlogDetailPage";
 
 const AppRoutes = () => {
   return (
@@ -16,12 +19,13 @@ const AppRoutes = () => {
       <Route path="/" element={<HomePage />} />
       <Route path="/infoseat" element={<InfoSeatPage />} />
       <Route path="/returnticket" element={<ReturnTicketPage />} />
-      <Route path="/promotion" element={<PromotionPage />} />
       <Route path="/rules" element={<RulesPage />} />
+      <Route path="/contact" element={<ContactPage />} />
       <Route path="/timetickettrain" element={<TimeTicketTrainPage />} />
       <Route path="/gotrain" element={<GoTrain />} />
-      <Route path="/promotion-detail" element={<PromotionDetailPage />} />
-      <Route path="/promotion-detail-1" element={<PromotionDetailPage1 />} />
+      <Route path="/findbill" element={<FindBillPage />} />
+      <Route path="/homeblogpage" element={<HomeBlogPage />} />
+      <Route path="/blog/:id" element={<BlogDetailPage />} />
     </Routes>
   );
 };

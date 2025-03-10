@@ -1,0 +1,33 @@
+/* Custom radio button style */
+.custom-radio {
+    background-color: #f0f0f0;
+    border: 1px solid #ccc;
+    padding: 7px 25px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    border: none;
+  }
+  
+  .custom-radio:hover {
+    background-color: #e0e0e0; /* Hover effect */
+  }
+  label {
+    font-size: 16px;
+  }
+  
+ .form-check-input {
+    position: relative;
+    left: 6px;
+ }
+ .form-control {
+    height: 38px !important; /* Đảm bảo chiều cao của các input */
+    border-radius: 0px;
+  }
+  
+  .img-fluid {
+    max-height: 38px; /* Đảm bảo hình ảnh CAPTCHA có chiều cao phù hợp */
+    object-fit: contain;
+  }
+  
+  
+  

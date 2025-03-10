@@ -27,7 +27,7 @@ const Header = () => {
           >
             TRẢ VÉ
           </a>
-          <a href="/promotion" className="text-white text-decoration-none mx-3">
+          <a href="/homeblogpage" className="text-white text-decoration-none mx-3">
             KHUYẾN MÃI
           </a>
           <div className="dropdown">
@@ -60,13 +60,13 @@ const Header = () => {
                 </a>
               </li>
               <li>
-                <a className="dropdown-item text-white" href="/">
+                <a className="dropdown-item text-white" href="/contact">
                   LIÊN HỆ
                 </a>
               </li>
             </ul>
           </div>
-          <a href="/" className="text-white text-decoration-none mx-3">
+          <a href="/findbill" className="text-white text-decoration-none mx-3">
             TRA CỨU HÓA ĐƠN
           </a>
           <a href="/" className="text-white text-decoration-none mx-3">
