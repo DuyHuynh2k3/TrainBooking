@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 
 function BlogCard({ blog }) {
   return (
-    <div className="card shadow-sm w-100" style={{ borderRadius: "10px" }}>
+    <div className="card shadow-sm w-100 mb-4" style={{ borderRadius: "10px" }}>
       <img
         src={blog.img}
         alt={blog.title}

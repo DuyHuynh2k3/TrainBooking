@@ -3,11 +3,11 @@ import { Routes, Route } from "react-router-dom";
 import HomePage from "./client/pages/Homepage";
 import InfoSeatPage from "./client/pages/InfoSeatPage";
 import ReturnTicketPage from "./client/pages/ReturnTicketPage";
-import RulesPage from './client/pages/RulesPage';
-import ContactPage from './client/pages/ContactPage';
-import TimeTicketTrainPage from './client/pages/TimeTicketTrainPage';
-import GoTrain from './client/pages/GoTrainPage';
-import FindBillPage from './client/pages/FindBillPage';
+import RulesPage from "./client/pages/RulesPage";
+import ContactPage from "./client/pages/ContactPage";
+import TimeTicketTrainPage from "./client/pages/TimeTicketTrainPage";
+import GoTrain from "./client/pages/GoTrainPage";
+import FindBillPage from "./client/pages/FindBillPage";
 // import PromotionPage from "./client/pages/PromotionPage/PromotionPage";
 // import PromotionDetail from "./client/pages/PromotionPage/[...id]/PromotionDetail";
 import HomeBlogPage from "./client/pages/BlogPage/HomeBlogPage";
@@ -24,7 +24,10 @@ const AppRoutes = () => {
       <Route path="/timetickettrain" element={<TimeTicketTrainPage />} />
       <Route path="/gotrain" element={<GoTrain />} />
       <Route path="/findbill" element={<FindBillPage />} />
-      <Route path="/homeblogpage" element={<HomeBlogPage />} />
+      <Route path="/homeblogpage"element={<HomeBlogPage category="khuyen-mai" />}/>
+      <Route path="/trong-nganh"element={<HomeBlogPage category="trong-nganh" />}/>
+      <Route path="/noi-bo" element={<HomeBlogPage category="noi-bo" />} />
+      <Route path="/atgt-duong-sat" element={<HomeBlogPage category="atgt-duong-sat" />}/>
       <Route path="/blog/:id" element={<BlogDetailPage />} />
     </Routes>
   );

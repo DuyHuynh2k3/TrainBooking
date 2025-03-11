@@ -27,9 +27,44 @@ const Header = () => {
           >
             TRẢ VÉ
           </a>
-          <a href="/homeblogpage" className="text-white text-decoration-none mx-3">
-            KHUYẾN MÃI
-          </a>
+        
+          <div className="dropdown">
+            <a
+              href="/"
+              className="text-white text-decoration-none mx-3 dropdown-toggle"
+              id="dropdownMenuLink"
+              data-bs-toggle="dropdown"
+              aria-expanded="false"
+            >
+              TIN TỨC
+            </a>
+            <ul
+              className="dropdown-menu bg-primary border-0"
+              aria-labelledby="dropdownMenuLink"
+            >
+              <li>
+                <a className="dropdown-item text-white" href="/atgt-duong-sat">
+                  ATGT Đường Sắt
+                </a>
+              </li>
+              <li>
+                <a className="dropdown-item text-white" href="/noi-bo">
+                  Nội Bộ
+                </a>
+              </li>
+              <li>
+                <a className="dropdown-item text-white" href="/trong-nganh">
+                 Trong Ngành
+                </a>
+              </li>
+              <li>
+                <a className="dropdown-item text-white" href="/homeblogpage">
+                  Khuyễn Mãi
+                </a>
+              </li>
+            </ul>
+          </div>
+
           <div className="dropdown">
             <a
               href="/"
