@@ -1,39 +1,61 @@
-const jsonServer = require("json-server");
-const server = jsonServer.create();
-const router = jsonServer.router("db.json");
-const middlewares = jsonServer.defaults();
+const express = require("express");
+const fs = require("fs");
+const path = require("path");
+const cors = require("cors");
 
-server.use(middlewares);
+const app = express();
+app.use(cors()); // Cho phép các yêu cầu từ các nguồn gốc khác
+const port = 5000;
 
-// API tùy chỉnh để lọc blog theo category trong URL
-// API custom lọc theo category
-// http://localhost:5000/blogs/category/noi-bo
-//http://localhost:5000/blogs?category=Nội Bộ
-//http://localhost:5000/blogs/category/trong-nganh
-//http://localhost:5000/blogs/category/noi-bo
-//http://localhost:5000/blogs/category/atgt-duong-sat
+// Đường dẫn đến tệp db.json
+const dbPath = path.join(__dirname, "db.json");
 
-server.get("/blogs/category/:category", (req, res) => {
-  const { category } = req.params;
-  const formattedCategory = category.replace(/-/g, " "); // Chuyển "noi-bo" -> "Nội Bộ"
+const getDataFromDB = () => {
+  try {
+    const data = fs.readFileSync(dbPath, "utf-8"); // Đọc tệp JSON
+    return JSON.parse(data); // Phân tích dữ liệu JSON
+  } catch (error) {
+    console.error("Lỗi khi đọc tệp db.json:", error);
+    return null; // Nếu có lỗi, trả về null
+  }
+};
 
-  // Lấy danh sách bài viết từ db.json
-  const allBlogs = router.db.get("blogs").value();
+// API lấy tất cả bài viết
+app.get("/blogs", (req, res) => {
+  const { category } = req.query; // Lấy giá trị category từ query string nếu có
 
-  // Lọc bài viết theo category (không phân biệt hoa/thường)
-  const filteredBlogs = allBlogs.filter(
-    (blog) => blog.category.toLowerCase() === formattedCategory.toLowerCase()
-  );
+  const data = getDataFromDB();
+  let blogs = data.blogs;
 
-  if (filteredBlogs.length > 0) {
-    res.json(filteredBlogs);
+  // Nếu có category trong query string, lọc theo category
+  if (category) {
+    const formattedCategory = category.replace(/-/g, " "); // Chuyển "noi-bo" -> "Nội Bộ"
+    blogs = blogs.filter(
+      (blog) => blog.category.toLowerCase() === formattedCategory.toLowerCase()
+    );
+  }
+
+  if (blogs.length > 0) {
+    res.json(blogs);
   } else {
     res.status(404).json({ message: "Không tìm thấy bài viết nào." });
   }
 });
 
-// Kết nối json-server với API tùy chỉnh
-server.use(router);
-server.listen(5000, () => {
-  console.log(" SON Server đang chạy trên cổng 5000");
+// API lấy blog theo ID
+app.get("/blogs/:id", (req, res) => {
+  const { id } = req.params;
+  const data = getDataFromDB();
+  const blog = data.blogs.find((b) => b.id === parseInt(id));
+
+  if (blog) {
+    res.json(blog);
+  } else {
+    res.status(404).json({ message: "Bài viết không tìm thấy." });
+  }
+});
+
+// Khởi động server
+app.listen(port, () => {
+  console.log(`Server đang chạy trên cổng ${port}`);
 });

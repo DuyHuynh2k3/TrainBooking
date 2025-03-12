@@ -8,15 +8,15 @@ import ContactPage from "./client/pages/ContactPage";
 import TimeTicketTrainPage from "./client/pages/TimeTicketTrainPage";
 import GoTrain from "./client/pages/GoTrainPage";
 import FindBillPage from "./client/pages/FindBillPage";
-// import PromotionPage from "./client/pages/PromotionPage/PromotionPage";
-// import PromotionDetail from "./client/pages/PromotionPage/[...id]/PromotionDetail";
 import HomeBlogPage from "./client/pages/BlogPage/HomeBlogPage";
 import BlogDetailPage from "./client/pages/BlogPage/BlogDetailPage";
+import HomePageResult from "./client/pages/HomePageResult";
 
 const AppRoutes = () => {
   return (
     <Routes>
       <Route path="/" element={<HomePage />} />
+      <Route path="/resultticket" element={<HomePageResult />} />
       <Route path="/infoseat" element={<InfoSeatPage />} />
       <Route path="/returnticket" element={<ReturnTicketPage />} />
       <Route path="/rules" element={<RulesPage />} />

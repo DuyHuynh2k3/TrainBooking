@@ -4,6 +4,7 @@ import { FiAlignJustify } from "react-icons/fi";
 import TextField from "@mui/material/TextField";
 //import Stack from "@mui/material/Stack";
 import Autocomplete from "@mui/material/Autocomplete";
+import { useNavigate } from "react-router-dom";
 
 // Danh sách các ga tàu
 const stations = [
@@ -44,6 +45,11 @@ const stations = [
 ];
 
 const BookForm = () => {
+  const navigate = useNavigate();
+  const handleSearchClick = (event) => {
+    event.preventDefault(); 
+    navigate("/resultticket", { replace: true });
+  };
   return (
     <div className="container-fluid mt-2">
       <div className="row d-flex justify-content-center">
@@ -132,7 +138,10 @@ const BookForm = () => {
                     <input type="date" className="form-control" />
                   </div>
                   <div className="col-md-4 d-flex align-items-end">
-                    <button type="submit" className="btn btn-primary w-100">
+                    <button
+                      type="submit"
+                      className="btn btn-primary w-100"
+                      onClick={handleSearchClick}>
                       Tìm kiếm
                     </button>
                   </div>
