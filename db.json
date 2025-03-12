@@ -1,0 +1,144 @@
+{
+  "blogs": [
+    {
+      "id": 1,
+      "title": "Khuyến mãi tháng 3",
+      "description": "Giảm giá 50% cho tất cả vé tàu.",
+      "img": "https://via.placeholder.com/300",
+      "category": "Khuyến Mãi"
+    },
+    {
+      "id": 2,
+      "title": "Mua vé online giảm 30%",
+      "description": "Ưu đãi khi đặt vé online qua website chính thức.",
+      "img": "https://via.placeholder.com/300",
+      "category": "Khuyến Mãi"
+    },
+    {
+      "id": 3,
+      "title": "Khuyến mãi nhóm",
+      "description": "Giảm giá đặc biệt khi đi theo nhóm 4 người.",
+      "img": "https://via.placeholder.com/300",
+      "category": "Khuyến Mãi"
+    },
+    {
+      "id": 4,
+      "title": "Tuyến tàu mới từ Bắc vào Nam",
+      "description": "Triển khai tuyến tàu nhanh mới từ Hà Nội đến TP.HCM.",
+      "img": "https://via.placeholder.com/300",
+      "category": "Trong Ngành"
+    },
+    {
+      "id": 5,
+      "title": "Nâng cấp hệ thống đặt vé",
+      "description": "Hệ thống đặt vé sẽ được nâng cấp vào tháng sau.",
+      "img": "https://via.placeholder.com/300",
+      "category": "Trong Ngành"
+    },
+    {
+      "id": 6,
+      "title": "Tăng cường an ninh nhà ga",
+      "description": "Bổ sung thêm camera giám sát tại các nhà ga lớn.",
+      "img": "https://via.placeholder.com/300",
+      "category": "Trong Ngành"
+    },
+    {
+      "id": 7,
+      "title": "Hoạt động nội bộ công ty",
+      "description": "Buổi họp nội bộ để cải thiện dịch vụ khách hàng.",
+      "img": "https://via.placeholder.com/300",
+      "category": "Nội Bộ"
+    },
+    {
+      "id": 8,
+      "title": "Khen thưởng nhân viên xuất sắc",
+      "description": "Những cá nhân có đóng góp lớn trong tháng vừa qua.",
+      "img": "https://via.placeholder.com/300",
+      "category": "Nội Bộ"
+    },
+    {
+      "id": 9,
+      "title": "Chương trình đào tạo mới",
+      "description": "Cập nhật lộ trình đào tạo nhân viên mới năm 2024.",
+      "img": "https://via.placeholder.com/300",
+      "category": "Nội Bộ"
+    },
+    {
+      "id": 10,
+      "title": "An toàn giao thông đường sắt",
+      "description": "Những biện pháp giúp tăng cường an toàn đường sắt.",
+      "img": "https://via.placeholder.com/300",
+      "category": "ATGT Đường Sắt"
+    },
+    {
+      "id": 11,
+      "title": "Tuyên truyền an toàn khi qua đường sắt",
+      "description": "Hướng dẫn người dân chấp hành luật giao thông đường sắt.",
+      "img": "https://via.placeholder.com/300",
+      "category": "ATGT Đường Sắt"
+    },
+    {
+      "id": 12,
+      "title": "Lắp đặt thêm rào chắn tự động",
+      "description": "Thêm 50 rào chắn tự động tại các điểm giao cắt nguy hiểm.",
+      "img": "https://via.placeholder.com/300",
+      "category": "ATGT Đường Sắt"
+    },
+    {
+      "id": 13,
+      "title": "Khuyến mãi hè 2024",
+      "description": "Ưu đãi lớn cho khách hàng đặt vé sớm mùa hè này.",
+      "img": "https://via.placeholder.com/300",
+      "category": "Khuyến Mãi"
+    },
+    {
+      "id": 14,
+      "title": "Hướng dẫn đặt vé online",
+      "description": "Các bước đơn giản để đặt vé tàu trực tuyến.",
+      "img": "https://via.placeholder.com/300",
+      "category": "Khuyến Mãi"
+    },
+    {
+      "id": 15,
+      "title": "Nâng cấp đoàn tàu SE3",
+      "description": "Tàu SE3 được cải thiện nội thất và dịch vụ.",
+      "img": "https://via.placeholder.com/300",
+      "category": "Trong Ngành"
+    },
+    {
+      "id": 16,
+      "title": "Quy trình bảo trì đường ray",
+      "description": "Bảo trì định kỳ giúp đảm bảo an toàn chạy tàu.",
+      "img": "https://via.placeholder.com/300",
+      "category": "Trong Ngành"
+    },
+    {
+      "id": 17,
+      "title": "Chương trình thiện nguyện công ty",
+      "description": "Hoạt động từ thiện do nhân viên công ty tổ chức.",
+      "img": "https://via.placeholder.com/300",
+      "category": "Nội Bộ"
+    },
+    {
+      "id": 18,
+      "title": "Đào tạo kỹ năng cho nhân viên mới",
+      "description": "Nâng cao chất lượng phục vụ khách hàng.",
+      "img": "https://via.placeholder.com/300",
+      "category": "Nội Bộ"
+    },
+    {
+      "id": 19,
+      "title": "Lắp đặt đèn tín hiệu mới",
+      "description": "Tăng cường hệ thống đèn tín hiệu tại các ga tàu.",
+      "img": "https://via.placeholder.com/300",
+      "category": "ATGT Đường Sắt"
+    },
+    {
+      "id": 20,
+      "title": "Phát động chiến dịch lái xe an toàn",
+      "description": "Chương trình tuyên truyền cho tài xế tàu hỏa.",
+      "img": "https://via.placeholder.com/300",
+      "category": "ATGT Đường Sắt"
+    }
+  ]
+}
