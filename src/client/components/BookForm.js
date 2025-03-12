@@ -48,7 +48,7 @@ const BookForm = () => {
     <div className="container-fluid mt-2">
       <div className="row d-flex justify-content-center">
         {/* Carousel on the left */}
-        <div className="col-lg-7 p-0">
+        <div className="col-lg-6 p-0">
           <div className="card shadow" style={{ height: "100%" }}>
             <div className="card-header text-primary">
               <h5

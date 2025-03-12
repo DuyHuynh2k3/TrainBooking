@@ -4,7 +4,7 @@ const Policies = () => {
   return (
     <div className="container-fluid mt-4">
       <div className="row d-flex justify-content-center">
-        <div className="col-lg-11">
+        <div className="col-lg-9">
           <div className="card shadow-sm" style={{ border: "none" }}>
             <div className="card-body">
               <h1 className="mb-4 d-flex justify-content-center text-polici">
