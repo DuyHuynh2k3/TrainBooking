@@ -6,7 +6,7 @@ const InfoSeat = () => {
   return (
     <div className="container-fluid mt-2">
       <div className="row d-flex justify-content-center">
-        <div className="col-lg-8">
+        <div className="col-lg-9">
           <div className="card shadow">
             <div className="card-header text-primary">
               <h5

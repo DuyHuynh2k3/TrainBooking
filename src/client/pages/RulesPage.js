@@ -11,10 +11,13 @@ export default function RulesPage() {
       <main className="mt-4">
         <div className="container-fluid mt-2">
           <div className="row d-flex justify-content-center">
-            <div className="col-lg-8">
+            <div className="col-lg-9">
               <div className="card shadow">
                 <div className="card-header text-primary">
-                  <h5 className="m-0 d-flex align-items-center" style={{ gap: "5px" }}>
+                  <h5
+                    className="m-0 d-flex align-items-center"
+                    style={{ gap: "5px" }}
+                  >
                     CÁC QUY ĐỊNH
                   </h5>
                 </div>

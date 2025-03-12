@@ -12,6 +12,8 @@ const Carousel = () => {
       <div className="row d-flex justify-content-center">
         {/* Carousel on the left */}
         <div className="col-lg-7 p-0">
+          {" "}
+          {/* Giảm từ col-lg-7 xuống col-lg-6 */}
           <div
             id="carouselExampleIndicators"
             className="carousel slide"
@@ -44,21 +46,24 @@ const Carousel = () => {
                 <img
                   src={image1}
                   alt="Slide 1"
-                  style={{ height: "310px", width: "100%" }}
+                  className="img-fluid"
+                  style={{ height: "310px", width: "100%", objectFit: "cover" }}
                 />
               </div>
               <div className="carousel-item">
                 <img
                   src={image2}
                   alt="Slide 2"
-                  style={{ height: "310px", width: "100%" }}
+                  className="img-fluid"
+                  style={{ height: "310px", width: "100%", objectFit: "cover" }}
                 />
               </div>
               <div className="carousel-item">
                 <img
                   src={image3}
                   alt="Slide 3"
-                  style={{ height: "310px", width: "100%" }}
+                  className="img-fluid"
+                  style={{ height: "310px", width: "100%", objectFit: "cover" }}
                 />
               </div>
             </div>
@@ -90,13 +95,19 @@ const Carousel = () => {
         </div>
 
         {/* Banners on the right */}
-        <div className="col-lg-3 d-flex flex-column">
+        <div className="col-lg-2 d-flex flex-column">
+          {" "}
+          {/* Giảm từ col-lg-3 xuống col-lg-2 */}
           <div className="mb-2">
             <img
               src={bn1}
               className="img-fluid"
               alt="Banner 1"
+<<<<<<< HEAD
+              style={{ width: "100%", height: "150px", objectFit: "cover" }}
+=======
               style={{ width: "100%", maxHeight: "150px",objectFit: "cover" }}
+>>>>>>> 61c8f514abd337587c65cb7b121add9cb3552a88
             />
           </div>
           <div>
@@ -104,7 +115,11 @@ const Carousel = () => {
               src={bn2}
               className="img-fluid"
               alt="Banner 2"
+<<<<<<< HEAD
+              style={{ width: "100%", height: "150px", objectFit: "cover" }}
+=======
               style={{ width: "100%", maxHeight: "150px",objectFit: "cover" }}
+>>>>>>> 61c8f514abd337587c65cb7b121add9cb3552a88
             />
           </div>
         </div>
