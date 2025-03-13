@@ -41,7 +41,7 @@ const Carousel = () => {
                 aria-label="Slide 3"
               ></button>
             </div>
-            <div className="carousel-inner">
+            <div className="carousel-inner h-100 d-inline-block">
               <div className="carousel-item active">
                 <img
                   src={image1}
@@ -103,11 +103,7 @@ const Carousel = () => {
               src={bn1}
               className="img-fluid"
               alt="Banner 1"
-<<<<<<< HEAD
-              style={{ width: "100%", height: "150px", objectFit: "cover" }}
-=======
-              style={{ width: "100%", maxHeight: "150px",objectFit: "cover" }}
->>>>>>> 61c8f514abd337587c65cb7b121add9cb3552a88
+              style={{ width: "100%", maxHeight: "150px", objectFit: "cover" }}
             />
           </div>
           <div>
@@ -115,11 +111,7 @@ const Carousel = () => {
               src={bn2}
               className="img-fluid"
               alt="Banner 2"
-<<<<<<< HEAD
-              style={{ width: "100%", height: "150px", objectFit: "cover" }}
-=======
-              style={{ width: "100%", maxHeight: "150px",objectFit: "cover" }}
->>>>>>> 61c8f514abd337587c65cb7b121add9cb3552a88
+              style={{ width: "100%", maxHeight: "150px", objectFit: "cover" }}
             />
           </div>
         </div>
