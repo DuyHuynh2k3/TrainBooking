@@ -1,0 +1,49 @@
+.gadi {
+    position: absolute;
+    top: 40px;
+    left: 180px;
+    font-size: 25px;
+}
+.gadi1 {
+    position: absolute;
+    top: 80px;
+    font-size: 20px;
+    left: 140px;
+}
+.gaden {
+    position: absolute;
+    top: 40px;
+    left: 380px;
+    font-size: 25px;
+}
+.gaden1 {
+    position: absolute;
+    top: 80px;
+    font-size: 20px;
+    left: 340px;
+}
+.muiten {
+    position: absolute;
+    top: 40px;
+    width: 50px;
+    height: 40px;
+    left: 290px;
+}
+.tongtime {
+    position: absolute;
+    top: 50px;
+    font-size: 18px;
+    left: 510px;
+}
+.giamgia {
+    position: absolute;
+    top: 40px;
+    font-size: 18px;
+    right: 13px;
+}
+.chitietkm {
+    position: absolute;
+    top: 60px;
+    font-size: 18px;
+    right: 13px;
+}

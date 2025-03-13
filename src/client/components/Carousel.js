@@ -103,11 +103,7 @@ const Carousel = () => {
               src={bn1}
               className="img-fluid"
               alt="Banner 1"
-<<<<<<< HEAD
               style={{ width: "100%", height: "150px", objectFit: "cover" }}
-=======
-              style={{ width: "100%", maxHeight: "150px",objectFit: "cover" }}
->>>>>>> 61c8f514abd337587c65cb7b121add9cb3552a88
             />
           </div>
           <div>
@@ -115,11 +111,7 @@ const Carousel = () => {
               src={bn2}
               className="img-fluid"
               alt="Banner 2"
-<<<<<<< HEAD
               style={{ width: "100%", height: "150px", objectFit: "cover" }}
-=======
-              style={{ width: "100%", maxHeight: "150px",objectFit: "cover" }}
->>>>>>> 61c8f514abd337587c65cb7b121add9cb3552a88
             />
           </div>
         </div>

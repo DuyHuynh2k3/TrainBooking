@@ -13,7 +13,8 @@ const trains = [
     name: "SE8",
     departureTime: "06:00",
     arrivalTime: "13:39",
-    route: "Sài Gòn -> Nha Trang",
+    departureStation: "20/03 từ Hà Nội",  // Ga đi
+    arrivalStation: "21/03 đến Sài Gòn",  // Ga đến
     duration: "7 giờ, 39 phút",
     seats: [
       { type: "Ngồi mềm", available: 13, price: "270,000 đ" },
@@ -27,7 +28,8 @@ const trains = [
     name: "SE22",
     departureTime: "10:20",
     arrivalTime: "18:33",
-    route: "Sài Gòn -> Nha Trang",
+    departureStation: "20/03 từ Hà Nội",
+    arrivalStation: "21/03 đến Sài Gòn",
     duration: "8 giờ, 13 phút",
     seats: [
       { type: "Nằm khoang 6", available: 0, price: "369,000 đ" },
@@ -41,7 +43,8 @@ const trains = [
     name: "SE24",
     departureTime: "08:00",
     arrivalTime: "15:20",
-    route: "Sài Gòn -> Nha Trang",
+    departureStation: "20/03 từ Hà Nội",
+    arrivalStation: "21/03 đến Sài Gòn",
     duration: "7 giờ, 20 phút",
     seats: [
       { type: "Ngồi mềm", available: 15, price: "250,000 đ" },
@@ -55,7 +58,8 @@ const trains = [
     name: "SE30",
     departureTime: "12:00",
     arrivalTime: "19:30",
-    route: "Sài Gòn -> Nha Trang",
+    departureStation: "20/03 từ Hà Nội",
+    arrivalStation: "21/03 đến Sài Gòn",
     duration: "7 giờ, 30 phút",
     seats: [
       { type: "Ngồi mềm", available: 20, price: "280,000 đ" },
@@ -69,7 +73,8 @@ const trains = [
     name: "SE12",
     departureTime: "14:30",
     arrivalTime: "22:00",
-    route: "Sài Gòn -> Nha Trang",
+    departureStation: "20/03 từ Hà Nội",
+    arrivalStation: "21/03 đến Sài Gòn",
     duration: "7 giờ, 30 phút",
     seats: [
       { type: "Ngồi mềm", available: 5, price: "320,000 đ" },
@@ -83,7 +88,8 @@ const trains = [
     name: "SE18",
     departureTime: "16:00",
     arrivalTime: "23:40",
-    route: "Sài Gòn -> Nha Trang",
+    departureStation: "20/03 từ Hà Nội",
+    arrivalStation: "21/03 đến Sài Gòn",
     duration: "7 giờ, 40 phút",
     seats: [
       { type: "Ngồi mềm", available: 8, price: "300,000 đ" },
@@ -97,7 +103,8 @@ const trains = [
     name: "SE28",
     departureTime: "18:00",
     arrivalTime: "01:10",
-    route: "Sài Gòn -> Nha Trang",
+    departureStation: "20/03 từ Hà Nội",
+    arrivalStation: "21/03 đến Sài Gòn",
     duration: "7 giờ, 10 phút",
     seats: [
       { type: "Ngồi mềm", available: 12, price: "260,000 đ" },
