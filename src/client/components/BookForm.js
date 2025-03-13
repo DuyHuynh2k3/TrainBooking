@@ -1,9 +1,9 @@
-import React from "react";
+import React, { useState } from "react";
 import "../../styles/BookForm.css";
 import { FiAlignJustify } from "react-icons/fi";
 import TextField from "@mui/material/TextField";
-//import Stack from "@mui/material/Stack";
 import Autocomplete from "@mui/material/Autocomplete";
+import { useNavigate } from "react-router-dom";
 
 // Danh sách các ga tàu
 const stations = [
@@ -44,6 +44,19 @@ const stations = [
 ];
 
 const BookForm = () => {
+  const [departureStation, setDepartureStation] = useState("");
+  const [arrivalStation, setArrivalStation] = useState("");
+  const [departureDate, setDepartureDate] = useState("");
+  const [arrivalDate, setArrivalDate] = useState("");
+  const navigate = useNavigate();
+
+  const handleSearchClick = (event) => {
+    event.preventDefault();
+    navigate("/resultticket", {
+      state: { departureDate, departureStation, arrivalStation, arrivalDate },
+    });
+  };
+
   return (
     <div className="container-fluid mt-2">
       <div className="row d-flex justify-content-center">
@@ -52,7 +65,7 @@ const BookForm = () => {
           <div className="card shadow" style={{ height: "100%" }}>
             <div className="card-header text-primary">
               <h5
-                className="card-title text- text-main m-0"
+                className="card-title text-main m-0"
                 style={{ fontWeight: "bold" }}
               >
                 <i className="bi bi-list"></i> <FiAlignJustify />
@@ -67,12 +80,11 @@ const BookForm = () => {
                     <Autocomplete
                       freeSolo
                       options={stations.map((station) => station.title)}
+                      onInputChange={(e, newValue) =>
+                        setDepartureStation(newValue)
+                      }
                       renderInput={(params) => (
-                        <TextField
-                          {...params}
-                          placeholder="Chọn ga đi"
-                          fullWidth
-                        />
+                        <TextField {...params} placeholder="Chọn ga đi" fullWidth />
                       )}
                     />
                   </div>
@@ -81,12 +93,11 @@ const BookForm = () => {
                     <Autocomplete
                       freeSolo
                       options={stations.map((station) => station.title)}
+                      onInputChange={(e, newValue) =>
+                        setArrivalStation(newValue)
+                      }
                       renderInput={(params) => (
-                        <TextField
-                          {...params}
-                          placeholder="Chọn ga đến"
-                          fullWidth
-                        />
+                        <TextField {...params} placeholder="Chọn ga đến" fullWidth />
                       )}
                     />
                   </div>
@@ -112,10 +123,7 @@ const BookForm = () => {
                           id="roundTrip"
                           defaultChecked
                         />
-                        <label
-                          className="form-check-label "
-                          htmlFor="roundTrip"
-                        >
+                        <label className="form-check-label " htmlFor="roundTrip">
                           Khứ hồi
                         </label>
                       </div>
@@ -125,14 +133,26 @@ const BookForm = () => {
                 <div className="row mb-3">
                   <div className="col-md-4">
                     <label className="form-label text-primary">Ngày đi</label>
-                    <input type="date" className="form-control" />
+                    <input
+                      type="date"
+                      className="form-control"
+                      onChange={(e) => setDepartureDate(e.target.value)}
+                    />
                   </div>
                   <div className="col-md-4">
                     <label className="form-label text-primary">Ngày về</label>
-                    <input type="date" className="form-control" />
+                    <input
+                      type="date"
+                      className="form-control"
+                      onChange={(e) => setArrivalDate(e.target.value)}
+                    />
                   </div>
                   <div className="col-md-4 d-flex align-items-end">
-                    <button type="submit" className="btn btn-primary w-100">
+                    <button
+                      type="submit"
+                      className="btn btn-primary w-100"
+                      onClick={handleSearchClick}
+                    >
                       Tìm kiếm
                     </button>
                   </div>
@@ -144,7 +164,7 @@ const BookForm = () => {
         <div className="col-lg-3 d-flex flex-column">
           {/* Giỏ vé */}
           <div className="card mb-3 shadow">
-            <div className="card-header  text-white">
+            <div className="card-header text-white">
               <h5
                 className="card-title text-primary text-main m-0"
                 style={{ fontWeight: "bold" }}
