@@ -17,6 +17,20 @@ const formatDate = (date) => {
 };
 
 const TrainSchedule = () => {
+
+  const cars = [
+    { id: 1, type: "Toa 1", seatType: "Ngồi mềm" },
+    { id: 2, type: "Toa 2", seatType: "Ngồi mềm" },
+    { id: 3, type: "Toa 3", seatType: "Nằm khoang 6" },
+    { id: 4, type: "Toa 4", seatType: "Nằm khoang 6" },
+    { id: 5, type: "Toa 5", seatType: "Nằm khoang 6" },
+    { id: 6, type: "Toa 6", seatType: "Nằm khoang 4" },
+    { id: 7, type: "Toa 7", seatType: "Nằm khoang 4" },
+    { id: 8, type: "Toa 8", seatType: "Nằm khoang 4" },
+    { id: 9, type: "Toa 9", seatType: "Nằm khoang 4" },
+  ];
+
+  
   const location = useLocation();
   const { departureDate, departureStation, arrivalStation } =
     location.state || {};
@@ -28,6 +42,8 @@ const TrainSchedule = () => {
   // Trạng thái lưu thông tin ghế đang được chọn cho từng chuyến tàu
   const [selectedSeats, setSelectedSeats] = useState({}); // Lưu trạng thái ghế đã chọn
   const [selectedSeatPrices, setSelectedSeatPrices] = useState({}); // Lưu giá ghế đã chọn
+  const [selectedCar, setSelectedCar] = useState(null);
+  const [selectedSeatType, setSelectedSeatType] = useState(null);
 
   useEffect(() => {
     axios
@@ -70,6 +86,17 @@ const TrainSchedule = () => {
       ...prevState,
       [trainId]: prevState[trainId] === seatType ? null : seatPrice, 
     }));
+    // Cập nhật loại ghế được chọn
+    setSelectedSeatType(seatType);
+
+    // Tìm toa tàu tương ứng với loại ghế
+    const foundCar = cars.find((car) => car.seatType === seatType);
+    if (foundCar) {
+      setSelectedCar(foundCar.id); // Lưu ID toa tàu được chọn
+    } else {
+      setSelectedCar(null); // Nếu không tìm thấy toa tàu, đặt lại state
+    }
+
   };
   return (
     <div className="container-fluid mt-2">
@@ -161,61 +188,46 @@ const TrainSchedule = () => {
                         </div>
                       </div>
                       <div className="row mt-4">
-                        {train.seats &&
-                          train.seats.map((seat, index) => (
-                            <div
-                              className="col text-center p-0"
-                              key={index}
-                              style={{
-                                border: "1px solid orange",
-                                height: "70px",
-                              }}
-                            >
-                              <button
-                                className="btn border-0 seattype p-0"
-                                onClick={(e) =>
-                                  handleSeatClick(
-                                    train.id,
-                                    seat.type,
-                                    seat.price,
-                                    e
-                                  )
-                                }
-                              >
-                                {seat.type}
-                              </button>
-                              <button
-                                className="btn border-0 seatprice p-0"
-                                onClick={(e) =>
-                                  handleSeatClick(
-                                    train.id,
-                                    seat.type,
-                                    seat.price,
-                                    e
-                                  )
-                                }
-                              >
-                                Từ {seat.price}
-                              </button>
-                              <button
-                                className="btn border-0 seatavailabel p-0"
-                                onClick={(e) =>
-                                  handleSeatClick(
-                                    train.id,
-                                    seat.type,
-                                    seat.price,
-                                    e
-                                  )
-                                }
-                                style={{
-                                  backgroundColor: "#f5f5f5",
-                                  height: "68px",
-                                }}
-                              >
-                                {seat.available} Chỗ còn
-                              </button>
-                            </div>
-                          ))}
+                      {train.seats &&
+                  train.seats.map((seat, index) => (
+                    <div
+                      className="col text-center p-0"
+                      key={index}
+                      style={{
+                        border: "1px solid orange",
+                        height: "70px",
+                      }}
+                    >
+                      <button
+                        className="btn border-0 seattype p-0"
+                        onClick={(e) =>
+                          handleSeatClick(train.id, seat.type, seat.price, e)
+                        }
+                      >
+                        {seat.type}
+                      </button>
+                      <button
+                        className="btn border-0 seatprice p-0"
+                        onClick={(e) =>
+                          handleSeatClick(train.id, seat.type, seat.price, e)
+                        }
+                      >
+                        Từ {seat.price}
+                      </button>
+                      <button
+                        className="btn border-0 seatavailabel p-0"
+                        onClick={(e) =>
+                          handleSeatClick(train.id, seat.type, seat.price, e)
+                        }
+                        style={{
+                          backgroundColor: "#f5f5f5",
+                          height: "68px",
+                        }}
+                      >
+                        {seat.available} Chỗ còn
+                      </button>
+                    </div>
+                  ))}
                       </div>
                       {/* Dòng thứ 2 sẽ chỉ hiển thị khi ghế được chọn */}
                       {selectedSeats[train.id] && (
@@ -230,6 +242,11 @@ const TrainSchedule = () => {
                                 }))
                               }
                               seatPrice={selectedSeatPrices[train.id]}
+                              selectedCar={selectedCar}
+                              setSelectedCar={setSelectedCar} // Truyền hàm cập nhật selectedCar
+                              selectedSeatType={selectedSeatType}
+                              cars={cars} // Truyền dữ liệu toa tàu vào SeatSelect
+                              trainName={train.name} // Truyền train.name xuống component con
                             />
                           </div>
                         </div>

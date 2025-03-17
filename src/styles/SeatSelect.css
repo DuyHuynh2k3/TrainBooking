@@ -12,6 +12,9 @@
 .et-car-icon-avaiable {
     background-color: #80b5d6;
 }
+.et-car-icon-selected {
+    background-color: #a6b727;
+}
 .et-car-icon {
     margin: 0 1px 10px;
     border-radius: 15%;
@@ -22,3 +25,121 @@
     width: 100%;
     height: 130%;
 }
+
+.et-car-floor {
+    border-radius: 10px;
+    border: 3px solid #385d8a;
+    margin: 0;
+    padding: 5px 10px;
+    height: auto;
+}
+
+.et-col-1-18 {
+    width: 5.55555556%;
+    float: left;
+    min-height: 1px;
+}
+.et-car-floor-full-height {
+    height: 158px;
+}
+.et-bed-way {
+    height: 40px;
+    line-height: 40px;
+}
+.small {
+    font-size: 70%;
+}
+.et-full-width {
+    width: 99%;
+}
+.et-col-8-9 {
+    width: 88.88888889%;
+    float: left;
+    min-height: 1px;
+}
+.et-text-sm {
+    font-size: 8px;
+}
+.et-col-1-8 {
+    width: 12.5%;
+    float: left;
+    min-height: 1px;
+}
+.et-seat-h-35 {
+    height: 35px;
+    line-height: 30px;
+}
+.et-col-1-16 {
+    width: 6.25%;
+    float: left;
+    min-height: 1px;
+}
+
+.et-bed-left {
+    border-left: 3px solid #385d8a;
+    height: 45px;
+}
+.et-bed-right {
+    border-right: 3px solid #385d8a;
+    height: 45px;
+}
+
+.et-bed-left .et-bed-router {
+    padding-right: 2px;
+    padding-top: 28px;
+    padding-bottom: 10px;
+    height: 100%;
+}
+
+.et-bed-right .et-bed-router {
+    padding-left: 2px;
+    padding-top: 28px;
+    padding-bottom: 10px;
+    height: 100%;
+}
+.et-bed-illu {
+    border-bottom: 3px solid #385d8a;
+    border-left: 3px solid #385d8a;
+    border-right: 3px solid #385d8a;
+    border-bottom-left-radius: 5px;
+    border-bottom-right-radius: 5px;
+    height: 10px;
+    line-height: 30px;
+}
+.seat {
+    padding: 0px;
+    width: 35px;
+    height: 30px;
+    position: relative;
+    top: -25px; /* Dịch lên */
+    white-space: nowrap;
+    text-align: center;
+  }
+
+
+  /* Tooltip container */
+.tooltip {
+    position: relative;
+    display: inline-block;
+  }
+  
+  /* Tooltip text */
+  .tooltip .tooltiptext {
+    width: 120px;
+    background-color: black;
+    color: #fff;
+    text-align: center;
+    border-radius: 5px;
+    padding: 5px;
+    position: absolute;
+    z-index: 1;
+    bottom: 130%; /* Tooltip sẽ hiển thị trên */
+    left: 50%;
+    margin-left: -60px; /* Căn giữa tooltip */
+    font-size: 12px;
+    white-space: nowrap;
+    visibility: visible; /* Đảm bảo tooltip luôn hiển thị */
+    opacity: 1; /* Đảm bảo tooltip luôn có độ hiển thị */
+    pointer-events: none; /* Đảm bảo không cản trở việc hover vào các phần tử khác */
+  }
+  

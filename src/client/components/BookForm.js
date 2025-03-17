@@ -58,7 +58,7 @@ const BookForm = () => {
   };
 
   return (
-    <div className="container-fluid mt-2">
+    <div className="container-fluid mt-2 ">
       <div className="row d-flex justify-content-center">
         {/* Carousel on the left */}
         <div className="col-lg-6 p-0">

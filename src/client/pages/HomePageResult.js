@@ -12,11 +12,11 @@ const HomePageResult = () => {
       <Header />
       <Carousel />
       <main className="">
-        <BookingForm />
+        <BookingForm  />
        <TrainSchedule />
       </main>
       <Footer />
-    </div>
+    </div>  
   );
 };
 
