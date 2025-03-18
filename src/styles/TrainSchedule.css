@@ -1,49 +1,72 @@
 .gadi {
     position: absolute;
     top: 40px;
-    left: 180px;
-    font-size: 25px;
+    left: 200px;
+    font-size: 20px;
 }
 .gadi1 {
     position: absolute;
-    top: 80px;
-    font-size: 20px;
-    left: 140px;
+    top: 70px;
+    font-size: 18px;
+    left: 160px;
 }
 .gaden {
     position: absolute;
     top: 40px;
-    left: 380px;
-    font-size: 25px;
+    left: 400px;
+    font-size: 20px;
 }
 .gaden1 {
     position: absolute;
-    top: 80px;
-    font-size: 20px;
-    left: 340px;
+    top: 70px;
+    font-size: 18px;
+    left: 360px;
 }
 .muiten {
     position: absolute;
     top: 40px;
     width: 50px;
     height: 40px;
-    left: 290px;
+    left: 300px;
 }
 .tongtime {
     position: absolute;
-    top: 50px;
-    font-size: 18px;
-    left: 510px;
+    top: 40px;
+    font-size: 16px;
+    left: 550px;
 }
 .giamgia {
     position: absolute;
     top: 40px;
-    font-size: 18px;
-    right: 13px;
+    font-size: 16px;
+    right: 25px;
 }
 .chitietkm {
     position: absolute;
     top: 60px;
-    font-size: 18px;
+    font-size: 16px;
     right: 13px;
+}
+.seattype {
+    position: relative;
+    font-size: 16px;
+    float: left;
+    left: 50px;
+    width: 110px;
+}
+.seatprice {
+    position: relative;
+    float: none;
+    top:20px;
+    left: -55px;
+    font-size: 17px;
+    width: 100px;
+    color: orange;
+}
+.seatavailabel{
+    position: relative;
+    top:0px;
+    font-size: 17px;
+    float: right;
+    width: 90px;
 }

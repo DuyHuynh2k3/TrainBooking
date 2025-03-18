@@ -7,11 +7,18 @@ import RulesPage from "./client/pages/RulesPage";
 import TimeTicketTrainPage from "./client/pages/TimeTicketTrainPage";
 import GoTrain from "./client/pages/GoTrainPage";
 import BookingTicket from "./client/pages/BookingTicket";
+<<<<<<< HEAD
 import ContactPage from "./client/pages/ContactPage";
 import HomeBlogPage from "./client/pages/BlogPage/HomeBlogPage";
 import BlogDetailPage from "./client/pages/BlogPage/BlogDetailPage";
 import HomePageResult from "./client/pages/HomePageResult";
 import ForgetInfoSeatPage from "./client/pages/ForgetInfoSeatPage";
+=======
+import HomeBlogPage from "./client/pages/BlogPage/HomeBlogPage";
+import BlogDetailPage from "./client/pages/BlogPage/BlogDetailPage";
+import ContactPage from "./client/pages/ContactPage";
+import HomePageResult from "./client/pages/HomePageResult";
+>>>>>>> 8603e674d65690fae96e1a97dcf528413ccbdcc3
 
 const AppRoutes = () => {
   return (
@@ -26,6 +33,7 @@ const AppRoutes = () => {
       <Route path="/timetickettrain" element={<TimeTicketTrainPage />} />
       <Route path="/gotrain" element={<GoTrain />} />
       <Route path="/bookingticket" element={<BookingTicket />} />
+<<<<<<< HEAD
       <Route
         path="/homeblogpage"
         element={<HomeBlogPage category="khuyen-mai" />}
@@ -39,6 +47,13 @@ const AppRoutes = () => {
         path="/atgt-duong-sat"
         element={<HomeBlogPage category="atgt-duong-sat" />}
       />
+=======
+      {/* Routes cho Blog */}
+      <Route path="/homeblogpage" element={<HomeBlogPage category="khuyen-mai" />} />
+      <Route path="/trong-nganh" element={<HomeBlogPage category="trong-nganh" />} />
+      <Route path="/noi-bo" element={<HomeBlogPage category="noi-bo" />} />
+      <Route path="/atgt-duong-sat" element={<HomeBlogPage category="atgt-duong-sat" />} />
+>>>>>>> 8603e674d65690fae96e1a97dcf528413ccbdcc3
       <Route path="/blog/:id" element={<BlogDetailPage />} />
     </Routes>
   );
