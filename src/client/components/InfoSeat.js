@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Link } from "react-router-dom";
 import { FiAlignJustify } from "react-icons/fi";
 import "../../styles/InfoSeat.css";
 
@@ -105,9 +106,12 @@ const InfoSeat = () => {
                   >
                     Tra cứu
                   </button>
-                  <a href="/" className="text-primary text-decoration-none ">
+                  <Link
+                    to="/forgetseat"
+                    className="text-primary text-decoration-none"
+                  >
                     Quên mã đặt chỗ?
-                  </a>
+                  </Link>
                 </div>
               </form>
 
