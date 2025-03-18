@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import HorizontalLinearStepper from "../components/Steper";
+import React, { useState, useRef } from "react";
+import HorizontalLinearStepper from "./Steper";
 import "../../styles/InformationForm.css";
 import Box from "@mui/material/Box";
 import Stepper from "@mui/material/Stepper";
@@ -11,13 +11,21 @@ import Radio from "@mui/material/Radio";
 import RadioGroup from "@mui/material/RadioGroup";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import FormControl from "@mui/material/FormControl";
-import vnpayLogo from "../../assets/img/logo-dvtt-VNP.png";
+import zalopayLogo from "../../assets/img/logo-dvtt-ZLP.png";
 import momoLogo from "../../assets/img/logo-dvtt-MOM.png";
 import bankLogo from "../../assets/img/logo-dvtt-SML.png";
 import atmLogo from "../../assets/img/the-noi-dia.png";
 import visaLogo from "../../assets/img/the-quoc-te-no-jcb.png";
 import uncheckLogo from "../../assets/img/checkbox-unchecked.svg";
 import checkLogo from "../../assets/img/checkbox.svg";
+import Tooltip from "@mui/material/Tooltip";
+import CircularProgress from "@mui/material/CircularProgress";
+import Dialog from "@mui/material/Dialog";
+import DialogTitle from "@mui/material/DialogTitle";
+import DialogContent from "@mui/material/DialogContent";
+import DialogContentText from "@mui/material/DialogContentText";
+import DialogActions from "@mui/material/DialogActions";
+import Alert from "@mui/material/Alert";
 
 const steps = [
   "Nhập thông tin hành khách",
@@ -26,21 +34,85 @@ const steps = [
   "Hoàn tất",
 ];
 
-const InformationForm = () => {
-  const [selectedCard, setSelectedCard] = useState(null); // State để lưu trữ lựa chọn hiện tại
+const InformationFormStep1 = ({ onNext, onBack, formData, updateFormData }) => {
+  const [selectedCard, setSelectedCard] = useState(null);
+  const [activeStep, setActiveStep] = useState(0);
+  const [skipped, setSkipped] = useState(new Set());
+  const [errors, setErrors] = useState({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [openConfirmDialog, setOpenConfirmDialog] = useState(false);
+  const [paymentStatus, setPaymentStatus] = useState(null);
 
-  const handleCardClick = (cardType) => {
-    // Nếu cardType đã được chọn, bỏ chọn nó
-    if (selectedCard === cardType) {
-      setSelectedCard(null);
-    } else {
-      // Ngược lại, chọn cardType mới
-      setSelectedCard(cardType);
-    }
+  const passengerNameRef = useRef(null);
+  const passengerTypeRef = useRef(null);
+  const idNumberRef = useRef(null);
+  const fullNameRef = useRef(null);
+  const termsRef = useRef(null);
+
+  const requiredFields = {
+    passengerName: "Họ tên hành khách",
+    passengerType: "Đối tượng",
+    idNumber: "Số giấy tờ",
+    fullName: "Họ và tên người đặt",
+    terms: "Điều khoản",
+    paymentMethod: "Phương thức thanh toán",
   };
 
-  const [activeStep, setActiveStep] = React.useState(0);
-  const [skipped, setSkipped] = React.useState(new Set());
+  const validateForm = () => {
+    let tempErrors = {};
+    let isValid = true;
+    let firstInvalidField = null;
+
+    Object.keys(requiredFields).forEach((field) => {
+      if (
+        field !== "terms" &&
+        field !== "paymentMethod" &&
+        (!formData.passengerInfo[field] ||
+          formData.passengerInfo[field].trim() === "")
+      ) {
+        tempErrors[field] = `${requiredFields[field]} là bắt buộc`;
+        isValid = false;
+        if (!firstInvalidField) {
+          firstInvalidField = field;
+        }
+      } else if (field === "terms" && !formData.passengerInfo.terms) {
+        tempErrors[field] = `${requiredFields[field]} là bắt buộc`;
+        isValid = false;
+        if (!firstInvalidField) {
+          firstInvalidField = field;
+        }
+      } else if (
+        field === "paymentMethod" &&
+        !formData.passengerInfo.paymentMethod
+      ) {
+        tempErrors[field] = `${requiredFields[field]} là bắt buộc`;
+        isValid = false;
+        if (!firstInvalidField) {
+          firstInvalidField = field;
+        }
+      }
+    });
+
+    setErrors(tempErrors);
+
+    if (!isValid && firstInvalidField) {
+      const fieldRefs = {
+        passengerName: passengerNameRef,
+        passengerType: passengerTypeRef,
+        idNumber: idNumberRef,
+        fullName: fullNameRef,
+        terms: termsRef,
+        paymentMethod: null,
+      };
+      const targetRef = fieldRefs[firstInvalidField]?.current;
+      if (targetRef) {
+        targetRef.scrollIntoView({ behavior: "smooth", block: "center" });
+        targetRef.focus();
+      }
+    }
+
+    return isValid;
+  };
 
   const isStepOptional = (step) => {
     return step === 1;
@@ -50,25 +122,69 @@ const InformationForm = () => {
     return skipped.has(step);
   };
 
-  const handleNext = () => {
-    let newSkipped = skipped;
-    if (isStepSkipped(activeStep)) {
-      newSkipped = new Set(newSkipped.values());
-      newSkipped.delete(activeStep);
+  const handleCardClick = (cardType) => {
+    if (selectedCard === cardType) {
+      setSelectedCard(null);
+      updateFormData({
+        passengerInfo: {
+          ...formData.passengerInfo,
+          paymentMethod: "napas", // Reset về giá trị mặc định của Napas
+        },
+      });
+    } else {
+      setSelectedCard(cardType);
+      updateFormData({
+        passengerInfo: {
+          ...formData.passengerInfo,
+          paymentMethod: cardType === "atm" ? "atm" : "visa", // Lưu giá trị tương ứng
+        },
+      });
     }
-
-    setActiveStep((prevActiveStep) => prevActiveStep + 1);
-    setSkipped(newSkipped);
+    console.log(
+      "Selected paymentMethod:",
+      formData.passengerInfo.paymentMethod
+    ); // Kiểm tra giá trị
   };
 
-  const handleBack = () => {
+  const handleInputChange = (e) => {
+    const { id, value, type, checked } = e.target;
+    updateFormData({
+      passengerInfo: {
+        ...formData.passengerInfo,
+        [id]: type === "checkbox" ? checked : value,
+      },
+    });
+
+    if (errors[id]) {
+      setErrors((prev) => ({ ...prev, [id]: null }));
+    }
+  };
+
+  const handleNextLocal = () => {
+    if (validateForm()) {
+      setIsSubmitting(true);
+      setTimeout(() => {
+        setIsSubmitting(false);
+        let newSkipped = skipped;
+        if (isStepSkipped(activeStep)) {
+          newSkipped = new Set(newSkipped.values());
+          newSkipped.delete(activeStep);
+        }
+
+        setActiveStep((prevActiveStep) => prevActiveStep + 1);
+        setSkipped(newSkipped);
+        onNext(formData); // Truyền formData sang bước tiếp theo
+      }, 1000);
+    }
+  };
+
+  const handleBackLocal = () => {
     setActiveStep((prevActiveStep) => prevActiveStep - 1);
+    onBack();
   };
 
   const handleSkip = () => {
     if (!isStepOptional(activeStep)) {
-      // You probably want to guard against something like this,
-      // it should never occur unless someone's actively trying to break something.
       throw new Error("You can't skip a step that isn't optional.");
     }
 
@@ -82,6 +198,39 @@ const InformationForm = () => {
 
   const handleReset = () => {
     setActiveStep(0);
+  };
+
+  const handlePaymentMethodChange = (e) => {
+    const selectedMethod = e.target.value;
+    updateFormData({
+      passengerInfo: {
+        ...formData.passengerInfo,
+        paymentMethod: selectedMethod,
+      },
+    });
+
+    // Reset selectedCard nếu chọn phương thức khác Napas
+    if (selectedMethod !== "napas") {
+      setSelectedCard(null);
+    }
+
+    if (errors.paymentMethod) {
+      setErrors((prev) => ({ ...prev, paymentMethod: null }));
+    }
+  };
+
+  const handleConfirmFinish = () => {
+    setOpenConfirmDialog(true);
+  };
+
+  const handleFinishConfirmed = () => {
+    setOpenConfirmDialog(false);
+    handleNextLocal();
+  };
+
+  const errorStyle = {
+    borderColor: "red",
+    boxShadow: "0 0 5px red",
   };
 
   return (
@@ -107,7 +256,7 @@ const InformationForm = () => {
         {activeStep === steps.length ? (
           <React.Fragment>
             <Typography sx={{ mt: 2, mb: 1 }}>
-              All steps completed - you&apos;re finished
+              All steps completed - you're finished
             </Typography>
           </React.Fragment>
         ) : (
@@ -156,33 +305,87 @@ const InformationForm = () => {
                     <span className=".labelspan" style={{ width: "120px" }}>
                       Họ tên
                     </span>
-                    <input
-                      type="text"
-                      className="form-control custom-input"
-                      placeholder="Thông tin hành khách"
-                    />
+                    <div style={{ width: "100%" }}>
+                      <Tooltip
+                        title="Vui lòng nhập họ tên hành khách"
+                        placement="right"
+                      >
+                        <input
+                          ref={passengerNameRef}
+                          type="text"
+                          className={`form-control custom-input ${
+                            errors.passengerName ? "is-invalid" : ""
+                          }`}
+                          style={errors.passengerName ? errorStyle : {}}
+                          placeholder="Thông tin hành khách"
+                          id="passengerName"
+                          onChange={handleInputChange}
+                          value={formData.passengerInfo.passengerName || ""}
+                        />
+                      </Tooltip>
+                      {errors.passengerName && (
+                        <div className="invalid-feedback">
+                          {errors.passengerName}
+                        </div>
+                      )}
+                    </div>
                   </div>
                   <div className="mb-2 d-flex align-items-center">
                     <span className=".labelspan" style={{ width: "120px" }}>
                       Đối tượng
                     </span>
-                    <select className="form-control custom-input">
-                      <option value="">Chọn đối tượng</option>
-                      <option value="adult">Người lớn</option>
-                      <option value="child">Trẻ em</option>
-                      <option value="child">Người cao tuổi</option>
-                      <option value="child">Sinh viên</option>
-                    </select>
+                    <div style={{ width: "100%" }}>
+                      <select
+                        ref={passengerTypeRef}
+                        className={`form-control custom-input ${
+                          errors.passengerType ? "is-invalid" : ""
+                        }`}
+                        style={errors.passengerType ? errorStyle : {}}
+                        id="passengerType"
+                        onChange={handleInputChange}
+                        value={formData.passengerInfo.passengerType || ""}
+                      >
+                        <option value="">Chọn đối tượng</option>
+                        <option value="adult">Người lớn</option>
+                        <option value="child">Trẻ em</option>
+                        <option value="elderly">Người cao tuổi</option>
+                        <option value="student">Sinh viên</option>
+                      </select>
+                      {errors.passengerType && (
+                        <div className="invalid-feedback">
+                          {errors.passengerType}
+                        </div>
+                      )}
+                    </div>
                   </div>
                   <div className="mb-2 d-flex align-items-center">
                     <span className=".labelspan" style={{ width: "120px" }}>
                       Số giấy tờ
                     </span>
-                    <input
-                      type="text"
-                      className="form-control custom-input"
-                      placeholder="Số CMND/Hộ chiếu"
-                    />
+                    <div style={{ width: "100%" }}>
+                      <Tooltip
+                        title="Vui lòng nhập số CMND hoặc Hộ chiếu hợp lệ"
+                        placement="right"
+                      >
+                        <input
+                          ref={idNumberRef}
+                          type="text"
+                          className={`form-control custom-input ${
+                            errors.idNumber ? "is-invalid" : ""
+                          }`}
+                          style={errors.idNumber ? errorStyle : {}}
+                          placeholder="Số CMND/Hộ chiếu"
+                          id="idNumber"
+                          onChange={handleInputChange}
+                          value={formData.passengerInfo.idNumber || ""}
+                        />
+                      </Tooltip>
+                      {errors.idNumber && (
+                        <div className="invalid-feedback">
+                          {errors.idNumber}
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </td>
                 <td>Thông tin hành khách</td>
@@ -220,7 +423,7 @@ const InformationForm = () => {
         </div>
         <div className="card-body">
           <span style={{ color: "#3A87AD" }}>
-            Quý khách vui lòng điền đẩy đủ và chính xác các thông tin về người
+            Quý khách vui lòng điền đầy đủ và chính xác các thông tin về người
             mua vé dưới đây. Các thông tin này sẽ được sử dụng để xác minh người
             mua vé và lấy vé tại ga trước khi lên tàu theo đúng các quy định của
             Tổng công ty Đường sắt Việt Nam.
@@ -232,10 +435,19 @@ const InformationForm = () => {
                   Họ và tên*
                 </label>
                 <input
+                  ref={fullNameRef}
                   type="text"
-                  className="form-control custom-input"
+                  className={`form-control custom-input ${
+                    errors.fullName ? "is-invalid" : ""
+                  }`}
+                  style={errors.fullName ? errorStyle : {}}
                   id="fullName"
+                  onChange={handleInputChange}
+                  value={formData.passengerInfo.fullName || ""}
                 />
+                {errors.fullName && (
+                  <div className="invalid-feedback">{errors.fullName}</div>
+                )}
               </div>
               <div className="col-md-6">
                 <label htmlFor="idNumber" className="form-label custom-label">
@@ -243,9 +455,17 @@ const InformationForm = () => {
                 </label>
                 <input
                   type="text"
-                  className="form-control custom-input"
+                  className={`form-control custom-input ${
+                    errors.idNumber ? "is-invalid" : ""
+                  }`}
+                  style={errors.idNumber ? errorStyle : {}}
                   id="idNumber"
+                  onChange={handleInputChange}
+                  value={formData.passengerInfo.idNumber || ""}
                 />
+                {errors.idNumber && (
+                  <div className="invalid-feedback">{errors.idNumber}</div>
+                )}
               </div>
             </div>
             <div className="row mb-3">
@@ -257,6 +477,8 @@ const InformationForm = () => {
                   type="email"
                   className="form-control custom-input"
                   id="email"
+                  onChange={handleInputChange}
+                  value={formData.passengerInfo.email || ""}
                 />
               </div>
               <div className="col-md-6">
@@ -270,6 +492,8 @@ const InformationForm = () => {
                   type="email"
                   className="form-control custom-input"
                   id="confirmEmail"
+                  onChange={handleInputChange}
+                  value={formData.passengerInfo.confirmEmail || ""}
                 />
               </div>
             </div>
@@ -282,6 +506,8 @@ const InformationForm = () => {
                   type="text"
                   className="form-control custom-input"
                   id="phone"
+                  onChange={handleInputChange}
+                  value={formData.passengerInfo.phone || ""}
                 />
               </div>
             </div>
@@ -308,6 +534,8 @@ const InformationForm = () => {
                   type="text"
                   className="form-control custom-input"
                   id="companyName"
+                  onChange={handleInputChange}
+                  value={formData.passengerInfo.companyName || ""}
                 />
               </div>
               <div className="col-md-6">
@@ -318,6 +546,8 @@ const InformationForm = () => {
                   type="text"
                   className="form-control custom-input"
                   id="taxCode"
+                  onChange={handleInputChange}
+                  value={formData.passengerInfo.taxCode || ""}
                 />
               </div>
             </div>
@@ -330,6 +560,8 @@ const InformationForm = () => {
                   type="text"
                   className="form-control custom-input"
                   id="address"
+                  onChange={handleInputChange}
+                  value={formData.passengerInfo.address || ""}
                 />
               </div>
             </div>
@@ -347,30 +579,27 @@ const InformationForm = () => {
             <RadioGroup
               aria-labelledby="payment-method-label"
               name="payment-method"
+              onChange={handlePaymentMethodChange}
+              value={formData.passengerInfo.paymentMethod || ""}
             >
               <div className="payment-method-container">
                 <FormControlLabel
-                  value="vnpay"
+                  value="zalo"
                   control={<Radio />}
                   label={
                     <div style={{ display: "flex", alignItems: "center" }}>
                       <img
-                        src={vnpayLogo}
-                        alt="VNPAY Logo"
+                        src={zalopayLogo}
+                        alt="Zalo Logo"
                         style={{ marginRight: "10px" }}
                       />
                       <div>
                         <div>
-                          Thanh toán trực tuyến qua công thanh toán VNPAY
+                          Thanh toán trực tuyến qua công thanh toán ZaloPay
                         </div>
                         <div style={{ fontSize: "14px", color: "#666" }}>
-                          - QR Pay trên ứng dụng Mobile Banking của các ngân
-                          hàng và Ví VNPAY (quét mã VNPAY-QR để thanh toán)
-                          <br />
-                          - Thẻ quốc tế phát hành trong nước và nước ngoài:
-                          Visa, Master, JCB, UnionPay, Amex, Google Pay, Apple
-                          Pay, Samsung Pay
-                          <br />- Thẻ ATM/Tài khoản nội địa
+                          - Thanh toán bằng hình thức Quét mã QR sử dụng ví điện
+                          tử ZaloPay
                         </div>
                       </div>
                     </div>
@@ -433,7 +662,7 @@ const InformationForm = () => {
                                 fontSize: "14px",
                                 padding: "10px",
                                 background: "#FAFAFA",
-                                width: "360px",
+                                width: "380px",
                                 marginRight: "20px",
                                 cursor: "pointer",
                               }}
@@ -461,7 +690,7 @@ const InformationForm = () => {
                                 fontSize: "14px",
                                 padding: "10px",
                                 background: "#FAFAFA",
-                                width: "360px",
+                                width: "380px",
                                 cursor: "pointer",
                               }}
                               className="buttonn-check"
@@ -491,16 +720,33 @@ const InformationForm = () => {
                 />
               </div>
             </RadioGroup>
+            {errors.paymentMethod && (
+              <div className="invalid-feedback d-block">
+                {errors.paymentMethod}
+              </div>
+            )}
           </FormControl>
           <div className="mt-3">
             <div className="form-check">
-              <input className="form-check-input" type="checkbox" id="terms" />
+              <input
+                ref={termsRef}
+                className={`form-check-input ${
+                  errors.terms ? "is-invalid" : ""
+                }`}
+                type="checkbox"
+                id="terms"
+                onChange={handleInputChange}
+                checked={formData.passengerInfo.terms || false}
+              />
               <label className="form-check-label" htmlFor="terms">
                 Tôi đã đọc kỹ và đồng ý tuân thủ tất cả các quy định mua vé trực
                 tuyến, các chương trình khuyến mại của Tổng công ty đường sắt
                 Việt Nam và chịu trách nhiệm về tính xác thực của các thông tin
                 trên.
               </label>
+              {errors.terms && (
+                <div className="invalid-feedback d-block">{errors.terms}</div>
+              )}
             </div>
           </div>
         </div>
@@ -509,25 +755,91 @@ const InformationForm = () => {
       {/* Di chuyển các nút Next và Back xuống dưới cùng */}
       <Box sx={{ display: "flex", flexDirection: "row", pt: 2, mt: 3 }}>
         <Button
-          color="inherit"
+          variant="contained"
+          color="primary"
           disabled={activeStep === 0}
-          onClick={handleBack}
-          sx={{ mr: 1 }}
+          onClick={handleBackLocal}
+          sx={{
+            mr: 1,
+            width: "150px",
+          }}
         >
-          Back
+          Quay lại
         </Button>
         <Box sx={{ flex: "1 1 auto" }} />
         {isStepOptional(activeStep) && (
-          <Button color="inherit" onClick={handleSkip} sx={{ mr: 1 }}>
-            Skip
+          <Button
+            variant="outlined"
+            color="secondary"
+            onClick={handleSkip}
+            sx={{
+              mr: 1,
+              width: "150px",
+            }}
+          >
+            Bỏ qua
           </Button>
         )}
-        <Button onClick={handleNext}>
-          {activeStep === steps.length - 1 ? "Finish" : "Next"}
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={
+            activeStep === steps.length - 1
+              ? handleConfirmFinish
+              : handleNextLocal
+          }
+          disabled={
+            Object.keys(errors).length > 0 ||
+            !formData.passengerInfo.terms ||
+            !formData.passengerInfo.paymentMethod ||
+            isSubmitting
+          }
+          sx={{
+            width: "150px",
+          }}
+        >
+          {isSubmitting ? (
+            <CircularProgress size={24} />
+          ) : activeStep === steps.length - 1 ? (
+            "Hoàn tất"
+          ) : (
+            "Tiếp theo"
+          )}
         </Button>
       </Box>
+
+      {/* Dialog xác nhận hoàn tất */}
+      <Dialog
+        open={openConfirmDialog}
+        onClose={() => setOpenConfirmDialog(false)}
+      >
+        <DialogTitle>Xác nhận hoàn tất</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Bạn có chắc chắn muốn hoàn tất quá trình đặt vé không?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenConfirmDialog(false)}>Hủy</Button>
+          <Button onClick={handleFinishConfirmed} color="primary">
+            Xác nhận
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Hiển thị trạng thái thanh toán */}
+      {paymentStatus === "success" && (
+        <Alert severity="success" sx={{ mt: 2 }}>
+          Thanh toán thành công!
+        </Alert>
+      )}
+      {paymentStatus === "failed" && (
+        <Alert severity="error" sx={{ mt: 2 }}>
+          Thanh toán thất bại. Vui lòng thử lại.
+        </Alert>
+      )}
     </div>
   );
 };
 
-export default InformationForm;
+export default InformationFormStep1;

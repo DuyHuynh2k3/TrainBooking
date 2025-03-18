@@ -7,11 +7,13 @@ import RulesPage from "./client/pages/RulesPage";
 import TimeTicketTrainPage from "./client/pages/TimeTicketTrainPage";
 import GoTrain from "./client/pages/GoTrainPage";
 import BookingTicket from "./client/pages/BookingTicket";
+import ContactPage from "./client/pages/ContactPage";
 import HomeBlogPage from "./client/pages/BlogPage/HomeBlogPage";
 import BlogDetailPage from "./client/pages/BlogPage/BlogDetailPage";
-import ContactPage from "./client/pages/ContactPage";
 import HomePageResult from "./client/pages/HomePageResult";
 import InformationForm from "./client/components/InformationForm";
+import ForgetInfoSeatPage from "./client/pages/ForgetInfoSeatPage";
+
 
 const AppRoutes = () => {
   return (
@@ -20,6 +22,7 @@ const AppRoutes = () => {
       <Route path="/resultticket" element={<HomePageResult />} />
       <Route path="/infoseat" element={<InfoSeatPage />} />
       <Route path="/returnticket" element={<ReturnTicketPage />} />
+      <Route path="/forgetseat" element={<ForgetInfoSeatPage />} />
       <Route path="/rules" element={<RulesPage />} />
       <Route path="/contact" element={<ContactPage />} />
       <Route path="/timetickettrain" element={<TimeTicketTrainPage />} />
@@ -29,8 +32,20 @@ const AppRoutes = () => {
       {/* Routes cho Blog */}
       <Route path="/homeblogpage" element={<HomeBlogPage category="khuyen-mai" />} />
       <Route path="/trong-nganh" element={<HomeBlogPage category="trong-nganh" />} />
+      <Route
+        path="/homeblogpage"
+        element={<HomeBlogPage category="khuyen-mai" />}
+      />
+      <Route
+        path="/trong-nganh"
+        element={<HomeBlogPage category="trong-nganh" />}
+      />
       <Route path="/noi-bo" element={<HomeBlogPage category="noi-bo" />} />
-      <Route path="/atgt-duong-sat" element={<HomeBlogPage category="atgt-duong-sat" />} />
+      <Route
+        path="/atgt-duong-sat"
+        element={<HomeBlogPage category="atgt-duong-sat" />}
+      />
+
       <Route path="/blog/:id" element={<BlogDetailPage />} />
     </Routes>
   );
