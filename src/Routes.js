@@ -11,6 +11,7 @@ import HomeBlogPage from "./client/pages/BlogPage/HomeBlogPage";
 import BlogDetailPage from "./client/pages/BlogPage/BlogDetailPage";
 import ContactPage from "./client/pages/ContactPage";
 import HomePageResult from "./client/pages/HomePageResult";
+import InformationForm from "./client/components/InformationForm";
 
 const AppRoutes = () => {
   return (
@@ -24,6 +25,7 @@ const AppRoutes = () => {
       <Route path="/timetickettrain" element={<TimeTicketTrainPage />} />
       <Route path="/gotrain" element={<GoTrain />} />
       <Route path="/bookingticket" element={<BookingTicket />} />
+      <Route path="/informationform" element={<InformationForm />} />
       {/* Routes cho Blog */}
       <Route path="/homeblogpage" element={<HomeBlogPage category="khuyen-mai" />} />
       <Route path="/trong-nganh" element={<HomeBlogPage category="trong-nganh" />} />

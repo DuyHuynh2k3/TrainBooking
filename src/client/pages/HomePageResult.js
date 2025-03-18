@@ -1,6 +1,6 @@
 import React from "react";
 import Header from "../components/Header";
-import BookingForm from "../components/BookForm";
+import BookForm from "../components/BookForm";
 import Footer from "../components/Footer";
 import Carousel from "../components/Carousel";
 import "bootstrap/dist/css/bootstrap.min.css";
@@ -12,7 +12,7 @@ const HomePageResult = () => {
       <Header />
       <Carousel />
       <main className="">
-        <BookingForm  />
+        <BookForm  />
        <TrainSchedule />
       </main>
       <Footer />

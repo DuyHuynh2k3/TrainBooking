@@ -4,6 +4,7 @@ import { FiAlignJustify } from "react-icons/fi";
 import TextField from "@mui/material/TextField";
 import Autocomplete from "@mui/material/Autocomplete";
 import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 // Danh sách các ga tàu
 const stations = [
@@ -43,7 +44,7 @@ const stations = [
   { title: "Sài Gòn" },
 ];
 
-const BookForm = () => {
+const BookForm = ({ cart, onAddToCart }) => {
   const [departureStation, setDepartureStation] = useState("");
   const [arrivalStation, setArrivalStation] = useState("");
   const [departureDate, setDepartureDate] = useState("");
@@ -84,7 +85,11 @@ const BookForm = () => {
                         setDepartureStation(newValue)
                       }
                       renderInput={(params) => (
-                        <TextField {...params} placeholder="Chọn ga đi" fullWidth />
+                        <TextField
+                          {...params}
+                          placeholder="Chọn ga đi"
+                          fullWidth
+                        />
                       )}
                     />
                   </div>
@@ -97,7 +102,11 @@ const BookForm = () => {
                         setArrivalStation(newValue)
                       }
                       renderInput={(params) => (
-                        <TextField {...params} placeholder="Chọn ga đến" fullWidth />
+                        <TextField
+                          {...params}
+                          placeholder="Chọn ga đến"
+                          fullWidth
+                        />
                       )}
                     />
                   </div>
@@ -123,7 +132,10 @@ const BookForm = () => {
                           id="roundTrip"
                           defaultChecked
                         />
-                        <label className="form-check-label " htmlFor="roundTrip">
+                        <label
+                          className="form-check-label "
+                          htmlFor="roundTrip"
+                        >
                           Khứ hồi
                         </label>
                       </div>
@@ -162,24 +174,42 @@ const BookForm = () => {
           </div>
         </div>
         <div className="col-lg-3 d-flex flex-column">
-          {/* Giỏ vé */}
           <div className="card mb-3 shadow">
             <div className="card-header text-white">
               <h5
                 className="card-title text-primary text-main m-0"
                 style={{ fontWeight: "bold" }}
               >
-                <i className="bi bi-list"></i> <FiAlignJustify />
-                Giỏ Vé
+                <i className="bi bi-list"></i> Giỏ Vé
               </h5>
             </div>
             <div className="card-body text-center">
-              <h6
-                className="card-title"
-                style={{ fontWeight: "bold", color: "red", fontSize: "20px" }}
-              >
-                Chưa có vé
-              </h6>
+              {cart && cart.length === 0 ? (
+                <h6
+                  className="card-title"
+                  style={{ fontWeight: "bold", color: "red", fontSize: "20px" }}
+                >
+                  Chưa có vé
+                </h6>
+              ) : (
+                <div>
+                  {cart?.map((ticket, index) => (
+                    <div key={index} className="mb-3">
+                      <p>
+                        <strong>Tàu:</strong> {ticket.trainName}
+                      </p>
+                      <p>
+                        <strong>Ghế:</strong> {ticket.seat}
+                      </p>
+                      <p>
+                        <strong>Giá:</strong> {ticket.price.toLocaleString()}{" "}
+                        VND
+                      </p>
+                      <hr />
+                    </div>
+                  ))}
+                </div>
+              )}
               <button className="btn btn-primary w-100">Mua vé</button>
             </div>
           </div>
@@ -199,7 +229,9 @@ const BookForm = () => {
               <p className="card-text" style={{ fontSize: "17px" }}>
                 Công ty cổ phần vận tải đường sắt Việt Nam
               </p>
-              <button className="btn btn-primary w-100">Đăng ký</button>
+              <Link to="/informationform">
+                <button className="btn btn-primary w-100">Mua vé</button>
+              </Link>
             </div>
           </div>
         </div>

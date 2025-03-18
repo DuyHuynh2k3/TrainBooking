@@ -1,10 +1,57 @@
-const express = require('express');
+const express = require("express");
+const fs = require("fs");
+const path = require("path");
+const cors = require("cors");
+
 const app = express();
 const port = 5000;
-const cors = require('cors');
+app.use(cors()); // Cho phép các yêu cầu từ nguồn gốc khác
 
-// Cấu hình CORS cho phép tất cả các nguồn gốc (Origins)
-app.use(cors());
+// Đường dẫn đến tệp db.json
+const dbPath = path.join(__dirname, "db.json");
+
+const getDataFromDB = () => {
+  try {
+    const data = fs.readFileSync(dbPath, "utf-8");
+    return JSON.parse(data);
+  } catch (error) {
+    console.error("Lỗi khi đọc tệp db.json:", error);
+    return null;
+  }
+};
+
+// API lấy tất cả bài viết
+app.get("/blogs", (req, res) => {
+  const { category } = req.query;
+  const data = getDataFromDB();
+  let blogs = data.blogs;
+
+  if (category) {
+    const formattedCategory = category.replace(/-/g, " ");
+    blogs = blogs.filter(
+      (blog) => blog.category.toLowerCase() === formattedCategory.toLowerCase()
+    );
+  }
+
+  if (blogs.length > 0) {
+    res.json(blogs);
+  } else {
+    res.status(404).json({ message: "Không tìm thấy bài viết nào." });
+  }
+});
+
+// API lấy blog theo ID
+app.get("/blogs/:id", (req, res) => {
+  const { id } = req.params;
+  const data = getDataFromDB();
+  const blog = data.blogs.find((b) => b.id === parseInt(id));
+
+  if (blog) {
+    res.json(blog);
+  } else {
+    res.status(404).json({ message: "Bài viết không tìm thấy." });
+  }
+});
 
 // Dữ liệu tàu mẫu
 const trains = [
@@ -13,8 +60,8 @@ const trains = [
     name: "SE8",
     departureTime: "06:00",
     arrivalTime: "13:39",
-    departureStation: "20/03 từ Hà Nội",  // Ga đi
-    arrivalStation: "21/03 đến Sài Gòn",  // Ga đến
+    departureStation: "20/03 từ Hà Nội",
+    arrivalStation: "21/03 đến Sài Gòn",
     duration: "7 giờ, 39 phút",
     seats: [
       { type: "Ngồi mềm", available: 13, price: "270,000 đ" },
@@ -37,88 +84,15 @@ const trains = [
       { type: "Nằm khoang 4", available: 69, price: "545,000 đ" }
     ],
     discount: "Giảm tới 20%",
-  },
-  {
-    id: 3,
-    name: "SE24",
-    departureTime: "08:00",
-    arrivalTime: "15:20",
-    departureStation: "20/03 từ Hà Nội",
-    arrivalStation: "21/03 đến Sài Gòn",
-    duration: "7 giờ, 20 phút",
-    seats: [
-      { type: "Ngồi mềm", available: 15, price: "250,000 đ" },
-      { type: "Nằm khoang 6", available: 50, price: "400,000 đ" },
-      { type: "Nằm khoang 4", available: 40, price: "490,000 đ" }
-    ],
-    discount: "Giảm tới 15%",
-  },
-  {
-    id: 4,
-    name: "SE30",
-    departureTime: "12:00",
-    arrivalTime: "19:30",
-    departureStation: "20/03 từ Hà Nội",
-    arrivalStation: "21/03 đến Sài Gòn",
-    duration: "7 giờ, 30 phút",
-    seats: [
-      { type: "Ngồi mềm", available: 20, price: "280,000 đ" },
-      { type: "Nằm khoang 6", available: 45, price: "410,000 đ" },
-      { type: "Nằm khoang 4", available: 35, price: "500,000 đ" }
-    ],
-    discount: "Giảm tới 25%",
-  },
-  {
-    id: 5,
-    name: "SE12",
-    departureTime: "14:30",
-    arrivalTime: "22:00",
-    departureStation: "20/03 từ Hà Nội",
-    arrivalStation: "21/03 đến Sài Gòn",
-    duration: "7 giờ, 30 phút",
-    seats: [
-      { type: "Ngồi mềm", available: 5, price: "320,000 đ" },
-      { type: "Nằm khoang 6", available: 30, price: "380,000 đ" },
-      { type: "Nằm khoang 4", available: 50, price: "520,000 đ" }
-    ],
-    discount: "Giảm tới 10%",
-  },
-  {
-    id: 6,
-    name: "SE18",
-    departureTime: "16:00",
-    arrivalTime: "23:40",
-    departureStation: "20/03 từ Hà Nội",
-    arrivalStation: "21/03 đến Sài Gòn",
-    duration: "7 giờ, 40 phút",
-    seats: [
-      { type: "Ngồi mềm", available: 8, price: "300,000 đ" },
-      { type: "Nằm khoang 6", available: 28, price: "390,000 đ" },
-      { type: "Nằm khoang 4", available: 20, price: "510,000 đ" }
-    ],
-    discount: "Giảm tới 5%",
-  },
-  {
-    id: 7,
-    name: "SE28",
-    departureTime: "18:00",
-    arrivalTime: "01:10",
-    departureStation: "20/03 từ Hà Nội",
-    arrivalStation: "21/03 đến Sài Gòn",
-    duration: "7 giờ, 10 phút",
-    seats: [
-      { type: "Ngồi mềm", available: 12, price: "260,000 đ" },
-      { type: "Nằm khoang 6", available: 40, price: "380,000 đ" },
-      { type: "Nằm khoang 4", available: 45, price: "500,000 đ" }
-    ],
-    discount: "Giảm tới 15%",
   }
 ];
 
-app.get('/api/trains', (req, res) => {
+// API lấy danh sách tàu
+app.get("/api/trains", (req, res) => {
   res.json(trains);
 });
 
+// Khởi động server
 app.listen(port, () => {
   console.log(`Server đang chạy tại http://localhost:${port}`);
 });

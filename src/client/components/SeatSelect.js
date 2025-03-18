@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, {} from "react";
 import { Button } from "react-bootstrap";
 import "../../styles/SeatSelect.css";
 import headtrain from "../../assets/img/train1.png";
@@ -12,7 +12,8 @@ const SeatSelect = ({
   setSelectedCar, // Nhận hàm cập nhật selectedCar từ props
   selectedSeatType,
   cars,
-  trainName,
+  trainName,  
+  onAddToCart,
 }) => {
   // Lọc danh sách toa tàu theo loại ghế
   const filteredCars = cars
@@ -78,12 +79,20 @@ const SeatSelect = ({
 
   const handleSeatSelect = (seatNumber) => {
     if (selectedSeat === seatNumber) {
-      setSelectedSeat(null); // Bỏ chọn ghế
+      setSelectedSeat(null); 
+      onAddToCart(null); 
     } else {
-      setSelectedSeat(seatNumber); // Chọn ghế mới
+      setSelectedSeat(seatNumber);
+      const ticket = {
+        trainName: trainName, 
+        seat: seatNumber, 
+        price: seatPrices.find((s) => s.id === seatNumber)?.price || 0,
+        car: selectedCar, 
+        seatType: selectedSeatType, 
+      };
+      onAddToCart(ticket);
     }
   };
-
   return (
     <div className="container mt-2">
       <div className="seat-select-container">
