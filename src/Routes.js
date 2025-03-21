@@ -1,5 +1,5 @@
 import React from "react";
-import { Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import HomePage from "./client/pages/Homepage";
 import InfoSeatPage from "./client/pages/InfoSeatPage";
 import ReturnTicketPage from "./client/pages/ReturnTicketPage";
@@ -11,8 +11,8 @@ import ContactPage from "./client/pages/ContactPage";
 import HomeBlogPage from "./client/pages/BlogPage/HomeBlogPage";
 import BlogDetailPage from "./client/pages/BlogPage/BlogDetailPage";
 import HomePageResult from "./client/pages/HomePageResult";
-import InformationForm from "./client/components/InformationForm";
 import ForgetInfoSeatPage from "./client/pages/ForgetInfoSeatPage";
+
 
 
 const AppRoutes = () => {
@@ -28,24 +28,13 @@ const AppRoutes = () => {
       <Route path="/timetickettrain" element={<TimeTicketTrainPage />} />
       <Route path="/gotrain" element={<GoTrain />} />
       <Route path="/bookingticket" element={<BookingTicket />} />
-      <Route path="/informationform" element={<InformationForm />} />
       {/* Routes cho Blog */}
       <Route path="/homeblogpage" element={<HomeBlogPage category="khuyen-mai" />} />
       <Route path="/trong-nganh" element={<HomeBlogPage category="trong-nganh" />} />
-      <Route
-        path="/homeblogpage"
-        element={<HomeBlogPage category="khuyen-mai" />}
-      />
-      <Route
-        path="/trong-nganh"
-        element={<HomeBlogPage category="trong-nganh" />}
-      />
+      <Route path="/homeblogpage" element={<HomeBlogPage category="khuyen-mai" />}/>
+      <Route path="/trong-nganh"element={<HomeBlogPage category="trong-nganh" />}/>
       <Route path="/noi-bo" element={<HomeBlogPage category="noi-bo" />} />
-      <Route
-        path="/atgt-duong-sat"
-        element={<HomeBlogPage category="atgt-duong-sat" />}
-      />
-
+      <Route path="/atgt-duong-sat" element={<HomeBlogPage category="atgt-duong-sat" />}/>
       <Route path="/blog/:id" element={<BlogDetailPage />} />
     </Routes>
   );

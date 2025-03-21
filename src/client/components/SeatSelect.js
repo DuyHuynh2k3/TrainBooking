@@ -4,16 +4,21 @@ import "../../styles/SeatSelect.css";
 import headtrain from "../../assets/img/train1.png";
 import train from "../../assets/img/train2.png";
 
+
 const SeatSelect = ({
   selectedSeat,
   setSelectedSeat,
   seatPrice,
   selectedCar,
-  setSelectedCar, // Nhận hàm cập nhật selectedCar từ props
+  setSelectedCar, 
   selectedSeatType,
   cars,
   trainName,  
   onAddToCart,
+  departureDate,
+  formatDate,
+  departureStation,
+  arrivalStation
 }) => {
   // Lọc danh sách toa tàu theo loại ghế
   const filteredCars = cars
@@ -89,6 +94,7 @@ const SeatSelect = ({
         price: seatPrices.find((s) => s.id === seatNumber)?.price || 0,
         car: selectedCar, 
         seatType: selectedSeatType, 
+        departureDate: departureDate
       };
       onAddToCart(ticket);
     }

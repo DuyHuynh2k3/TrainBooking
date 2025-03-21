@@ -1,10 +1,13 @@
-import React, { useState } from "react";
+import React, { useEffect,useState } from "react";
 import "../../styles/BookForm.css";
 import { FiAlignJustify } from "react-icons/fi";
 import TextField from "@mui/material/TextField";
 import Autocomplete from "@mui/material/Autocomplete";
 import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
+import TripInfo from "./TripInfo";
+import { RiDeleteBin5Line } from "react-icons/ri";
+
 
 // Danh sách các ga tàu
 const stations = [
@@ -44,18 +47,58 @@ const stations = [
   { title: "Sài Gòn" },
 ];
 
-const BookForm = ({ cart, onAddToCart }) => {
+const BookForm = ({ cart, onAddToCart, formatDate }) => {
   const [departureStation, setDepartureStation] = useState("");
   const [arrivalStation, setArrivalStation] = useState("");
   const [departureDate, setDepartureDate] = useState("");
   const [arrivalDate, setArrivalDate] = useState("");
   const navigate = useNavigate();
+  const [ticketType, setTicketType] = useState("roundTrip"); // Mặc định là "Khứ hồi"
+
+  const handleTicketTypeChange = (e) => {
+    setTicketType(e.target.value);
+    if (e.target.value === "oneWay") {
+      setArrivalDate(""); // Reset ngày về nếu chọn "Một chiều"
+    }
+  };
+
+  useEffect(() => {
+    const savedData = sessionStorage.getItem("searchData");
+    if (savedData) {
+      const parsedData = JSON.parse(savedData);
+      setDepartureStation(parsedData.departureStation);
+      setArrivalStation(parsedData.arrivalStation);
+      setDepartureDate(parsedData.departureDate);
+      if (parsedData.isRoundTrip) {
+        setArrivalDate(parsedData.returnDate);
+        setTicketType("roundTrip");
+      } else {
+        setTicketType("oneWay");
+      }
+    }
+  }, []);
 
   const handleSearchClick = (event) => {
     event.preventDefault();
-    navigate("/resultticket", {
-      state: { departureDate, departureStation, arrivalStation, arrivalDate },
-    });
+  
+    if (!departureStation || !arrivalStation || !departureDate) {
+      alert("Vui lòng chọn đầy đủ Ga đi, Ga đến và Ngày đi!");
+      return;
+    }
+  
+    const isRoundTrip = ticketType === "roundTrip";
+    const searchData = {
+      departureDate,
+      departureStation,
+      arrivalStation,
+      returnDate: isRoundTrip ? arrivalDate : "",
+      isRoundTrip,
+    };
+  
+    console.log("📤 Dữ liệu chuẩn bị gửi:", searchData);
+  
+    sessionStorage.setItem("searchData", JSON.stringify(searchData));
+    navigate("/resultticket", { replace: true, state: searchData });
   };
 
   return (
@@ -74,7 +117,7 @@ const BookForm = ({ cart, onAddToCart }) => {
               </h5>
             </div>
             <div className="card-body">
-              <form>
+              <form> 
                 <div className="row mb-3">
                   <div className="col-md-4">
                     <label className="form-label text-primary">Ga đi</label>
@@ -119,8 +162,11 @@ const BookForm = ({ cart, onAddToCart }) => {
                           type="radio"
                           name="ticketType"
                           id="oneWay"
+                          value="oneWay"
+                          checked={ticketType === "oneWay"}
+                          onChange={handleTicketTypeChange}
                         />
-                        <label className="form-check-label " htmlFor="oneWay">
+                        <label className="form-check-label" htmlFor="oneWay">
                           Một chiều
                         </label>
                       </div>
@@ -130,12 +176,11 @@ const BookForm = ({ cart, onAddToCart }) => {
                           type="radio"
                           name="ticketType"
                           id="roundTrip"
-                          defaultChecked
+                          value="roundTrip"
+                          checked={ticketType === "roundTrip"}
+                          onChange={handleTicketTypeChange}
                         />
-                        <label
-                          className="form-check-label "
-                          htmlFor="roundTrip"
-                        >
+                        <label className="form-check-label" htmlFor="roundTrip">
                           Khứ hồi
                         </label>
                       </div>
@@ -153,10 +198,19 @@ const BookForm = ({ cart, onAddToCart }) => {
                   </div>
                   <div className="col-md-4">
                     <label className="form-label text-primary">Ngày về</label>
+                    {/* Chỉ hiển thị "Ngày về" nếu chọn Khứ hồi */}
                     <input
                       type="date"
                       className="form-control"
+                      value={arrivalDate}
                       onChange={(e) => setArrivalDate(e.target.value)}
+                      disabled={ticketType === "oneWay"} // Vô hiệu hóa thay vì ẩn đi
+                      style={{
+                        backgroundColor:
+                          ticketType === "oneWay" ? "#e9ecef" : "white",
+                        cursor:
+                          ticketType === "oneWay" ? "not-allowed" : "auto",
+                      }}
                     />
                   </div>
                   <div className="col-md-4 d-flex align-items-end">
@@ -180,10 +234,10 @@ const BookForm = ({ cart, onAddToCart }) => {
                 className="card-title text-primary text-main m-0"
                 style={{ fontWeight: "bold" }}
               >
-                <i className="bi bi-list"></i> Giỏ Vé
+                <i className="bi bi-list"></i> <FiAlignJustify /> Giỏ Vé
               </h5>
             </div>
-            <div className="card-body text-center">
+            <div className="card-body text-center p-2">
               {cart && cart.length === 0 ? (
                 <h6
                   className="card-title"
@@ -192,30 +246,54 @@ const BookForm = ({ cart, onAddToCart }) => {
                   Chưa có vé
                 </h6>
               ) : (
-                <div>
+                <div className="">
                   {cart?.map((ticket, index) => (
-                    <div key={index} className="mb-3">
-                      <p>
-                        <strong>Tàu:</strong> {ticket.trainName}
-                      </p>
-                      <p>
-                        <strong>Ghế:</strong> {ticket.seat}
-                      </p>
-                      <p>
-                        <strong>Giá:</strong> {ticket.price.toLocaleString()}{" "}
-                        VND
-                      </p>
+                    <div key={index} className="mb-1">
+                      <TripInfo
+                        departureDate={departureDate}
+                        departureStation={departureStation}
+                        arrivalStation={arrivalStation}
+                        formatDate={formatDate}
+                      />
+                      <div className="ticket-info d-flex justify-content-between align-items-start">
+                        <div className="d-flex flex-column flex-grow-1 mt-2">
+                          <strong>Tàu:</strong>
+                          <strong>Toa:</strong>
+                          <strong>Ghế:</strong>
+                          <strong>Giá:</strong>
+                        </div>
+                        <div className="d-flex flex-column flex-grow-1 align-items-start mt-2">
+                          <span>{ticket.trainName}</span>
+                          <span>{ticket.car}</span>
+                          <span>{ticket.seat}</span>
+                          <span>{ticket.price.toLocaleString()} VND</span>
+                        </div>
+                        <button
+                          className="btn-delete d-flex justify-content-end align-items-end"
+                          style={{ height: "96px" }}
+                          onClick={() => onAddToCart(null, index)}
+                        >
+                          <RiDeleteBin5Line size={18} />
+                        </button>
+                      </div>
                       <hr />
                     </div>
                   ))}
                 </div>
               )}
-              <button className="btn btn-primary w-100">Mua vé</button>
+              <Link
+                to={{
+                  pathname: "/bookingTicket",
+                  state: { cartTickets: cart }, // Truyền giỏ vé qua state
+                }}
+              >
+                <button className="btn btn-primary w-100">Mua vé</button>
+              </Link>
             </div>
           </div>
           {/* Đăng ký hội viên */}
           <div className="card shadow">
-            <div className="card-body text-center">
+            <div className="card-body text-center p-2">
               <h6
                 className="card-title"
                 style={{
@@ -229,9 +307,7 @@ const BookForm = ({ cart, onAddToCart }) => {
               <p className="card-text" style={{ fontSize: "17px" }}>
                 Công ty cổ phần vận tải đường sắt Việt Nam
               </p>
-              <Link to="/informationform">
-                <button className="btn btn-primary w-100">Mua vé</button>
-              </Link>
+              <button className="btn btn-primary w-100">Đăng ký</button>
             </div>
           </div>
         </div>
