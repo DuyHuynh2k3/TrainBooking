@@ -13,9 +13,14 @@ const BookingTicket = () => {
     passengerInfo: {},
     bookingInfo: {},
     paymentInfo: {},
+    tripInfo: {},
   });
 
-  const handleNext = () => {
+  const handleNext = (newData) => {
+    setFormData((prevData) => ({
+      ...prevData,
+      ...newData, // Cập nhật formData với cartTickets
+    }));
     setActiveStep((prevActiveStep) => prevActiveStep + 1);
   };
 
@@ -41,6 +46,7 @@ const BookingTicket = () => {
             onBack={handleBack}
             formData={formData}
             updateFormData={updateFormData}
+            tripInfo={formData.tripInfo}
           />
         )}
         {activeStep === 1 && (
@@ -48,6 +54,7 @@ const BookingTicket = () => {
             onNext={handleNext}
             onBack={handleBack}
             formData={formData}
+             tripInfo={formData.tripInfo}
           />
         )}
       </main>

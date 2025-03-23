@@ -1,19 +1,30 @@
-import React, { useState } from "react";
+import React, {} from "react";
 import { Button } from "react-bootstrap";
 import "../../styles/SeatSelect.css";
 import headtrain from "../../assets/img/train1.png";
 import train from "../../assets/img/train2.png";
+import useStore from "../../store/trains";
+
 
 const SeatSelect = ({
+  stationtype,
   selectedSeat,
   setSelectedSeat,
   seatPrice,
   selectedCar,
-  setSelectedCar, // Nhận hàm cập nhật selectedCar từ props
+  setSelectedCar, 
   selectedSeatType,
   cars,
-  trainName,
+  trainName,  
+  onAddToCart,
+  departureDate,
+  formatDate,
+  departureStation,
+  arrivalStation
 }) => {
+  const {setisround,isRound } = useStore();
+  console.log(isRound);
+  
   // Lọc danh sách toa tàu theo loại ghế
   const filteredCars = cars
     .filter((car) => car.seatType === selectedSeatType)
@@ -76,14 +87,25 @@ const SeatSelect = ({
     })),
   ];
 
-  const handleSeatSelect = (seatNumber) => {
+  const handleSeatSelect = (seatNumber,type) => {
+    console.log(seatNumber);
+    setisround(type)
     if (selectedSeat === seatNumber) {
-      setSelectedSeat(null); // Bỏ chọn ghế
+      setSelectedSeat(null); 
+      onAddToCart(null); 
     } else {
-      setSelectedSeat(seatNumber); // Chọn ghế mới
+      setSelectedSeat(seatNumber);
+      const ticket = {
+        trainName: trainName, 
+        seat: seatNumber, 
+        price: seatPrices.find((s) => s.id === seatNumber)?.price || 0,
+        car: selectedCar, 
+        seatType: selectedSeatType, 
+        departureDate: departureDate
+      };
+      onAddToCart(ticket);
     }
   };
-
   return (
     <div className="container mt-2">
       <div className="seat-select-container">
@@ -205,7 +227,7 @@ const SeatSelect = ({
                             className={`seat ${
                               selectedSeat === seat ? "selected" : ""
                             }`}
-                            onClick={() => handleSeatSelect(seat)}
+                            onClick={() => handleSeatSelect(seat,stationtype)}
                             style={{
                               backgroundColor:
                                 selectedSeat === seat ? "orange" : "#fff",

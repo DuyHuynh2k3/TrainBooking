@@ -7,6 +7,8 @@ import Step from "@mui/material/Step";
 import StepLabel from "@mui/material/StepLabel";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
+import useStore from "../../store/trains";
+import TripInfo from "./TripInfo";
 
 const steps = [
   "Nhập thông tin hành khách",
@@ -16,25 +18,37 @@ const steps = [
 ];
 
 const InformationFormStep2 = ({ onNext, onBack, formData }) => {
-  const { passengerInfo } = formData;
-  console.log("FormData in Step2:", formData); // Kiểm tra giá trị của formData
+  const [isLoading, setIsLoading] = useState(false);
+  const { passengerInfo, cartTickets = [] } = formData;
   const [activeStep, setActiveStep] = React.useState(1);
   const [skipped, setSkipped] = React.useState(new Set());
   const [timeLeft, setTimeLeft] = useState(478);
   const navigate = useNavigate();
+  const { station, setstation,isRound } = useStore(); 
+  const totalAmount = (cartTickets || []).reduce(
+    (total, ticket) => total + (ticket.price || 0) + 1000,
+    0
+  );
 
   useEffect(() => {
     if (timeLeft === 0) {
       navigate("/");
       return;
     }
-
-    const timer = setInterval(() => {
-      setTimeLeft((prevTime) => prevTime - 1);
+  
+    const timerId = setInterval(() => {
+      setTimeLeft((prevTime) => {
+        if (prevTime <= 1) {
+          clearInterval(timerId);
+          return 0;
+        }
+        return prevTime - 1;
+      });
     }, 1000);
-
-    return () => clearInterval(timer);
+  
+    return () => clearInterval(timerId);
   }, [timeLeft, navigate]);
+  
 
   const isStepOptional = (step) => {
     return step === 1;
@@ -81,14 +95,18 @@ const InformationFormStep2 = ({ onNext, onBack, formData }) => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          amount: 650000,
+          amount: totalAmount, // Sử dụng tổng giá trị từ cartTickets
           orderId: `ORDER_${new Date().getTime()}`,
           orderInfo: "Thanh toán vé tàu",
         }),
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        const errorData = await response.json(); // Lấy thông tin lỗi từ server
+        console.error("API Error:", errorData); // Log thông tin lỗi
+        throw new Error(
+          `HTTP error! status: ${response.status}, message: ${errorData.message}`
+        );
       }
 
       const data = await response.json();
@@ -123,7 +141,7 @@ const InformationFormStep2 = ({ onNext, onBack, formData }) => {
     onNext();
   };
 
-  const [isLoading, setIsLoading] = useState(false);
+ 
 
   const handleBackLocal = () => {
     setActiveStep((prevActiveStep) => prevActiveStep - 1);
@@ -312,21 +330,26 @@ const InformationFormStep2 = ({ onNext, onBack, formData }) => {
                     </tr>
                   </thead>
                   <tbody>
-                    <tr>
-                      <td>1</td>
-                      <td>
-                        <div>Họ tên: {passengerInfo.passengerName}</div>
-                        <div>Đối tượng: {passengerInfo.passengerType}</div>
-                        <div>Số giấy tờ: {passengerInfo.idNumber}</div>
-                        <div>
-                          Hành trình: SE2 Sài Gòn - Nha Trang 05/04/2025 20:35
-                          Toa 1 chỗ 40 Ngôi mềm
-                        </div>
-                      </td>
-                      <td>Còn {timeLeft} giây</td>
-                      <td>649,000</td>
-                      <td>650,000</td>
-                    </tr>
+                    {cartTickets.map((ticket, index) => {
+                      return (
+                        <tr key={index}>
+                          <td>{index + 1}</td>
+                          <td>
+                             <TripInfo stationtype={isRound} />
+                            Tàu: {ticket.trainName}
+                            <br></br>
+                            {ticket.seatType}
+                            <br></br>
+                            Toa: {ticket.car}
+                            <br></br>
+                            Ghế: {ticket.seat}
+                          </td>
+                          <td>Còn {timeLeft} giây</td>
+                          <td>{ticket.price.toLocaleString()} VND</td>
+                          <td>{(ticket.price + 1000).toLocaleString()} VND</td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                   <tfoot className="table-info">
                     <tr
@@ -339,7 +362,16 @@ const InformationFormStep2 = ({ onNext, onBack, formData }) => {
                       <td colSpan={4} style={{ textAlign: "right" }}>
                         Tổng tiền
                       </td>
-                      <td>650,000</td>
+                      <td>
+                        {" "}
+                        {cartTickets
+                          .reduce(
+                            (total, ticket) => total + ticket.price + 1000,
+                            0
+                          )
+                          .toLocaleString()}
+                        VND
+                      </td>
                     </tr>
                   </tfoot>
                 </table>

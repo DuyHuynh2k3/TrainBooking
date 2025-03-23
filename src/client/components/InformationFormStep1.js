@@ -26,6 +26,9 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogActions from "@mui/material/DialogActions";
 import Alert from "@mui/material/Alert";
+import { useLocation } from "react-router-dom";
+import useStore from "../../store/trains";
+import TripInfo from "./TripInfo";
 
 const steps = [
   "Nhập thông tin hành khách",
@@ -42,12 +45,24 @@ const InformationFormStep1 = ({ onNext, onBack, formData, updateFormData }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [openConfirmDialog, setOpenConfirmDialog] = useState(false);
   const [paymentStatus, setPaymentStatus] = useState(null);
+  const { station, setstation, isRound } = useStore();
 
   const passengerNameRef = useRef(null);
   const passengerTypeRef = useRef(null);
   const idNumberRef = useRef(null);
   const fullNameRef = useRef(null);
   const termsRef = useRef(null);
+
+  const location = useLocation();
+  const storedCart = JSON.parse(localStorage.getItem("cartTickets")) || [];
+  const [cartTickets, setCartTickets] = useState(
+    location.state?.cartTickets || storedCart
+  );
+
+  console.log(
+    "📥 Dữ liệu nhận được trong InformationFormStep1.js:",
+    cartTickets
+  );
 
   const requiredFields = {
     passengerName: "Họ tên hành khách",
@@ -57,23 +72,31 @@ const InformationFormStep1 = ({ onNext, onBack, formData, updateFormData }) => {
     terms: "Điều khoản",
     paymentMethod: "Phương thức thanh toán",
   };
-
   const validateForm = () => {
     let tempErrors = {};
     let isValid = true;
     let firstInvalidField = null;
 
     Object.keys(requiredFields).forEach((field) => {
+      // Tạo key động
+      let fieldKey = field.includes("passengerName")
+        ? `passengerName-0`
+        : field;
+      fieldKey = field.includes("passengerType") ? `passengerType-0` : fieldKey;
+      fieldKey = field.includes("idNumber") ? `idNumber-0` : fieldKey;
+
+      const value = formData.passengerInfo[fieldKey];
+      console.log(`Kiểm tra trường ${fieldKey}:`, value);
+
       if (
         field !== "terms" &&
         field !== "paymentMethod" &&
-        (!formData.passengerInfo[field] ||
-          formData.passengerInfo[field].trim() === "")
+        (!value || value.trim() === "")
       ) {
-        tempErrors[field] = `${requiredFields[field]} là bắt buộc`;
+        tempErrors[fieldKey] = `${requiredFields[field]} là bắt buộc`;
         isValid = false;
         if (!firstInvalidField) {
-          firstInvalidField = field;
+          firstInvalidField = fieldKey;
         }
       } else if (field === "terms" && !formData.passengerInfo.terms) {
         tempErrors[field] = `${requiredFields[field]} là bắt buộc`;
@@ -97,9 +120,9 @@ const InformationFormStep1 = ({ onNext, onBack, formData, updateFormData }) => {
 
     if (!isValid && firstInvalidField) {
       const fieldRefs = {
-        passengerName: passengerNameRef,
-        passengerType: passengerTypeRef,
-        idNumber: idNumberRef,
+        "passengerName-0": passengerNameRef,
+        "passengerType-0": passengerTypeRef,
+        "idNumber-0": idNumberRef,
         fullName: fullNameRef,
         terms: termsRef,
         paymentMethod: null,
@@ -112,6 +135,24 @@ const InformationFormStep1 = ({ onNext, onBack, formData, updateFormData }) => {
     }
 
     return isValid;
+  };
+
+  const handleDeletePassenger = (index) => {
+    // Cập nhật danh sách vé
+    setCartTickets((prevTickets) => prevTickets.filter((_, i) => i !== index));
+
+    // Cập nhật formData (nếu cần)
+    updateFormData({
+      ...formData,
+      passengerInfo: Object.fromEntries(
+        Object.entries(formData.passengerInfo).filter(
+          ([key]) => !key.includes(`-${index}`)
+        )
+      ),
+    });
+
+    // Cập nhật localStorage
+    localStorage.setItem("cartTickets", JSON.stringify(cartTickets));
   };
 
   const isStepOptional = (step) => {
@@ -148,6 +189,8 @@ const InformationFormStep1 = ({ onNext, onBack, formData, updateFormData }) => {
 
   const handleInputChange = (e) => {
     const { id, value, type, checked } = e.target;
+    console.log(`ID: ${id}, Giá trị nhập vào: ${value}`);
+    console.log("Dữ liệu formData trước cập nhật:", formData.passengerInfo);
     updateFormData({
       passengerInfo: {
         ...formData.passengerInfo,
@@ -158,6 +201,7 @@ const InformationFormStep1 = ({ onNext, onBack, formData, updateFormData }) => {
     if (errors[id]) {
       setErrors((prev) => ({ ...prev, [id]: null }));
     }
+    console.log("✅ Dữ liệu sau cập nhật:", formData.passengerInfo);
   };
 
   const handleNextLocal = () => {
@@ -165,6 +209,7 @@ const InformationFormStep1 = ({ onNext, onBack, formData, updateFormData }) => {
       setIsSubmitting(true);
       setTimeout(() => {
         setIsSubmitting(false);
+        console.log("🚀 Trip Info Before Navigate:", formData.tripInfo);
         let newSkipped = skipped;
         if (isStepSkipped(activeStep)) {
           newSkipped = new Set(newSkipped.values());
@@ -173,7 +218,11 @@ const InformationFormStep1 = ({ onNext, onBack, formData, updateFormData }) => {
 
         setActiveStep((prevActiveStep) => prevActiveStep + 1);
         setSkipped(newSkipped);
-        onNext(formData); // Truyền formData sang bước tiếp theo
+        onNext({
+          cartTickets,
+          passengerInfo: formData.passengerInfo,
+          tripInfo: formData.tripInfo,
+        }); // Truyền formData sang bước tiếp theo
       }, 1000);
     }
   };
@@ -285,6 +334,7 @@ const InformationFormStep1 = ({ onNext, onBack, formData, updateFormData }) => {
             thông tin này sẽ được nhân viên soát vé kiểm tra trước khi lên tàu
             theo đúng các quy định của Tổng công ty Đường sắt Việt Nam.
           </p>
+
           <table className="table custom-table">
             <thead>
               <tr>
@@ -299,103 +349,150 @@ const InformationFormStep1 = ({ onNext, onBack, formData, updateFormData }) => {
               </tr>
             </thead>
             <tbody>
-              <tr>
-                <td>
-                  <div className="mb-2 d-flex align-items-center">
-                    <span className=".labelspan" style={{ width: "120px" }}>
-                      Họ tên
-                    </span>
-                    <div style={{ width: "100%" }}>
-                      <Tooltip
-                        title="Vui lòng nhập họ tên hành khách"
-                        placement="right"
-                      >
-                        <input
-                          ref={passengerNameRef}
-                          type="text"
-                          className={`form-control custom-input ${
-                            errors.passengerName ? "is-invalid" : ""
-                          }`}
-                          style={errors.passengerName ? errorStyle : {}}
-                          placeholder="Thông tin hành khách"
-                          id="passengerName"
-                          onChange={handleInputChange}
-                          value={formData.passengerInfo.passengerName || ""}
-                        />
-                      </Tooltip>
-                      {errors.passengerName && (
-                        <div className="invalid-feedback">
-                          {errors.passengerName}
+              {cartTickets.length > 0 ? (
+                cartTickets.map((ticket, index) => (
+                  <tr key={index}>
+                    <td>
+                      <div className="mb-2 d-flex align-items-center">
+                        <span className="labelspan" style={{ width: "120px" }}>
+                          Họ tên
+                        </span>
+                        <div style={{ width: "100%" }}>
+                          <Tooltip
+                            title="Vui lòng nhập họ tên hành khách"
+                            placement="right"
+                          >
+                            <input
+                              type="text"
+                              className={`form-control custom-input ${
+                                errors.passengerName ? "is-invalid" : ""
+                              }`}
+                              style={errors.passengerName ? errorStyle : {}}
+                              placeholder="Thông tin hành khách"
+                              id={`passengerName-${index}`}
+                              onChange={(e) => {
+                                console.log(
+                                  `Nhập vào: ID = ${e.target.id}, Giá trị = ${e.target.value}`
+                                );
+                                handleInputChange(e);
+                              }}
+                              value={
+                                formData.passengerInfo?.[
+                                  `passengerName-${index}`
+                                ] || ""
+                              }
+                            />
+                          </Tooltip>
+                          {errors[`passengerName-${index}`] && (
+                            <div className="invalid-feedback">
+                              {errors[`passengerName-${index}`]}
+                            </div>
+                          )}
                         </div>
-                      )}
-                    </div>
-                  </div>
-                  <div className="mb-2 d-flex align-items-center">
-                    <span className=".labelspan" style={{ width: "120px" }}>
-                      Đối tượng
-                    </span>
-                    <div style={{ width: "100%" }}>
-                      <select
-                        ref={passengerTypeRef}
-                        className={`form-control custom-input ${
-                          errors.passengerType ? "is-invalid" : ""
-                        }`}
-                        style={errors.passengerType ? errorStyle : {}}
-                        id="passengerType"
-                        onChange={handleInputChange}
-                        value={formData.passengerInfo.passengerType || ""}
-                      >
-                        <option value="">Chọn đối tượng</option>
-                        <option value="Người lớn">Người lớn</option>
-                        <option value="Trẻ em">Trẻ em</option>
-                        <option value="Người cao tuổi">Người cao tuổi</option>
-                        <option value="Sinh Viên">Sinh viên</option>
-                      </select>
-                      {errors.passengerType && (
-                        <div className="invalid-feedback">
-                          {errors.passengerType}
+                      </div>
+
+                      {/* Đối tượng hành khách */}
+                      <div className="mb-2 d-flex align-items-center">
+                        <span className="labelspan" style={{ width: "120px" }}>
+                          Đối tượng
+                        </span>
+                        <div style={{ width: "100%" }}>
+                          <select
+                            className={`form-control custom-input ${
+                              errors[`passengerType-${index}`]
+                                ? "is-invalid"
+                                : ""
+                            }`}
+                            style={
+                              errors[`passengerType-${index}`] ? errorStyle : {}
+                            }
+                            id={`passengerType-${index}`}
+                            onChange={handleInputChange}
+                            value={
+                              formData.passengerInfo?.[
+                                `passengerType-${index}`
+                              ] || ""
+                            }
+                          >
+                            <option value="">Chọn đối tượng</option>
+                            <option value="Người lớn">Người lớn</option>
+                            <option value="Trẻ em">Trẻ em</option>
+                            <option value="Người cao tuổi">
+                              Người cao tuổi
+                            </option>
+                            <option value="Sinh Viên">Sinh viên</option>
+                          </select>
+                          {errors[`passengerType-${index}`] && (
+                            <div className="invalid-feedback">
+                              {errors[`passengerType-${index}`]}
+                            </div>
+                          )}
                         </div>
-                      )}
-                    </div>
-                  </div>
-                  <div className="mb-2 d-flex align-items-center">
-                    <span className=".labelspan" style={{ width: "120px" }}>
-                      Số giấy tờ
-                    </span>
-                    <div style={{ width: "100%" }}>
-                      <Tooltip
-                        title="Vui lòng nhập số CMND hoặc Hộ chiếu hợp lệ"
-                        placement="right"
-                      >
-                        <input
-                          ref={idNumberRef}
-                          type="text"
-                          className={`form-control custom-input ${
-                            errors.idNumber ? "is-invalid" : ""
-                          }`}
-                          style={errors.idNumber ? errorStyle : {}}
-                          placeholder="Số CMND/Hộ chiếu"
-                          id="idNumber"
-                          onChange={handleInputChange}
-                          value={formData.passengerInfo.idNumber || ""}
-                        />
-                      </Tooltip>
-                      {errors.idNumber && (
-                        <div className="invalid-feedback">
-                          {errors.idNumber}
+                      </div>
+
+                      {/* Số giấy tờ */}
+                      <div className="mb-2 d-flex align-items-center">
+                        <span className="labelspan" style={{ width: "120px" }}>
+                          Số giấy tờ
+                        </span>
+                        <div style={{ width: "100%" }}>
+                          <Tooltip
+                            title="Vui lòng nhập số CMND hoặc Hộ chiếu hợp lệ"
+                            placement="right"
+                          >
+                            <input
+                              type="text"
+                              className={`form-control custom-input ${
+                                errors[`idNumber-${index}`] ? "is-invalid" : ""
+                              }`}
+                              style={
+                                errors[`idNumber-${index}`] ? errorStyle : {}
+                              }
+                              id={`idNumber-${index}`}
+                              onChange={handleInputChange}
+                              value={
+                                formData.passengerInfo?.[`idNumber-${index}`] ||
+                                ""
+                              }
+                            />
+                          </Tooltip>
+                          {errors[`idNumber-${index}`] && (
+                            <div className="invalid-feedback">
+                              {errors[`idNumber-${index}`]}
+                            </div>
+                          )}
                         </div>
-                      )}
-                    </div>
-                  </div>
-                </td>
-                <td>Thông tin hành khách</td>
-                <td>790,000</td>
-                <td>0</td>
-                <td>Không có khuyến mãi cho vé này</td>
-                <td>1,000</td>
-                <td>791,000</td>
-                <td></td>
-              </tr>
+                      </div>
+                    </td>
+                    <td>
+                      <TripInfo stationtype={isRound} />
+                      Tàu: {ticket.trainName},<br></br>
+                      {ticket.seatType},<br></br>
+                      Toa: {ticket.car},<br></br>
+                      Ghế: {ticket.seat}
+                    </td>
+                    <td>{ticket.price.toLocaleString()} VND</td>
+                    <td>0</td>
+                    <td>Không có khuyến mãi</td>
+                    <td>1,000 VND</td>
+                    <td>{(ticket.price + 1000).toLocaleString()} VND</td>
+                    <td>
+                      <button
+                        className="btn btn-danger"
+                        onClick={() => handleDeletePassenger(index)}
+                      >
+                        Xóa vé
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="8" style={{ textAlign: "center" }}>
+                    Chưa có vé nào được chọn
+                  </td>
+                </tr>
+              )}
             </tbody>
             <tfoot className="table-info">
               <tr
@@ -408,7 +505,12 @@ const InformationFormStep1 = ({ onNext, onBack, formData, updateFormData }) => {
                 <td colSpan={6} style={{ textAlign: "right" }}>
                   Tổng tiền
                 </td>
-                <td>791,000</td>
+                <td>
+                  {cartTickets
+                    .reduce((total, ticket) => total + ticket.price + 1000, 0)
+                    .toLocaleString()}{" "}
+                  VND
+                </td>
                 <td></td>
               </tr>
             </tfoot>
