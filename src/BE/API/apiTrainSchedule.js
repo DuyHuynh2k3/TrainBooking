@@ -94,9 +94,9 @@ const trains = [
     arrivalTime: "20:00",
     duration: "12 giờ",
     seats: [
-      { type: "Ngồi cứng", available: 40, price: "180,000 đ" },
-      { type: "Ngồi mềm", available: 30, price: "250,000 đ" },
-      { type: "Nằm khoang 6", available: 20, price: "350,000 đ" }
+      { type: "Ngồi mềm", available: 40, price: "180,000 đ" },
+      { type: "Nằm khoang 6", available: 30, price: "250,000 đ" },
+      { type: "Nằm khoang 4", available: 20, price: "350,000 đ" }
     ],
     discount: "Giảm tới 5%",
   },
@@ -111,9 +111,9 @@ const trains = [
     arrivalTime: "22:00",
     duration: "12 giờ",
     seats: [
-      { type: "Ngồi cứng", available: 35, price: "190,000 đ" },
-      { type: "Ngồi mềm", available: 25, price: "260,000 đ" },
-      { type: "Nằm khoang 6", available: 15, price: "360,000 đ" }
+      { type: "Ngồi mềm", available: 35, price: "190,000 đ" },
+      { type: "Nằm khoang 6", available: 25, price: "260,000 đ" },
+      { type: "Nằm khoang 4", available: 15, price: "360,000 đ" }
     ],
     discount: "Không giảm giá",
   }

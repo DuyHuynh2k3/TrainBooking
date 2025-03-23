@@ -1,6 +1,6 @@
 import React from "react";
 import Header from "../components/Header";
-import BookingForm from "../components/BookForm";
+import BookForm from "../components/BookForm";
 import Policies from "../components/Policies";
 import Footer from "../components/Footer";
 import Carousel from "../components/Carousel";
@@ -12,7 +12,7 @@ const HomePage = () => {
       <Header />
       <Carousel />
       <main className="">
-        <BookingForm />
+        <BookForm />
         <Policies />
       </main>
       <Footer />

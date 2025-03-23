@@ -6,8 +6,10 @@ import "../../styles/TrainSchedule.css";
 import { BsArrowRight } from "react-icons/bs";
 import SeatSelect from "./SeatSelect";
 import TripInfo from "./TripInfo";
+import useStore from "../../store/trains";
 
 const TrainSchedule = ({ onAddToCart }) => {
+  const { station, setstation, settrainS, settrainsreturn,} = useStore();
   const cars = [
     { id: 1, type: "Toa 1", seatType: "Ngồi mềm" },
     { id: 2, type: "Toa 2", seatType: "Ngồi mềm" },
@@ -20,15 +22,12 @@ const TrainSchedule = ({ onAddToCart }) => {
     { id: 9, type: "Toa 9", seatType: "Nằm khoang 4" },
   ];
 
-  const location = useLocation();
-  const {
+  const {departureStation,
+    arrivalStation,
     departureDate,
     returnDate,
-    departureStation,
-    arrivalStation,
-    isRoundTrip,
-  } = location.state || {};
-  console.log("📥 Dữ liệu nhận từ location.state:", location.state);
+    ticketType} = station;
+      const isRoundTrip = station.ticketType ==='roundTrip';
 
   const [trains, setTrains] = useState([]); // Danh sách tàu chiều đi
   const [trainsReturn, setTrainsReturn] = useState([]); // Danh sách tàu chiều về
@@ -42,28 +41,49 @@ const TrainSchedule = ({ onAddToCart }) => {
   const [selectedSeatPrices, setSelectedSeatPrices] = useState({}); // Lưu giá ghế đã chọn
   const [selectedCar, setSelectedCar] = useState(null); // Lưu toa tàu được chọn
   const [selectedSeatType, setSelectedSeatType] = useState(null); // Lưu loại ghế được chọn
-
+    const i =1;
   // Tải dữ liệu tàu chiều đi
+  console.log(departureDate, departureStation, arrivalStation)
   useEffect(() => {
-    if (!departureDate || !departureStation || !arrivalStation) return;
-
+    console.log("useEffect đã chạy!");
+  
+    // Kiểm tra các giá trị bắt buộc
+    if (!departureDate || !departureStation || !arrivalStation) {
+      console.error("Thiếu thông tin cần thiết!");
+      return;
+    }
+  
     // Kiểm tra ngày về phải >= ngày đi nếu là khứ hồi
-    if (
-      isRoundTrip &&
-      (!returnDate || new Date(returnDate) < new Date(departureDate))
-    ) {
+    if (isRoundTrip && (!returnDate || new Date(returnDate) < new Date(departureDate))) {
       console.error("Ngày về phải lớn hơn hoặc bằng ngày đi!");
       return;
     }
-
+  
+    // Log kiểm tra kiểu dữ liệu
+    console.log("Kiểu dữ liệu:", {
+      departureDate: typeof departureDate,
+      departureStation: typeof departureStation,
+      arrivalStation: typeof arrivalStation,
+    });
+  
+    // Log giá trị hiện tại
+    console.log("Giá trị hiện tại:", {
+      departureDate,
+      departureStation,
+      arrivalStation,
+      returnDate,
+    });
+  
+    // Gọi API chiều đi
     setLoading(true);
     axios
       .get("http://localhost:5000/api/trains", {
         params: { departureDate, departureStation, arrivalStation },
       })
       .then((response) => {
-        setTrains(response.data);
-        setLoading(false);
+        console.log("API response (chiều đi):", response.data);
+        setTrains(response.data); // Cập nhật danh sách tàu chiều đi
+        settrainS(response.data); // Cập nhật store (nếu cần)
         setAvailableTrains(
           response.data.filter((train) =>
             train.seats.some((seat) => seat.available > 0)
@@ -71,10 +91,24 @@ const TrainSchedule = ({ onAddToCart }) => {
         );
       })
       .catch((error) => {
-        console.error("Có lỗi khi tải dữ liệu tàu chiều đi:", error);
-        setLoading(false);
+        if (error.response) {
+          // Lỗi từ phía server (ví dụ: 404, 500)
+          console.error("Lỗi từ server (chiều đi):", error.response.status, error.response.data);
+          setTrains([]); // Đặt lại danh sách tàu chiều đi
+          settrainS([]); // Đặt lại store (nếu cần)
+        } else if (error.request) {
+          // Không nhận được phản hồi từ server
+          console.error("Không nhận được phản hồi từ server (chiều đi):", error.request);
+        } else {
+          // Lỗi khác
+          console.error("Lỗi khi gọi API (chiều đi):", error.message);
+        }
+      })
+      .finally(() => {
+        setLoading(false); // Dừng loading sau khi hoàn thành
       });
-
+  
+    // Gọi API chiều về (nếu là khứ hồi)
     if (isRoundTrip) {
       setLoadingReturn(true);
       axios
@@ -86,8 +120,9 @@ const TrainSchedule = ({ onAddToCart }) => {
           },
         })
         .then((response) => {
-          setTrainsReturn(response.data);
-          setLoadingReturn(false);
+          console.log("API response (chiều về):", response.data);
+          setTrainsReturn(response.data); // Cập nhật danh sách tàu chiều về
+          settrainsreturn(response.data); // Cập nhật store (nếu cần)
           setAvailableTrainsReturn(
             response.data.filter((train) =>
               train.seats.some((seat) => seat.available > 0)
@@ -95,10 +130,37 @@ const TrainSchedule = ({ onAddToCart }) => {
           );
         })
         .catch((error) => {
-          console.error("Có lỗi khi tải dữ liệu tàu chiều về:", error);
-          setLoadingReturn(false);
+          if (error.response) {
+            // Lỗi từ phía server (ví dụ: 404, 500)
+            console.error("Lỗi từ server (chiều về):", error.response.status, error.response.data);
+            setTrainsReturn([]); // Đặt lại danh sách tàu chiều về
+            settrainsreturn([]); // Đặt lại store (nếu cần)
+          } else if (error.request) {
+            // Không nhận được phản hồi từ server
+            console.error("Không nhận được phản hồi từ server (chiều về):", error.request);
+          } else {
+            // Lỗi khác
+            console.error("Lỗi khi gọi API (chiều về):", error.message);
+          }
+        })
+        .finally(() => {
+          setLoadingReturn(false); // Dừng loading sau khi hoàn thành
         });
+    } else {
+      // Nếu không phải khứ hồi, đặt lại danh sách tàu chiều về
+      setTrainsReturn([]);
+      setLoadingReturn(false);
     }
+  }, [
+    departureDate,
+    returnDate,
+    departureStation,
+    arrivalStation,
+    isRoundTrip,
+  ]);
+  useEffect(() => {
+    
+    console.log("dm code : ",i + 2);
   }, [
     departureDate,
     returnDate,
@@ -109,8 +171,10 @@ const TrainSchedule = ({ onAddToCart }) => {
   console.log(
     "📤 Gửi request chiều đi:",
     departureDate,
+    returnDate,
     departureStation,
-    arrivalStation
+    arrivalStation,
+    isRoundTrip,
   );
   console.log(
     "📤 Gửi request chiều về:",
@@ -118,7 +182,6 @@ const TrainSchedule = ({ onAddToCart }) => {
     arrivalStation,
     departureStation
   );
-  console.log(trainsReturn);
   console.log("🔄 isRoundTrip:", isRoundTrip);
 
   // Hàm xử lý khi chọn ghế
@@ -156,7 +219,7 @@ const TrainSchedule = ({ onAddToCart }) => {
       </div>
     );
   }
-
+  console.log("train : ",trains, "train return :" ,trainsReturn)
   return (
     <div className="container-fluid mt-2">
       <div className="row d-flex justify-content-center">
@@ -165,10 +228,7 @@ const TrainSchedule = ({ onAddToCart }) => {
           <div className="card shadow mb-4">
             <div className="card-header text-primary d-flex justify-content-between p-2">
               <TripInfo
-                departureDate={departureDate}
-                departureStation={departureStation}
-                arrivalStation={arrivalStation}
-                isReturnTrip={false}
+              stationtype = {"Chiều Đi"}
               />
               <div className="text-primary" style={{ fontWeight: "bold" }}>
                 <strong>{availableTrains}</strong> Tàu còn vé cho ngày này
@@ -304,6 +364,7 @@ const TrainSchedule = ({ onAddToCart }) => {
                         <div className="row mt-4">
                           <div className="col text-center">
                             <SeatSelect
+                              stationtype = {"Chiều Đi"}
                               selectedSeat={selectedSeats[train.id]}
                               setSelectedSeat={(seat) =>
                                 setSelectedSeats((prev) => ({
@@ -334,10 +395,7 @@ const TrainSchedule = ({ onAddToCart }) => {
             <div className="card shadow mb-4">
               <div className="card-header text-primary d-flex justify-content-between p-2">
                 <TripInfo
-                  departureDate={returnDate}
-                  departureStation={arrivalStation}
-                  arrivalStation={departureStation}
-                  isReturnTrip={true} // Chiều về
+                stationtype = {"Chiều Về "}
                 />
                 <div className="text-primary" style={{ fontWeight: "bold" }}>
                   <strong>{availableTrainsReturn}</strong> Tàu còn vé cho ngày
@@ -482,6 +540,7 @@ const TrainSchedule = ({ onAddToCart }) => {
                             <div className="row mt-4">
                               <div className="col text-center">
                                 <SeatSelect
+                                stationtype = {"Chiều Về"}
                                   selectedSeat={selectedSeats[train.id]}
                                   setSelectedSeat={(seat) =>
                                     setSelectedSeats((prev) => ({

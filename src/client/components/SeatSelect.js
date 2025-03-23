@@ -3,9 +3,11 @@ import { Button } from "react-bootstrap";
 import "../../styles/SeatSelect.css";
 import headtrain from "../../assets/img/train1.png";
 import train from "../../assets/img/train2.png";
+import useStore from "../../store/trains";
 
 
 const SeatSelect = ({
+  stationtype,
   selectedSeat,
   setSelectedSeat,
   seatPrice,
@@ -20,6 +22,9 @@ const SeatSelect = ({
   departureStation,
   arrivalStation
 }) => {
+  const {setisround,isRound } = useStore();
+  console.log(isRound);
+  
   // Lọc danh sách toa tàu theo loại ghế
   const filteredCars = cars
     .filter((car) => car.seatType === selectedSeatType)
@@ -82,7 +87,9 @@ const SeatSelect = ({
     })),
   ];
 
-  const handleSeatSelect = (seatNumber) => {
+  const handleSeatSelect = (seatNumber,type) => {
+    console.log(seatNumber);
+    setisround(type)
     if (selectedSeat === seatNumber) {
       setSelectedSeat(null); 
       onAddToCart(null); 
@@ -220,7 +227,7 @@ const SeatSelect = ({
                             className={`seat ${
                               selectedSeat === seat ? "selected" : ""
                             }`}
-                            onClick={() => handleSeatSelect(seat)}
+                            onClick={() => handleSeatSelect(seat,stationtype)}
                             style={{
                               backgroundColor:
                                 selectedSeat === seat ? "orange" : "#fff",

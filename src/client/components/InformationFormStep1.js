@@ -27,6 +27,8 @@ import DialogContentText from "@mui/material/DialogContentText";
 import DialogActions from "@mui/material/DialogActions";
 import Alert from "@mui/material/Alert";
 import { useLocation } from "react-router-dom";
+import useStore from "../../store/trains";
+import TripInfo from "./TripInfo";
 
 
 const steps = [
@@ -44,6 +46,7 @@ const InformationFormStep1 = ({ onNext, onBack, formData, updateFormData }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [openConfirmDialog, setOpenConfirmDialog] = useState(false);
   const [paymentStatus, setPaymentStatus] = useState(null);
+  const { station, setstation,isRound } = useStore(); 
 
   const passengerNameRef = useRef(null);
   const passengerTypeRef = useRef(null);
@@ -462,6 +465,7 @@ const InformationFormStep1 = ({ onNext, onBack, formData, updateFormData }) => {
                       </div>
                     </td>
                       <td>
+                       <TripInfo stationtype={isRound} /> 
                         Tàu: {ticket.trainName},<br></br>
                         {ticket.seatType},<br></br>
                         Toa: {ticket.car},<br></br>

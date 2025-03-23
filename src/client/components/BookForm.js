@@ -1,4 +1,4 @@
-import React, { useEffect,useState } from "react";
+import React, { useEffect, useState } from "react";
 import "../../styles/BookForm.css";
 import { FiAlignJustify } from "react-icons/fi";
 import TextField from "@mui/material/TextField";
@@ -7,8 +7,7 @@ import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 import TripInfo from "./TripInfo";
 import { RiDeleteBin5Line } from "react-icons/ri";
-
-
+import useStore from "../../store/trains";
 // Danh sách các ga tàu
 const stations = [
   { title: "Lào Cai" },
@@ -48,59 +47,45 @@ const stations = [
 ];
 
 const BookForm = ({ cart, onAddToCart, formatDate }) => {
+  const {isRound } = useStore(); 
   const [departureStation, setDepartureStation] = useState("");
   const [arrivalStation, setArrivalStation] = useState("");
   const [departureDate, setDepartureDate] = useState("");
   const [arrivalDate, setArrivalDate] = useState("");
   const navigate = useNavigate();
-  const [ticketType, setTicketType] = useState("roundTrip"); // Mặc định là "Khứ hồi"
-
+  const [ticketType, setTicketType] = useState(localStorage.getItem("ticketType") || ""); // Mặc định là "Khứ hồi"
+  const { station, setstation } = useStore(); 
+  
   const handleTicketTypeChange = (e) => {
-    setTicketType(e.target.value);
-    if (e.target.value === "oneWay") {
-      setArrivalDate(""); // Reset ngày về nếu chọn "Một chiều"
+    const selectedTicketType = e.target.value;
+    setTicketType(selectedTicketType);
+    localStorage.setItem("ticketType", selectedTicketType);
+    // Nếu chọn "Một chiều", reset ngày về
+    if (selectedTicketType === "oneWay") {
+      setArrivalDate(""); // Reset ngày về
     }
   };
 
-  useEffect(() => {
-    const savedData = sessionStorage.getItem("searchData");
-    if (savedData) {
-      const parsedData = JSON.parse(savedData);
-      setDepartureStation(parsedData.departureStation);
-      setArrivalStation(parsedData.arrivalStation);
-      setDepartureDate(parsedData.departureDate);
-      if (parsedData.isRoundTrip) {
-        setArrivalDate(parsedData.returnDate);
-        setTicketType("roundTrip");
-      } else {
-        setTicketType("oneWay");
-      }
-    }
-  }, []);
-
   const handleSearchClick = (event) => {
+
     event.preventDefault();
-  
+    const dataTrain = {
+      departureStation,
+      arrivalStation,
+      departureDate,
+      returnDate: ticketType === "roundTrip" ? arrivalDate : "",
+      ticketType,
+    }
+    console.log(dataTrain);
+    setstation(dataTrain)
     if (!departureStation || !arrivalStation || !departureDate) {
       alert("Vui lòng chọn đầy đủ Ga đi, Ga đến và Ngày đi!");
       return;
     }
-  
-    const isRoundTrip = ticketType === "roundTrip";
-    const searchData = {
-      departureDate,
-      departureStation,
-      arrivalStation,
-      returnDate: isRoundTrip ? arrivalDate : "",
-      isRoundTrip,
-    };
-  
-    console.log("📤 Dữ liệu chuẩn bị gửi:", searchData);
-  
-    sessionStorage.setItem("searchData", JSON.stringify(searchData));
-    navigate("/resultticket", { replace: true, state: searchData });
-  };
 
+    navigate("/resultticket");
+  };
+  
   return (
     <div className="container-fluid mt-2 ">
       <div className="row d-flex justify-content-center">
@@ -117,11 +102,12 @@ const BookForm = ({ cart, onAddToCart, formatDate }) => {
               </h5>
             </div>
             <div className="card-body">
-              <form> 
+              <form>
                 <div className="row mb-3">
                   <div className="col-md-4">
                     <label className="form-label text-primary">Ga đi</label>
                     <Autocomplete
+                      value={station.departureStation|| ""}
                       freeSolo
                       options={stations.map((station) => station.title)}
                       onInputChange={(e, newValue) =>
@@ -129,6 +115,7 @@ const BookForm = ({ cart, onAddToCart, formatDate }) => {
                       }
                       renderInput={(params) => (
                         <TextField
+                          value={departureStation}
                           {...params}
                           placeholder="Chọn ga đi"
                           fullWidth
@@ -139,6 +126,7 @@ const BookForm = ({ cart, onAddToCart, formatDate }) => {
                   <div className="col-md-4">
                     <label className="form-label text-primary">Ga đến</label>
                     <Autocomplete
+                    value={station.arrivalStation|| ""}
                       freeSolo
                       options={stations.map((station) => station.title)}
                       onInputChange={(e, newValue) =>
@@ -164,7 +152,7 @@ const BookForm = ({ cart, onAddToCart, formatDate }) => {
                           id="oneWay"
                           value="oneWay"
                           checked={ticketType === "oneWay"}
-                          onChange={handleTicketTypeChange}
+                          onChange={handleTicketTypeChange} // Gọi hàm handle khi chọn loại vé
                         />
                         <label className="form-check-label" htmlFor="oneWay">
                           Một chiều
@@ -178,7 +166,7 @@ const BookForm = ({ cart, onAddToCart, formatDate }) => {
                           id="roundTrip"
                           value="roundTrip"
                           checked={ticketType === "roundTrip"}
-                          onChange={handleTicketTypeChange}
+                          onChange={handleTicketTypeChange} // Gọi hàm handle khi chọn loại vé
                         />
                         <label className="form-check-label" htmlFor="roundTrip">
                           Khứ hồi
@@ -193,6 +181,7 @@ const BookForm = ({ cart, onAddToCart, formatDate }) => {
                     <input
                       type="date"
                       className="form-control"
+                      value={ departureDate || station.departureDate }
                       onChange={(e) => setDepartureDate(e.target.value)}
                     />
                   </div>
@@ -202,7 +191,7 @@ const BookForm = ({ cart, onAddToCart, formatDate }) => {
                     <input
                       type="date"
                       className="form-control"
-                      value={arrivalDate}
+                      value={ arrivalDate || station.returnDate }
                       onChange={(e) => setArrivalDate(e.target.value)}
                       disabled={ticketType === "oneWay"} // Vô hiệu hóa thay vì ẩn đi
                       style={{
@@ -217,8 +206,7 @@ const BookForm = ({ cart, onAddToCart, formatDate }) => {
                     <button
                       type="submit"
                       className="btn btn-primary w-100"
-                      onClick={handleSearchClick}
-                    >
+                      onClick={handleSearchClick}>
                       Tìm kiếm
                     </button>
                   </div>
@@ -238,7 +226,7 @@ const BookForm = ({ cart, onAddToCart, formatDate }) => {
               </h5>
             </div>
             <div className="card-body text-center p-2">
-              {cart && cart.length === 0 ? (
+              {!cart || cart.length === 0 ? (
                 <h6
                   className="card-title"
                   style={{ fontWeight: "bold", color: "red", fontSize: "20px" }}
@@ -249,12 +237,7 @@ const BookForm = ({ cart, onAddToCart, formatDate }) => {
                 <div className="">
                   {cart?.map((ticket, index) => (
                     <div key={index} className="mb-1">
-                      <TripInfo
-                        departureDate={departureDate}
-                        departureStation={departureStation}
-                        arrivalStation={arrivalStation}
-                        formatDate={formatDate}
-                      />
+                      <TripInfo  stationtype={isRound}  />
                       <div className="ticket-info d-flex justify-content-between align-items-start">
                         <div className="d-flex flex-column flex-grow-1 mt-2">
                           <strong>Tàu:</strong>

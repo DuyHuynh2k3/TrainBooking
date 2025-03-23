@@ -5,22 +5,14 @@ import Footer from "../components/Footer";
 import Carousel from "../components/Carousel";
 import "bootstrap/dist/css/bootstrap.min.css";
 import TrainSchedule from "../components/TrainSchedule";
-import { useLocation } from "react-router-dom";
-
+import useStore from "../../store/trains";
 const HomePageResult = () => {
-  const location = useLocation();
-  const {
-    departureDate,
-    departureStation,
-    arrivalStation,
-    returnDate,
-    isRoundTrip,
-  } = location.state || {}; // Lấy dữ liệu hoặc set default
+  // Get form data from location.state or fallback to localStorage if empty
+  const { station, setstation } = useStore(); 
+  console.log(station);
 
-  console.log("📥 Dữ liệu nhận được:", location.state);
 
   const [cart, setCart] = useState([]);
-
   const handleAddToCart = (ticket, index = null) => {
     setCart((prevCart) => {
       let newCart;
@@ -39,29 +31,12 @@ const HomePageResult = () => {
       return newCart;
     });
   };
-  console.log("🛒 Giỏ vé trước khi mua:", cart);
-  console.log("📥 Props nhận được trong BookForm:", {
-    departureDate,
-    departureStation,
-    arrivalStation,
-    returnDate,
-    isRoundTrip,
-  });
- 
-  
+
   useEffect(() => {
     if (cart.length > 0) {
       localStorage.setItem("cartTickets", JSON.stringify(cart));
     }
   }, [cart]);
-
-   useEffect(() => {
-    // Lấy giỏ hàng từ localStorage khi component mount
-    const savedCart = localStorage.getItem("cartTickets");
-    if (savedCart) {
-      setCart(JSON.parse(savedCart)); // Khôi phục giỏ hàng
-    }
-  }, []);
 
   return (
     <div className="d-flex flex-column" style={{ backgroundColor: "#f7f7f7" }}>
@@ -70,21 +45,9 @@ const HomePageResult = () => {
       <main className="">
         <BookForm
           cart={cart}
-          onAddToCart={handleAddToCart}
-          departureDate={departureDate}
-          departureStation={departureStation}
-          arrivalStation={arrivalStation}
-          returnDate={returnDate}
-          isRoundTrip={isRoundTrip}
-        />
+          onAddToCart={handleAddToCart}/>
         <TrainSchedule
-          ddepartureDate={departureDate}
-          departureStation={departureStation} 
-          arrivalStation={arrivalStation} 
-          returnDate={returnDate}
-          isRoundTrip={isRoundTrip}
-          onAddToCart={handleAddToCart}
-        />
+          onAddToCart={handleAddToCart}/>
       </main>
       <Footer />
     </div>

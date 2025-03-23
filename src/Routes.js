@@ -1,5 +1,5 @@
 import React from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 import HomePage from "./client/pages/Homepage";
 import InfoSeatPage from "./client/pages/InfoSeatPage";
 import ReturnTicketPage from "./client/pages/ReturnTicketPage";
@@ -12,8 +12,6 @@ import HomeBlogPage from "./client/pages/BlogPage/HomeBlogPage";
 import BlogDetailPage from "./client/pages/BlogPage/BlogDetailPage";
 import HomePageResult from "./client/pages/HomePageResult";
 import ForgetInfoSeatPage from "./client/pages/ForgetInfoSeatPage";
-
-
 
 const AppRoutes = () => {
   return (
@@ -30,8 +28,6 @@ const AppRoutes = () => {
       <Route path="/bookingticket" element={<BookingTicket />} />
       {/* Routes cho Blog */}
       <Route path="/homeblogpage" element={<HomeBlogPage category="khuyen-mai" />} />
-      <Route path="/trong-nganh" element={<HomeBlogPage category="trong-nganh" />} />
-      <Route path="/homeblogpage" element={<HomeBlogPage category="khuyen-mai" />}/>
       <Route path="/trong-nganh"element={<HomeBlogPage category="trong-nganh" />}/>
       <Route path="/noi-bo" element={<HomeBlogPage category="noi-bo" />} />
       <Route path="/atgt-duong-sat" element={<HomeBlogPage category="atgt-duong-sat" />}/>
