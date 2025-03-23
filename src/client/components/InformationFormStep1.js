@@ -346,10 +346,10 @@ const InformationFormStep1 = ({ onNext, onBack, formData, updateFormData }) => {
                         value={formData.passengerInfo.passengerType || ""}
                       >
                         <option value="">Chọn đối tượng</option>
-                        <option value="adult">Người lớn</option>
-                        <option value="child">Trẻ em</option>
-                        <option value="elderly">Người cao tuổi</option>
-                        <option value="student">Sinh viên</option>
+                        <option value="Người lớn">Người lớn</option>
+                        <option value="Trẻ em">Trẻ em</option>
+                        <option value="Người cao tuổi">Người cao tuổi</option>
+                        <option value="Sinh Viên">Sinh viên</option>
                       </select>
                       {errors.passengerType && (
                         <div className="invalid-feedback">

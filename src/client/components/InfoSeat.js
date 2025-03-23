@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { FiAlignJustify } from "react-icons/fi";
 import "../../styles/InfoSeat.css";
@@ -10,9 +10,22 @@ const InfoSeat = () => {
   const [ticketInfo, setTicketInfo] = useState(null);
   const [error, setError] = useState("");
 
+  useEffect(() => {
+    // Lấy thông tin từ localStorage khi component được tải
+    const savedTicketInfo = localStorage.getItem("ticketInfo");
+    if (savedTicketInfo) {
+      const parsedTicketInfo = JSON.parse(savedTicketInfo);
+      setTicketId(parsedTicketInfo.orderId || "");
+      setEmail(parsedTicketInfo.email || "");
+      setPhoneNumber(parsedTicketInfo.phone || "");
+      setTicketInfo(parsedTicketInfo);
+    }
+  }, []);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // Kiểm tra nếu thiếu thông tin
     if (!ticketId && !email && !phoneNumber) {
       setError(
         "Vui lòng nhập ít nhất một thông tin (mã đặt chỗ, email hoặc số điện thoại)."
@@ -25,17 +38,24 @@ const InfoSeat = () => {
         `/api/infoSeat?ticket_id=${ticketId}&email=${email}&phoneNumber=${phoneNumber}`
       );
 
+      // Nếu phản hồi không thành công (status code không phải 2xx)
       if (!response.ok) {
-        throw new Error(`Lỗi HTTP: ${response.status}`);
+        // Đọc thông báo lỗi từ phản hồi của API
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Lỗi không xác định từ server");
       }
 
+      // Nếu phản hồi thành công, đọc dữ liệu
       const data = await response.json();
       setTicketInfo(data);
-      setError("");
+      setError(""); // Xóa thông báo lỗi nếu có
     } catch (error) {
       console.error("Lỗi khi gọi API:", error);
-      setError("Lỗi kết nối đến server hoặc dữ liệu không hợp lệ.");
-      setTicketInfo(null);
+      // Hiển thị thông báo lỗi từ API hoặc thông báo mặc định
+      setError(
+        error.message || "Lỗi kết nối đến server hoặc dữ liệu không hợp lệ."
+      );
+      setTicketInfo(null); // Xóa thông tin vé nếu có lỗi
     }
   };
 

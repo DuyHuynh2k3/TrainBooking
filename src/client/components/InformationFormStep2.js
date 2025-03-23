@@ -72,6 +72,9 @@ const InformationFormStep2 = ({ onNext, onBack, formData }) => {
         return;
       }
 
+      // Lưu thông tin đặt vé vào localStorage
+      localStorage.setItem("ticketInfo", JSON.stringify(passengerInfo));
+
       const response = await fetch(endpoint, {
         method: "POST",
         headers: {
