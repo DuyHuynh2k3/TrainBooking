@@ -10,17 +10,17 @@ const InfoSeat = () => {
   const [ticketInfo, setTicketInfo] = useState(null);
   const [error, setError] = useState("");
 
-  useEffect(() => {
-    // Lấy thông tin từ localStorage khi component được tải
-    const savedTicketInfo = localStorage.getItem("ticketInfo");
-    if (savedTicketInfo) {
-      const parsedTicketInfo = JSON.parse(savedTicketInfo);
-      setTicketId(parsedTicketInfo.orderId || "");
-      setEmail(parsedTicketInfo.email || "");
-      setPhoneNumber(parsedTicketInfo.phone || "");
-      setTicketInfo(parsedTicketInfo);
-    }
-  }, []);
+  // useEffect(() => {
+  //   // Lấy thông tin từ localStorage khi component được tải
+  //   const savedTicketInfo = localStorage.getItem("ticketInfo");
+  //   if (savedTicketInfo) {
+  //     const parsedTicketInfo = JSON.parse(savedTicketInfo);
+  //     setTicketId(parsedTicketInfo.orderId || "");
+  //     setEmail(parsedTicketInfo.email || "");
+  //     setPhoneNumber(parsedTicketInfo.phone || "");
+  //     setTicketInfo(parsedTicketInfo);
+  //   }
+  // }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();

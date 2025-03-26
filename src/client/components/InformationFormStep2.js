@@ -24,7 +24,7 @@ const InformationFormStep2 = ({ onNext, onBack, formData }) => {
   const [skipped, setSkipped] = React.useState(new Set());
   const [timeLeft, setTimeLeft] = useState(478);
   const navigate = useNavigate();
-  const { station, setstation,isRound } = useStore(); 
+  const { station, setstation, isRound } = useStore();
   const totalAmount = (cartTickets || []).reduce(
     (total, ticket) => total + (ticket.price || 0) + 1000,
     0
@@ -35,7 +35,7 @@ const InformationFormStep2 = ({ onNext, onBack, formData }) => {
       navigate("/");
       return;
     }
-  
+
     const timerId = setInterval(() => {
       setTimeLeft((prevTime) => {
         if (prevTime <= 1) {
@@ -45,10 +45,9 @@ const InformationFormStep2 = ({ onNext, onBack, formData }) => {
         return prevTime - 1;
       });
     }, 1000);
-  
+
     return () => clearInterval(timerId);
   }, [timeLeft, navigate]);
-  
 
   const isStepOptional = (step) => {
     return step === 1;
@@ -123,6 +122,50 @@ const InformationFormStep2 = ({ onNext, onBack, formData }) => {
         );
         alert("Không thể tạo đơn hàng. Vui lòng thử lại.");
       }
+
+      // Lưu thông tin vào cơ sở dữ liệu sau khi thanh toán thành công
+      const customerData = {
+        passport: passengerInfo.idNumber,
+        fullName: passengerInfo.fullName,
+        email: passengerInfo.email,
+        phoneNumber: passengerInfo.phone,
+      };
+
+      const ticketData = {
+        fullName: passengerInfo.fullName,
+        passport: passengerInfo.idNumber,
+        phoneNumber: passengerInfo.phone,
+        email: passengerInfo.email,
+        qr_code: "QR11111",
+        seatID: 1,
+        coach_seat: "1B",
+        trainID: 1,
+        travel_date: new Date("2023-10-01").toISOString(), // Chuyển đổi sang định dạng ISO (UTC)
+        startStation: "Hà Nội",
+        endStation: "Sài Gòn",
+        departTime: new Date("1970-01-01T06:00:00Z").toISOString(), // Chuyển đổi sang định dạng ISO (UTC)
+        arrivalTime: new Date("1970-01-01T13:39:00Z").toISOString(), // Chuyển đổi sang định dạng ISO (UTC)
+        price: totalAmount,
+        payment_status: "Paid",
+        refund_status: "None",
+      };  
+
+      const paymentData = {
+        payment_method:
+          passengerInfo.paymentMethod === "zalo" ? "Zalopay" : "Momo",
+        payment_amount: totalAmount,
+        payment_status: "Success",
+        payment_date: new Date().toISOString(), // Chuyển đổi thời gian sang định dạng ISO (UTC)
+      };
+
+      // Gọi API để lưu thông tin vào cơ sở dữ liệu
+      await fetch("/api/save-booking", {
+        method: "POST",
+        headers: {  
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ customerData, ticketData, paymentData }),
+      });
     } catch (error) {
       console.error("Error creating order:", error);
       alert(`Đã xảy ra lỗi: ${error.message}`);
@@ -140,8 +183,6 @@ const InformationFormStep2 = ({ onNext, onBack, formData }) => {
     setSkipped(newSkipped);
     onNext();
   };
-
- 
 
   const handleBackLocal = () => {
     setActiveStep((prevActiveStep) => prevActiveStep - 1);
@@ -335,7 +376,7 @@ const InformationFormStep2 = ({ onNext, onBack, formData }) => {
                         <tr key={index}>
                           <td>{index + 1}</td>
                           <td>
-                             <TripInfo stationtype={isRound} />
+                            <TripInfo stationtype={isRound} />
                             Tàu: {ticket.trainName}
                             <br></br>
                             {ticket.seatType}
