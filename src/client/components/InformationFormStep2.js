@@ -58,130 +58,146 @@ const InformationFormStep2 = ({ onNext, onBack, formData }) => {
   };
 
   const handleNextLocal = async () => {
-    console.log(
-      "Selected paymentMethod in Step2:",
-      passengerInfo.paymentMethod
-    );
-
+    console.log("Selected paymentMethod in Step2:", passengerInfo.paymentMethod);
+  
     if (!passengerInfo.paymentMethod) {
       alert("Vui lòng chọn phương thức thanh toán.");
       return;
     }
-
+  
     setIsLoading(true);
-
+  
     try {
-      let endpoint = "";
-
-      if (passengerInfo.paymentMethod === "momo") {
-        endpoint = "/api/payment/momo";
-      } else if (passengerInfo.paymentMethod === "zalo") {
-        endpoint = "/api/payment/zalopay";
-      } else {
-        console.error("Invalid payment method:", passengerInfo.paymentMethod);
-        alert(
-          "Phương thức thanh toán không hợp lệ. Vui lòng chọn Momo hoặc ZaloPay."
-        );
-        return;
-      }
-
-      // Lưu thông tin đặt vé vào localStorage
-      localStorage.setItem("ticketInfo", JSON.stringify(passengerInfo));
-
-      const response = await fetch(endpoint, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          amount: totalAmount, // Sử dụng tổng giá trị từ cartTickets
-          orderId: `ORDER_${new Date().getTime()}`,
-          orderInfo: "Thanh toán vé tàu",
-        }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json(); // Lấy thông tin lỗi từ server
-        console.error("API Error:", errorData); // Log thông tin lỗi
-        throw new Error(
-          `HTTP error! status: ${response.status}, message: ${errorData.message}`
-        );
-      }
-
-      const data = await response.json();
-      console.log("API Response:", data);
-
-      if (passengerInfo.paymentMethod === "momo" && data.payUrl) {
-        window.location.href = data.payUrl;
-      } else if (passengerInfo.paymentMethod === "zalo" && data.order_url) {
-        window.location.href = data.order_url;
-      } else {
-        console.error(
-          "Failed to create order:",
-          data.message || "Unknown error"
-        );
-        alert("Không thể tạo đơn hàng. Vui lòng thử lại.");
-      }
-
-      // Lưu thông tin vào cơ sở dữ liệu sau khi thanh toán thành công
+      // 1. Chuẩn bị dữ liệu
       const customerData = {
         passport: passengerInfo.idNumber,
         fullName: passengerInfo.fullName,
         email: passengerInfo.email,
         phoneNumber: passengerInfo.phone,
       };
-
+  
+      // Tạo ngày đi (ngày mai)
+      const travelDate = new Date();
+      travelDate.setDate(travelDate.getDate() + 1);
+      
+      // Tạo thời gian khởi hành và đến (dùng ngày hôm nay làm base, chỉ quan tâm giờ phút)
+      const departTime = new Date();
+      departTime.setHours(6, 0, 0); // 06:00:00
+      
+      const arrivalTime = new Date();
+      arrivalTime.setHours(13, 39, 0); // 13:39:00
+  
       const ticketData = {
         fullName: passengerInfo.fullName,
         passport: passengerInfo.idNumber,
         phoneNumber: passengerInfo.phone,
         email: passengerInfo.email,
-        qr_code: "QR11111",
-        seatID: 1,
-        coach_seat: "1B",
-        trainID: 1,
-        travel_date: new Date("2023-10-01").toISOString(), // Chuyển đổi sang định dạng ISO (UTC)
-        startStation: "Hà Nội",
-        endStation: "Sài Gòn",
-        departTime: new Date("1970-01-01T06:00:00Z").toISOString(), // Chuyển đổi sang định dạng ISO (UTC)
-        arrivalTime: new Date("1970-01-01T13:39:00Z").toISOString(), // Chuyển đổi sang định dạng ISO (UTC)
+        q_code: "QR_" + Math.random().toString(36).substr(2, 9),
+        seatID: 1, // Nên thay bằng giá trị thực tế
+        coach_seat: "1B", // Nên thay bằng giá trị thực tế
+        trainID: 1, // Nên thay bằng giá trị thực tế
+        travel_date: travelDate.toISOString().split('T')[0], // Format YYYY-MM-DD
+        from_station_id: 8,
+        to_station_id: 34,
+        departTime: departTime.toISOString().split('T')[1].split('.')[0], // Format HH:MM:SS
+        arrivalTime: arrivalTime.toISOString().split('T')[1].split('.')[0], // Format HH:MM:SS
         price: totalAmount,
-        payment_status: "Paid",
+        payment_status: "Pending",
         refund_status: "None",
-      };  
-
-      const paymentData = {
-        payment_method:
-          passengerInfo.paymentMethod === "zalo" ? "Zalopay" : "Momo",
-        payment_amount: totalAmount,
-        payment_status: "Success",
-        payment_date: new Date().toISOString(), // Chuyển đổi thời gian sang định dạng ISO (UTC)
+        passenger_type: "Adult",
+        journey_segments: JSON.stringify([{ segment: "HN-SG", duration: 450 }]),
       };
-
-      // Gọi API để lưu thông tin vào cơ sở dữ liệu
-      await fetch("/api/save-booking", {
+  
+      const paymentData = {
+        payment_method: passengerInfo.paymentMethod === "zalo" ? "Zalopay" : "Momo",
+        payment_amount: totalAmount,
+        payment_status: "Pending",
+        payment_date: new Date().toISOString(),
+      };
+  
+      console.log("Sending data to save-booking:", { customerData, ticketData, paymentData });
+  
+      // 2. Gọi API save-booking
+      const saveResponse = await fetch("/api/save-booking", {
         method: "POST",
-        headers: {  
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ customerData, ticketData, paymentData }),
       });
+  
+      if (!saveResponse.ok) {
+        const errorText = await saveResponse.text();
+        console.error("Raw error response:", errorText);
+        let errorData;
+        try {
+          errorData = JSON.parse(errorText);
+        } catch (e) {
+          throw new Error(`Lỗi server: ${saveResponse.status} - ${errorText}`);
+        }
+        throw new Error(errorData.error || errorData.message || "Lỗi không xác định khi lưu thông tin");
+      }
+  
+      const saveResult = await saveResponse.json();
+      console.log("Save booking success:", saveResult);
+  
+      // 3. Xử lý thanh toán
+      let endpoint = "";
+      if (passengerInfo.paymentMethod === "momo") {
+        endpoint = "/api/payment/momo";
+      } else if (passengerInfo.paymentMethod === "zalo") {
+        endpoint = "/api/payment/zalopay";
+      }
+  
+      const paymentResponse = await fetch(endpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          amount: totalAmount,
+          orderId: `ORDER_${saveResult.ticket_id}_${new Date().getTime()}`,
+          orderInfo: "Thanh toán vé tàu",
+          ticketId: saveResult.ticket_id,
+        }),
+      });
+  
+      if (!paymentResponse.ok) {
+        const errorData = await paymentResponse.json();
+        throw new Error(`Lỗi thanh toán: ${errorData.message}`);
+      }
+  
+      const paymentResult = await paymentResponse.json();
+      console.log("Payment response:", paymentResult);
+  
+      // 4. Chuyển hướng đến trang thanh toán nếu thành công
+      if ((passengerInfo.paymentMethod === "momo" && paymentResult.payUrl) || 
+          (passengerInfo.paymentMethod === "zalo" && paymentResult.order_url)) {
+        window.location.href = paymentResult.payUrl || paymentResult.order_url;
+      } else {
+        throw new Error("Không nhận được URL thanh toán");
+      }
+  
     } catch (error) {
-      console.error("Error creating order:", error);
-      alert(`Đã xảy ra lỗi: ${error.message}`);
+      console.error("Full error details:", {
+        name: error.name,
+        message: error.message,
+        stack: error.stack,
+      });
+      
+      alert(`Lỗi khi xử lý đặt vé: ${error.message}`);
     } finally {
       setIsLoading(false);
+      
+      // Chỉ chuyển bước nếu không có chuyển hướng thanh toán
+      if (!window.location.href.includes('momo') && !window.location.href.includes('zalopay')) {
+        let newSkipped = skipped;
+        if (isStepSkipped(activeStep)) {
+          newSkipped = new Set(newSkipped.values());
+          newSkipped.delete(activeStep);
+        }
+  
+        setActiveStep((prevActiveStep) => prevActiveStep + 1);
+        setSkipped(newSkipped);
+        onNext();
+      }
     }
-
-    let newSkipped = skipped;
-    if (isStepSkipped(activeStep)) {
-      newSkipped = new Set(newSkipped.values());
-      newSkipped.delete(activeStep);
-    }
-
-    setActiveStep((prevActiveStep) => prevActiveStep + 1);
-    setSkipped(newSkipped);
-    onNext();
   };
 
   const handleBackLocal = () => {

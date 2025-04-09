@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import "../../styles/BookForm.css";
 import { FiAlignJustify } from "react-icons/fi";
 import TextField from "@mui/material/TextField";
@@ -54,7 +54,7 @@ const BookForm = ({ cart, onAddToCart, formatDate }) => {
   const [arrivalDate, setArrivalDate] = useState("");
   const navigate = useNavigate();
   const [ticketType, setTicketType] = useState(localStorage.getItem("ticketType") || ""); // Mặc định là "Khứ hồi"
-  const { station, setstation } = useStore(); 
+  const { station, setStation } = useStore(); 
   
   const handleTicketTypeChange = (e) => {
     const selectedTicketType = e.target.value;
@@ -77,7 +77,7 @@ const BookForm = ({ cart, onAddToCart, formatDate }) => {
       ticketType,
     }
     console.log(dataTrain);
-    setstation(dataTrain)
+    setStation(dataTrain)
     if (!departureStation || !arrivalStation || !departureDate) {
       alert("Vui lòng chọn đầy đủ Ga đi, Ga đến và Ngày đi!");
       return;
