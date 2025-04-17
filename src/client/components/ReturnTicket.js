@@ -105,13 +105,13 @@ const ReturnTicket = () => {
           <form onSubmit={handleSubmit}>
             <div className="mb-2">
               <label htmlFor="bookingCode" className="form-label">
-                Mã đặt chỗ
+                Mã đặt vé
               </label>
               <input
                 type="text"
                 className="form-control"
                 id="bookingCode"
-                placeholder="Nhập mã đặt chỗ"
+                placeholder="Nhập mã đặt vé"
                 value={bookingCode}
                 onChange={(e) => setBookingCode(e.target.value)}
               />
@@ -152,7 +152,7 @@ const ReturnTicket = () => {
                 {loading ? "Đang xử lý..." : "Tra cứu"}
               </button>
               <a href="/" className="text-primary text-decoration-none">
-                Quên mã đặt chỗ?
+                Quên mã đặt vé?
               </a>
             </div>
           </form>

@@ -1,11 +1,13 @@
+// components/SeatSelectHardSleeper6.jsx
 import React, { useEffect, useState } from "react";
 import { Button } from "react-bootstrap";
+import Tooltip from "@mui/material/Tooltip";
 import "../../styles/SeatSelect.css";
 import headtrain from "../../assets/img/train1.png";
 import train from "../../assets/img/train2.png";
-import Tooltip from "@mui/material/Tooltip";
+import "../../styles/SeatSelectHardSleeper4.css";
 
-const SeatSelect = ({
+const SeatSelectHardSleeper4 = ({
   selectedSeat,
   setSelectedSeat,
   seatPrice,
@@ -21,15 +23,11 @@ const SeatSelect = ({
   const [seatsData, setSeatsData] = useState([]);
 
   const seatTypeLabels = {
-    soft: "Ngồi mềm",
     hard_sleeper_4: "Nằm khoang 4",
-    hard_sleeper_6: "Nằm khoang 6",
   };
 
-  // Lọc các toa theo loại ghế
   const filteredCars = cars.filter((car) => car.seatType === selectedSeatType);
 
-  // Thêm đầu tàu vào danh sách hiển thị
   const carsWithHeadTrain = [
     ...filteredCars,
     { id: 0, type: "Đầu tàu", seatType: "Đầu tàu", name: trainName },
@@ -50,7 +48,6 @@ const SeatSelect = ({
         (c) => c.coach === selectedCar
       );
 
-      // Tạo mảng 48 ghế, điền thông tin từ API vào đúng vị trí
       const seats = Array(48)
         .fill(null)
         .map((_, index) => {
@@ -83,15 +80,14 @@ const SeatSelect = ({
     }
   };
 
-  // Chia 48 ghế thành 6 dòng (mỗi dòng 8 ghế) như giao diện cũ
   const seatRows = [];
-  for (let i = 0; i < 6; i++) {
-    seatRows.push(seatsData.slice(i * 8, (i + 1) * 8));
+  for (let i = 0; i < 2; i++) {
+    seatRows.push(seatsData.slice(i * 16, (i + 1) * 16)); // 16 ghế mỗi tầng
   }
+  
 
   return (
     <div className="container mt-2">
-      {/* Phần hiển thị danh sách toa tàu - Giữ nguyên */}
       <div className="seat-select-container">
         <div className="row d-flex justify-content-center align-items-center mb-3">
           <div className="col-12 pt-3">
@@ -116,7 +112,7 @@ const SeatSelect = ({
                     title={`Toa số ${car.id === 0 ? "Đầu máy" : car.id} - ${
                       seatTypeLabels[selectedSeatType]
                     } điều hòa`}
-                     placement="top"
+                    placement="top"
                   >
                     <img
                       src={car.id === 0 ? headtrain : train}
@@ -141,9 +137,6 @@ const SeatSelect = ({
         <div className="col-12 text-center et-car-floor">
           <div className="et-col-1-18 et-car-floor-full-height">
             <div className="et-bed-way et-full-width"></div>
-            <div className="et-bed-way et-full-width text-center small ng-binding">
-              Tầng 3
-            </div>
             <div className="et-bed-way et-full-width text-center small ng-binding">
               Tầng 2
             </div>
@@ -211,4 +204,4 @@ const SeatSelect = ({
   );
 };
 
-export default SeatSelect;
+export default SeatSelectHardSleeper4;

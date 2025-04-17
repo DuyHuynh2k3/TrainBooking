@@ -70,7 +70,7 @@ const InfoSeat = () => {
                 style={{ gap: "5px" }}
               >
                 <i className="bi bi-list"></i> <FiAlignJustify />
-                TRA CỨU THÔNG TIN ĐẶT CHỖ
+                TRA CỨU THÔNG TIN ĐẶT VÉ
               </h5>
             </div>
             <div className="card-body">

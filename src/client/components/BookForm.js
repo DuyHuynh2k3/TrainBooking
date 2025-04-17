@@ -47,7 +47,6 @@ const stations = [
 ];
 
 const BookForm = ({ cart, onAddToCart, formatDate }) => {
-  const {isRound } = useStore(); 
   const [departureStation, setDepartureStation] = useState("");
   const [arrivalStation, setArrivalStation] = useState("");
   const [departureDate, setDepartureDate] = useState("");
@@ -237,7 +236,7 @@ const BookForm = ({ cart, onAddToCart, formatDate }) => {
                 <div className="">
                   {cart?.map((ticket, index) => (
                     <div key={index} className="mb-1">
-                      <TripInfo  stationtype={isRound}  />
+                      <TripInfo  stationtype={"Chiều Đi"} />
                       <div className="ticket-info d-flex justify-content-between align-items-start">
                         <div className="d-flex flex-column flex-grow-1 mt-2">
                           <strong>Tàu:</strong>

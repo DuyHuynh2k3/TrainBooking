@@ -30,6 +30,12 @@ const InformationFormStep2 = ({ onNext, onBack, formData }) => {
     0
   );
 
+  const seatTypeDisplayName = {
+    soft: "Ngồi mềm",
+    hard_sleeper_4: "Nằm khoang 4",
+    hard_sleeper_6: "Nằm khoang 6",
+  };
+
   useEffect(() => {
     if (timeLeft === 0) {
       navigate("/");
@@ -58,15 +64,18 @@ const InformationFormStep2 = ({ onNext, onBack, formData }) => {
   };
 
   const handleNextLocal = async () => {
-    console.log("Selected paymentMethod in Step2:", passengerInfo.paymentMethod);
-  
+    console.log(
+      "Selected paymentMethod in Step2:",
+      passengerInfo.paymentMethod
+    );
+
     if (!passengerInfo.paymentMethod) {
       alert("Vui lòng chọn phương thức thanh toán.");
       return;
     }
-  
+
     setIsLoading(true);
-  
+
     try {
       // 1. Chuẩn bị dữ liệu
       const customerData = {
@@ -75,18 +84,18 @@ const InformationFormStep2 = ({ onNext, onBack, formData }) => {
         email: passengerInfo.email,
         phoneNumber: passengerInfo.phone,
       };
-  
+
       // Tạo ngày đi (ngày mai)
       const travelDate = new Date();
       travelDate.setDate(travelDate.getDate() + 1);
-      
+
       // Tạo thời gian khởi hành và đến (dùng ngày hôm nay làm base, chỉ quan tâm giờ phút)
       const departTime = new Date();
       departTime.setHours(6, 0, 0); // 06:00:00
-      
+
       const arrivalTime = new Date();
       arrivalTime.setHours(13, 39, 0); // 13:39:00
-  
+
       const ticketData = {
         fullName: passengerInfo.fullName,
         passport: passengerInfo.idNumber,
@@ -96,34 +105,39 @@ const InformationFormStep2 = ({ onNext, onBack, formData }) => {
         seatID: 1, // Nên thay bằng giá trị thực tế
         coach_seat: "1B", // Nên thay bằng giá trị thực tế
         trainID: 1, // Nên thay bằng giá trị thực tế
-        travel_date: travelDate.toISOString().split('T')[0], // Format YYYY-MM-DD
+        travel_date: travelDate.toISOString().split("T")[0], // Format YYYY-MM-DD
         from_station_id: 8,
         to_station_id: 34,
-        departTime: departTime.toISOString().split('T')[1].split('.')[0], // Format HH:MM:SS
-        arrivalTime: arrivalTime.toISOString().split('T')[1].split('.')[0], // Format HH:MM:SS
+        departTime: departTime.toISOString().split("T")[1].split(".")[0], // Format HH:MM:SS
+        arrivalTime: arrivalTime.toISOString().split("T")[1].split(".")[0], // Format HH:MM:SS
         price: totalAmount,
         payment_status: "Pending",
         refund_status: "None",
         passenger_type: "Adult",
         journey_segments: JSON.stringify([{ segment: "HN-SG", duration: 450 }]),
       };
-  
+
       const paymentData = {
-        payment_method: passengerInfo.paymentMethod === "zalo" ? "Zalopay" : "Momo",
+        payment_method:
+          passengerInfo.paymentMethod === "zalo" ? "Zalopay" : "Momo",
         payment_amount: totalAmount,
         payment_status: "Pending",
         payment_date: new Date().toISOString(),
       };
-  
-      console.log("Sending data to save-booking:", { customerData, ticketData, paymentData });
-  
+
+      console.log("Sending data to save-booking:", {
+        customerData,
+        ticketData,
+        paymentData,
+      });
+
       // 2. Gọi API save-booking
       const saveResponse = await fetch("/api/save-booking", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ customerData, ticketData, paymentData }),
       });
-  
+
       if (!saveResponse.ok) {
         const errorText = await saveResponse.text();
         console.error("Raw error response:", errorText);
@@ -133,12 +147,16 @@ const InformationFormStep2 = ({ onNext, onBack, formData }) => {
         } catch (e) {
           throw new Error(`Lỗi server: ${saveResponse.status} - ${errorText}`);
         }
-        throw new Error(errorData.error || errorData.message || "Lỗi không xác định khi lưu thông tin");
+        throw new Error(
+          errorData.error ||
+            errorData.message ||
+            "Lỗi không xác định khi lưu thông tin"
+        );
       }
-  
+
       const saveResult = await saveResponse.json();
       console.log("Save booking success:", saveResult);
-  
+
       // 3. Xử lý thanh toán
       let endpoint = "";
       if (passengerInfo.paymentMethod === "momo") {
@@ -146,7 +164,7 @@ const InformationFormStep2 = ({ onNext, onBack, formData }) => {
       } else if (passengerInfo.paymentMethod === "zalo") {
         endpoint = "/api/payment/zalopay";
       }
-  
+
       const paymentResponse = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -157,42 +175,46 @@ const InformationFormStep2 = ({ onNext, onBack, formData }) => {
           ticketId: saveResult.ticket_id,
         }),
       });
-  
+
       if (!paymentResponse.ok) {
         const errorData = await paymentResponse.json();
         throw new Error(`Lỗi thanh toán: ${errorData.message}`);
       }
-  
+
       const paymentResult = await paymentResponse.json();
       console.log("Payment response:", paymentResult);
-  
+
       // 4. Chuyển hướng đến trang thanh toán nếu thành công
-      if ((passengerInfo.paymentMethod === "momo" && paymentResult.payUrl) || 
-          (passengerInfo.paymentMethod === "zalo" && paymentResult.order_url)) {
+      if (
+        (passengerInfo.paymentMethod === "momo" && paymentResult.payUrl) ||
+        (passengerInfo.paymentMethod === "zalo" && paymentResult.order_url)
+      ) {
         window.location.href = paymentResult.payUrl || paymentResult.order_url;
       } else {
         throw new Error("Không nhận được URL thanh toán");
       }
-  
     } catch (error) {
       console.error("Full error details:", {
         name: error.name,
         message: error.message,
         stack: error.stack,
       });
-      
+
       alert(`Lỗi khi xử lý đặt vé: ${error.message}`);
     } finally {
       setIsLoading(false);
-      
+
       // Chỉ chuyển bước nếu không có chuyển hướng thanh toán
-      if (!window.location.href.includes('momo') && !window.location.href.includes('zalopay')) {
+      if (
+        !window.location.href.includes("momo") &&
+        !window.location.href.includes("zalopay")
+      ) {
         let newSkipped = skipped;
         if (isStepSkipped(activeStep)) {
           newSkipped = new Set(newSkipped.values());
           newSkipped.delete(activeStep);
         }
-  
+
         setActiveStep((prevActiveStep) => prevActiveStep + 1);
         setSkipped(newSkipped);
         onNext();
@@ -391,15 +413,19 @@ const InformationFormStep2 = ({ onNext, onBack, formData }) => {
                       return (
                         <tr key={index}>
                           <td>{index + 1}</td>
-                          <td>
-                            <TripInfo stationtype={isRound} />
-                            Tàu: {ticket.trainName}
-                            <br></br>
-                            {ticket.seatType}
-                            <br></br>
-                            Toa: {ticket.car}
-                            <br></br>
-                            Ghế: {ticket.seat}
+                          <td className="text-center">
+                            <div className="d-flex flex-column justify-content-center align-items-center">
+                              <TripInfo stationtype={"Chiều Đi"}/>
+                              Tàu: {ticket.trainName}
+                              <br />
+                              Loại:
+                              {seatTypeDisplayName[ticket.seatType] ||
+                                ticket.seatType}
+                              <br />
+                              Toa: {ticket.car}
+                              <br />
+                              Ghế: {ticket.seat}
+                            </div>
                           </td>
                           <td>Còn {timeLeft} giây</td>
                           <td>{ticket.price.toLocaleString()} VND</td>

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import axios from "axios";
 import Header from "../components/Header";
 import BookForm from "../components/BookForm";
@@ -7,141 +7,117 @@ import Carousel from "../components/Carousel";
 import "bootstrap/dist/css/bootstrap.min.css";
 import TrainSchedule from "../components/TrainSchedule";
 import useStore from "../../store/trains";
+
 const HomePageResult = () => {
-  // Get form data from location.state or fallback to localStorage if empty
   const { station } = useStore();
-  const [trains, setTrains] = useState([]); // Tàu chiều đi
-  const [trainsReturn, setTrainsReturn] = useState([]); // Tàu chiều về
-  const [loading, setLoading] = useState(true); // Trạng thái tải dữ liệu
-  const [loadingReturn, setLoadingReturn] = useState(false); // Trạng thái tải dữ liệu chiều về
-  const [error, setError] = useState(null); // Lỗi nếu có
 
-  const [isFetching, setIsFetching] = useState(false);
+  const [trains, setTrains] = useState([]);
+  const [trainsReturn, setTrainsReturn] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [loadingReturn, setLoadingReturn] = useState(false);
+  const [error, setError] = useState(null);
+  const [cart, setCart] = useState([]);
 
-  const fetchTrains = async () => {
-    console.log("Gửi request chiều đi:", {
-      departureStationId: station.departureStation,
-      arrivalStationId: station.arrivalStation,
-      departureDate: station.departureDate,
-    });
+  const fetchTrains = useCallback(async () => {
+    console.log("Gửi request chiều đi:", station);
     try {
       setLoading(true);
-      const response = await axios.get(
-        "http://localhost:3000/api/trains/search",
-        {
-          params: {
-            departureStation: station.departureStation, // Dữ liệu bạn muốn gửi
-            arrivalStation: station.arrivalStation,
-            departureDate: station.departureDate,
-          }
-         
-        }
-      );
+      setTrains([]); // ✅ clear kết quả cũ trước khi fetch mới
+      const response = await axios.get("http://localhost:3000/api/trains/search", {
+        params: {
+          departureStation: station.departureStation,
+          arrivalStation: station.arrivalStation,
+          departureDate: station.departureDate,
+        },
+      });
       console.log("Dữ liệu trả về từ API:", response.data);
-      setTrains(response.data);
+      const data = response.data;
+      if (Array.isArray(data) && data.length > 0) {
+        setTrains(data);
+      } else {
+        setTrains([]); // ✅ clear nếu API trả về rỗng
+      }
     } catch (error) {
       setError("Có lỗi xảy ra khi tải dữ liệu.");
       console.error("Lỗi chiều đi:", error);
+      setTrains([]); // ✅ clear nếu lỗi
     } finally {
       setLoading(false);
     }
-  };
+  }, [station]);
 
-  // Hàm lấy dữ liệu tàu chiều về (nếu là khứ hồi)
-  const fetchTrainsReturn = async () => {
+  const fetchTrainsReturn = useCallback(async () => {
     if (station.ticketType === "roundTrip") {
-      console.log("Đang gọi hàm fetchTrainsReturn..."); // Kiểm tra xem hàm có được gọi không
-      setLoadingReturn(true); // Bắt đầu tải dữ liệu chiều về
+      console.log("Đang gọi hàm fetchTrainsReturn...");
+      setLoadingReturn(true);
+      setTrainsReturn([]); // ✅ clear kết quả cũ trước khi fetch
       try {
-        const response = await axios.get(
-          "http://localhost:3000/api/trains/search",
-          {
-            // Thêm base URL
-            params: {
-              departureStationId: station.arrivalStationId, // Sửa tên param
-              arrivalStationId: station.departureStationId, // Sửa tên param
-              departureDate: station.returnDate,
-            },
-          }
-        );
-        console.log("Dữ liệu trả về từ API chiều về:", response.data); // Kiểm tra dữ liệu trả về
-        setTrainsReturn(response.data);
+        const response = await axios.get("http://localhost:3000/api/trains/search", {
+          params: {
+            departureStationId: station.arrivalStationId,
+            arrivalStationId: station.departureStationId,
+            departureDate: station.returnDate,
+          },
+        });
+        console.log("Dữ liệu trả về từ API chiều về:", response.data);
+        const data = response.data;
+        if (Array.isArray(data) && data.length > 0) {
+          setTrainsReturn(data);
+        } else {
+          setTrainsReturn([]); // ✅ clear nếu rỗng
+        }
       } catch (error) {
         setError("Có lỗi xảy ra khi tải dữ liệu chiều về.");
         console.error("Lỗi chiều về:", error);
+        setTrainsReturn([]); // ✅ clear nếu lỗi
       } finally {
-        setLoadingReturn(false); // Kết thúc tải dữ liệu chiều về
+        setLoadingReturn(false);
       }
     }
-  };
+  }, [station]);
+
   useEffect(() => {
-    console.log("Fetching trains with station details:", station);
-
-    console.log(station.departureDate);
-
-    console.log("dcm");
-
-    // Kiểm tra các ID ga là số và ngày đi hợp lệ
     if (
-      station.departureStation && // Kiểm tra ga đi
-      station.arrivalStation && // Kiểm tra ga đến
-      station.departureDate && // Kiểm tra ngày đi
-      !isNaN(new Date(station.departureDate)) // Kiểm tra ngày đi có hợp lệ không
+      station.departureStation &&
+      station.arrivalStation &&
+      station.departureDate &&
+      !isNaN(new Date(station.departureDate))
     ) {
-      console.log("Calling fetchTrains...");
-      fetchTrains(); // Gọi API lấy dữ liệu tàu chiều đi
-    } else {
-      console.log("Conditions not met for calling fetchTrains.");
+      fetchTrains();
     }
 
-    // Kiểm tra vé khứ hồi
-    if (
-      station.ticketType === "roundTrip" && // Kiểm tra ticketType là vé khứ hồi
-      station.returnDate // Kiểm tra ngày về
-    ) {
-      console.log("Calling fetchTrainsReturn...");
-      fetchTrainsReturn(); // Gọi API lấy dữ liệu tàu chiều về
-    } else {
-      console.log("Conditions not met for calling fetchTrainsReturn.");
+    if (station.ticketType === "roundTrip" && station.returnDate) {
+      fetchTrainsReturn();
     }
-  }, [station]); // Lắng nghe sự thay đổi của `station`
-
- 
-  
-
-  const [cart, setCart] = useState([]);
-  const handleAddToCart = (ticket, index = null) => {
-    setCart((prevCart) => {
-      let newCart;
-      if (index !== null) {
-        // Xóa vé tại vị trí index
-        newCart = prevCart.filter((_, i) => i !== index);
-      } else if (ticket === null) {
-        // Xóa vé cuối cùng
-        newCart = prevCart.slice(0, -1);
-      } else {
-        // Thêm vé mới vào giỏ
-        newCart = [...prevCart, ticket];
-      }
-
-      console.log("🛒 Giỏ vé sau khi cập nhật:", newCart);
-      return newCart;
-    });
-  };
+  }, [station, fetchTrains, fetchTrainsReturn]);
 
   useEffect(() => {
     if (cart.length > 0) {
       localStorage.setItem("cartTickets", JSON.stringify(cart));
     }
   }, [cart]);
-  console.log(station);
+
+  const handleAddToCart = (ticket, index = null) => {
+    setCart((prevCart) => {
+      let newCart;
+      if (index !== null) {
+        newCart = prevCart.filter((_, i) => i !== index);
+      } else if (ticket === null) {
+        newCart = prevCart.slice(0, -1);
+      } else {
+        newCart = [...prevCart, ticket];
+      }
+      console.log("🛒 Giỏ vé sau khi cập nhật:", newCart);
+      return newCart;
+    });
+  };
 
   return (
     <div className="d-flex flex-column" style={{ backgroundColor: "#f7f7f7" }}>
       <Header />
       <Carousel />
-      <main className="">
-        <BookForm cart={cart} onAddToCart={handleAddToCart}  />
+      <main>
+        <BookForm cart={cart} onAddToCart={handleAddToCart} />
         <TrainSchedule
           onAddToCart={handleAddToCart}
           trains={trains}
@@ -149,6 +125,7 @@ const HomePageResult = () => {
           loading={loading}
           loadingReturn={loadingReturn}
           error={error}
+          station={station}
         />
       </main>
       <Footer />

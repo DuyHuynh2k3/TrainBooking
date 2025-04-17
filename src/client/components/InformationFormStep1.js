@@ -64,6 +64,12 @@ const InformationFormStep1 = ({ onNext, onBack, formData, updateFormData }) => {
     cartTickets
   );
 
+  const seatTypeDisplayName = {
+    soft: "Ngồi mềm",
+    hard_sleeper_4: "Nằm khoang 4",
+    hard_sleeper_6: "Nằm khoang 6",
+  };
+  
   const requiredFields = {
     passengerName: "Họ tên hành khách",
     passengerType: "Đối tượng",
@@ -465,11 +471,13 @@ const InformationFormStep1 = ({ onNext, onBack, formData, updateFormData }) => {
                       </div>
                     </td>
                     <td>
-                      <TripInfo stationtype={isRound} />
-                      Tàu: {ticket.trainName},<br></br>
-                      {ticket.seatType},<br></br>
-                      Toa: {ticket.car},<br></br>
-                      Ghế: {ticket.seat}
+                      <div>
+                      <TripInfo stationtype={"Chiều Đi"}/>
+                      Tàu: {ticket.trainName}<br></br>
+                      Toa: {ticket.car}<br></br>
+                      Ghế: {ticket.seat} <br></br>
+                      Loại  {seatTypeDisplayName[ticket.seatType] || ticket.seatType}.
+                      </div>
                     </td>
                     <td>{ticket.price.toLocaleString()} VND</td>
                     <td>0</td>

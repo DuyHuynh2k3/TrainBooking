@@ -1,10 +1,13 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import icon from "../../assets/img/train-icon.png";
 import "../../styles/TrainSchedule.css";
 import { BsArrowRight } from "react-icons/bs";
 import SeatSelect from "./SeatSelect";
 import TripInfo from "./TripInfo";
 import useStore from "../../store/trains";
+import SeatSelectHardSleeper6 from "./SeatSelectHardSleeper6";
+import SeatSelectHardSleeper4 from "./SeatSelectHardSleeper4";
+import SeatSelectSoftSeat from "./SeatSelectSoftSeat";
 
 const TrainSchedule = ({
   onAddToCart,
@@ -15,43 +18,130 @@ const TrainSchedule = ({
   error,
 }) => {
   const { station } = useStore();
-  const cars = [
-    { id: 1, type: "Toa 1", seatType: "Ngồi mềm" },
-    { id: 2, type: "Toa 2", seatType: "Ngồi mềm" },
-    { id: 3, type: "Toa 3", seatType: "Nằm khoang 6" },
-    { id: 4, type: "Toa 4", seatType: "Nằm khoang 6" },
-    { id: 5, type: "Toa 5", seatType: "Nằm khoang 6" },
-    { id: 6, type: "Toa 6", seatType: "Nằm khoang 4" },
-    { id: 7, type: "Toa 7", seatType: "Nằm khoang 4" },
-    { id: 8, type: "Toa 8", seatType: "Nằm khoang 4" },
-    { id: 9, type: "Toa 9", seatType: "Nằm khoang 4" },
-  ];
 
   const { departureStation, arrivalStation, departureDate, returnDate } =
     station;
   const isRoundTrip = station.ticketType === "roundTrip";
+  console.log(isRoundTrip);
 
   // Trạng thái lưu thông tin ghế đang được chọn cho từng chuyến tàu
   const [selectedSeats, setSelectedSeats] = useState({}); // Lưu trạng thái ghế đã chọn
   const [selectedSeatPrices, setSelectedSeatPrices] = useState({}); // Lưu giá ghế đã chọn
   const [selectedCar, setSelectedCar] = useState(null); // Lưu toa tàu được chọn
   const [selectedSeatType, setSelectedSeatType] = useState(null); // Lưu loại ghế được chọn
+  const [enrichedTrains, setEnrichedTrains] = useState([]);
+  
+  const seatTypeDisplayName = {
+    soft: "Ngồi mềm",
+    hard_sleeper_4: "Nằm khoang 4",
+    hard_sleeper_6: "Nằm khoang 6",
+  };
 
-  if (trains.length === 0) {
-    return <p>Không có chuyến tàu chiều đi nào phù hợp.</p>;
-  }
+  console.log(trains);
+  console.log("hihih", station);
 
   function isValidDate(date) {
     return date && !isNaN(new Date(date).getTime()); // Kiểm tra ngày hợp lệ
   }
+  const fetchSeatAvailability = async ({
+    trainID,
+    travelDate,
+    fromStationID,
+    toStationID,
+  }) => {
+    try {
+      const query = new URLSearchParams({
+        trainID,
+        travel_date: travelDate,
+        from_station_id: fromStationID,
+        to_station_id: toStationID,
+      });
+
+      const res = await fetch(`/api/seats?${query.toString()}`);
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || "Lỗi khi lấy dữ liệu ghế");
+      }
+
+      const data = await res.json();
+      return data;
+    } catch (error) {
+      console.error("Lỗi khi fetch seat availability:", error.message);
+      return [];
+    }
+  };
+
+  useEffect(() => {
+    async function loadSeatsForAllTrains() {
+      const results = {};
+      const normalize = (str) => str?.toLowerCase().trim();
+  
+      await Promise.all(
+        trains.map(async (train) => {
+          const departureStationID = train.train_stop.find(
+            (stop) =>
+              normalize(stop.station.station_name) ===
+              normalize(station.departureStation)
+          )?.station.station_id;
+  
+          const arrivalStationID = train.train_stop.find(
+            (stop) =>
+              normalize(stop.station.station_name) ===
+              normalize(station.arrivalStation)
+          )?.station.station_id;
+  
+          if (!departureStationID || !arrivalStationID) {
+            console.warn(
+              `❗Không tìm thấy station ID cho tàu ${train.train_name}:`,
+              {
+                departureStation: station.departureStation,
+                arrivalStation: station.arrivalStation,
+              }
+            );
+            results[train.trainID] = [];
+            return;
+          }
+  
+          const seats = await fetchSeatAvailability({
+            trainID: train.trainID,
+            travelDate: station.departureDate,
+            fromStationID: departureStationID,
+            toStationID: arrivalStationID,
+          });
+  
+          console.log("✅ Ghế lấy về:", seats);
+          results[train.trainID] = seats;
+        })
+      );
+  
+      const trainsWithSeats = trains.map((train) => ({
+        ...train,
+        seats: results[train.trainID] || [],
+      }));
+  
+      setEnrichedTrains(trainsWithSeats);
+    }
+  
+    if (Array.isArray(trains) && trains.length > 0 && station) {
+      console.log("🚀 Bắt đầu fetch ghế cho từng chuyến tàu...");
+      loadSeatsForAllTrains();
+    } else {
+      setEnrichedTrains([]);
+    }
+  }, [trains, station]);
+  
+
 
   // Tải dữ liệu tàu chiều đi
   console.log(departureDate, departureStation, arrivalStation);
-  console.log("hii",trains);
+  console.log("hii", trains);
 
   // Hàm xử lý khi chọn ghế
   const handleSeatClick = (trainId, seatType, seatPrice, e) => {
     e.preventDefault();
+
+    console.log("✅ CLICKED", { trainId, seatType, seatPrice });
 
     setSelectedSeats((prevState) => ({
       ...prevState,
@@ -62,16 +152,119 @@ const TrainSchedule = ({
       ...prevState,
       [trainId]: prevState[trainId] === seatType ? null : seatPrice,
     }));
-    // Cập nhật loại ghế được chọn
-    setSelectedSeatType(seatType);
 
-    // Tìm toa tàu tương ứng với loại ghế
-    const foundCar = cars.find((car) => car.seatType === seatType);
-    if (foundCar) {
-      setSelectedCar(foundCar.id); // Lưu ID toa tàu được chọn
-    } else {
-      setSelectedCar(null); // Nếu không tìm thấy toa tàu, đặt lại state
+    setSelectedSeatType(seatType);
+  };
+
+  const renderSeatComponent = (train, stationtype = "Chiều Đi") => {
+    const dynamicCars = [];
+    if (Array.isArray(train.seats)) {
+      train.seats.forEach((seatType) => {
+        if (Array.isArray(seatType.coaches)) {
+          seatType.coaches.forEach((coach) => {
+            if (!dynamicCars.some((c) => c.id === coach.coach)) {
+              dynamicCars.push({
+                id: coach.coach,
+                name: `Toa ${coach.coach}`,
+                seatType: seatType.seat_type,
+              });
+            }
+          });
+        }
+      });
     }
+
+    dynamicCars.sort((a, b) => b.id.localeCompare(a.id));
+
+    switch (selectedSeatType) {
+      case "hard_sleeper_6":
+        return (
+          <SeatSelectHardSleeper6
+            stationtype={stationtype}
+            selectedSeat={selectedSeats[train.trainID]}
+            setSelectedSeat={(seat) =>
+              setSelectedSeats((prev) => ({
+                ...prev,
+                [train.trainID]: seat,
+              }))
+            }
+            seatPrice={selectedSeatPrices[train.trainID]}
+            selectedCar={selectedCar}
+            setSelectedCar={setSelectedCar}
+            selectedSeatType={selectedSeatType}
+            cars={dynamicCars}
+            trainName={train.train_name}
+            onAddToCart={onAddToCart}
+            allSeats={train.seats}
+          />
+        );
+    
+      case "hard_sleeper_4":
+        return (
+          <SeatSelectHardSleeper4
+            stationtype={stationtype}
+            selectedSeat={selectedSeats[train.trainID]}
+            setSelectedSeat={(seat) =>
+              setSelectedSeats((prev) => ({
+                ...prev,
+                [train.trainID]: seat,
+              }))
+            }
+            seatPrice={selectedSeatPrices[train.trainID]}
+            selectedCar={selectedCar}
+            setSelectedCar={setSelectedCar}
+            selectedSeatType={selectedSeatType}
+            cars={dynamicCars}
+            trainName={train.train_name}
+            onAddToCart={onAddToCart}
+            allSeats={train.seats}
+          />
+        );
+    
+      case "soft":
+        return (
+          <SeatSelectSoftSeat
+            stationtype={stationtype}
+            selectedSeat={selectedSeats[train.trainID]}
+            setSelectedSeat={(seat) =>
+              setSelectedSeats((prev) => ({
+                ...prev,
+                [train.trainID]: seat,
+              }))
+            }
+            seatPrice={selectedSeatPrices[train.trainID]}
+            selectedCar={selectedCar}
+            setSelectedCar={setSelectedCar}
+            selectedSeatType={selectedSeatType}
+            cars={dynamicCars}
+            trainName={train.train_name}
+            onAddToCart={onAddToCart}
+            allSeats={train.seats}
+          />
+        );
+    
+      default:
+        return (
+          <SeatSelect
+            stationtype={stationtype}
+            selectedSeat={selectedSeats[train.trainID]}
+            setSelectedSeat={(seat) =>
+              setSelectedSeats((prev) => ({
+                ...prev,
+                [train.trainID]: seat,
+              }))
+            }
+            seatPrice={selectedSeatPrices[train.trainID]}
+            selectedCar={selectedCar}
+            setSelectedCar={setSelectedCar}
+            selectedSeatType={selectedSeatType}
+            cars={dynamicCars}
+            trainName={train.train_name}
+            onAddToCart={onAddToCart}
+            allSeats={train.seats}
+          />
+        );
+    };
   };
 
   // Hiển thị spinner nếu đang tải dữ liệu
@@ -110,8 +303,8 @@ const TrainSchedule = ({
             </div>
             <div className="card-body">
               <form className="">
-                {Array.isArray(trains) && trains.length > 0 ? (
-                  trains.map((train) => (
+                {Array.isArray(enrichedTrains) && enrichedTrains.length > 0 ? (
+                  enrichedTrains.map((train) => (
                     <div key={train.trainID} className="card shadow-sm mb-4">
                       <div className="card-body shadow-lg">
                         {/* Nội dung tàu chiều đi */}
@@ -240,83 +433,78 @@ const TrainSchedule = ({
                           </div>
                         </div>
                         <div className="row mt-4">
-                          {train.seats &&
-                            train.seats.map((seat, index) => (
-                              <div
-                                className="col text-center p-0"
-                                key={index}
-                                style={{
-                                  border: "1px solid orange",
-                                  height: "70px",
-                                }}
-                              >
-                                <button
-                                  className="btn border-0 seattype p-0"
-                                  onClick={(e) =>
-                                    handleSeatClick(
-                                      train.id,
-                                      seat.type,
-                                      seat.price,
-                                      e
-                                    )
-                                  }
-                                >
-                                  {seat.type}
-                                </button>
-                                <button
-                                  className="btn border-0 seatprice p-0"
-                                  onClick={(e) =>
-                                    handleSeatClick(
-                                      train.id,
-                                      seat.type,
-                                      seat.price,
-                                      e
-                                    )
-                                  }
-                                >
-                                  Từ {seat.price}
-                                </button>
-                                <button
-                                  className="btn border-0 seatavailabel p-0"
-                                  onClick={(e) =>
-                                    handleSeatClick(
-                                      train.id,
-                                      seat.type,
-                                      seat.price,
-                                      e
-                                    )
-                                  }
-                                  style={{
-                                    backgroundColor: "#f5f5f5",
-                                    height: "68px",
-                                  }}
-                                >
-                                  {seat.available} Chỗ còn
-                                </button>
+                          {enrichedTrains.map((train) => (
+                            <div key={train.trainID}>
+                              {/* Các info về tàu */}
+                              <div className="row">
+                                {Array.isArray(train.seats) &&
+                                train.seats.length > 0 ? (
+                                  train.seats.map((seat, index) => (
+                                    <div
+                                      className="col p-0"
+                                      key={index}
+                                      style={{
+                                        border: "1px solid orange",
+                                        height: "70px",
+                                      }}
+                                    >
+                                      <button
+                                        className="btn border-0 seattype p-0"
+                                        onClick={(e) =>
+                                          handleSeatClick(
+                                            train.trainID,
+                                            seat.seat_type,
+                                            seat.price,
+                                            e
+                                          )
+                                        }
+                                      >
+                                        {seatTypeDisplayName[seat.seat_type] ||
+                                          seat.seat_type}
+                                      </button>
+                                      <button
+                                        className="btn border-0 seatprice p-0"
+                                        onClick={(e) =>
+                                          handleSeatClick(
+                                            train.trainID,
+                                            seat.seat_type,
+                                            seat.price,
+                                            e
+                                          )
+                                        }
+                                      >
+                                        Từ {seat.price.toLocaleString()}đ
+                                      </button>
+                                      <button
+                                        className="btn border-0 seatavailabel p-0"
+                                        onClick={(e) =>
+                                          handleSeatClick(
+                                            train.trainID,
+                                            seat.seat_type,
+                                            seat.price,
+                                            e
+                                          )
+                                        }
+                                        style={{
+                                          backgroundColor: "#f5f5f5",
+                                          height: "68px",
+                                        }}
+                                      >
+                                        {seat.available} Chỗ còn
+                                      </button>
+                                    </div>
+                                  ))
+                                ) : (
+                                  <p>Không có dữ liệu ghế</p>
+                                )}
                               </div>
-                            ))}
+                            </div>
+                          ))}
                         </div>
-                        {/* Dòng thứ 2 sẽ chỉ hiển thị khi ghế được chọn */}
-                        {selectedSeats[train.id] && (
+                        {selectedSeats[train.trainID] && (
                           <div className="row mt-4">
                             <div className="col text-center">
-                              <SeatSelect
-                                stationtype={"Chiều Đi"}
-                                selectedSeat={selectedSeats[train.id]}
-                                setSelectedSeat={(seat) =>
-                                  setSelectedSeats((prev) => ({
-                                    ...prev,
-                                    [train.id]: seat,
-                                  }))
-                                }
-                                seatPrice={selectedSeatPrices[train.id]}
-                                selectedCar={selectedCar}
-                                setSelectedCar={setSelectedCar}
-                                selectedSeatType={selectedSeatType}
-                                cars={cars}
-                                trainName={train.name}
-                                onAddToCart={onAddToCart}
-                              />
+                              {renderSeatComponent(train, "Chiều Đi")}
                             </div>
                           </div>
                         )}
@@ -491,7 +679,6 @@ const TrainSchedule = ({
                                   selectedCar={selectedCar}
                                   setSelectedCar={setSelectedCar}
                                   selectedSeatType={selectedSeatType}
-                                  cars={cars}
                                   trainName={train.name}
                                   onAddToCart={onAddToCart}
                                 />
