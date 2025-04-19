@@ -4,7 +4,6 @@ import HomePage from "./client/pages/Homepage";
 import InfoSeatPage from "./client/pages/InfoSeatPage";
 import ReturnTicketPage from "./client/pages/ReturnTicketPage";
 import RulesPage from "./client/pages/RulesPage";
-import TimeTicketTrainPage from "./client/pages/TimeTicketTrainPage";
 import GoTrain from "./client/pages/GoTrainPage";
 import BookingTicket from "./client/pages/BookingTicket";
 import ContactPage from "./client/pages/ContactPage";
@@ -23,7 +22,6 @@ const AppRoutes = () => {
       <Route path="/forgetseat" element={<ForgetInfoSeatPage />} />
       <Route path="/rules" element={<RulesPage />} />
       <Route path="/contact" element={<ContactPage />} />
-      <Route path="/timetickettrain" element={<TimeTicketTrainPage />} />
       <Route path="/gotrain" element={<GoTrain />} />
       <Route path="/bookingticket" element={<BookingTicket />} />
       {/* Routes cho Blog */}

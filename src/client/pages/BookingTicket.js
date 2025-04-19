@@ -6,6 +6,9 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "../../styles/BookingTicket.css";
 import InformationFormStep1 from "../components/InformationFormStep1";
 import InformationFormStep2 from "../components/InformationFormStep2";
+import { useLocation } from "react-router-dom";
+
+
 
 const BookingTicket = () => {
   const [activeStep, setActiveStep] = useState(0);

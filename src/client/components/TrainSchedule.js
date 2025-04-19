@@ -26,19 +26,23 @@ const TrainSchedule = ({
 
   // Trạng thái lưu thông tin ghế đang được chọn cho từng chuyến tàu
   const [selectedSeats, setSelectedSeats] = useState({}); // Lưu trạng thái ghế đã chọn
+  const [selectedSeatsReturn, setSelectedSeatsReturn] = useState({});
   const [selectedSeatPrices, setSelectedSeatPrices] = useState({}); // Lưu giá ghế đã chọn
+  const [selectedSeatPricesReturn, setSelectedSeatPricesReturn] = useState({});
   const [selectedCar, setSelectedCar] = useState(null); // Lưu toa tàu được chọn
   const [selectedSeatType, setSelectedSeatType] = useState(null); // Lưu loại ghế được chọn
   const [enrichedTrains, setEnrichedTrains] = useState([]);
-  
+  const [enrichedTrainsReturn, setEnrichedTrainsReturn] = useState([]);
+
   const seatTypeDisplayName = {
     soft: "Ngồi mềm",
     hard_sleeper_4: "Nằm khoang 4",
     hard_sleeper_6: "Nằm khoang 6",
   };
 
-  console.log(trains);
-  console.log("hihih", station);
+  console.log("aa",trains);
+console.log("bb",trainsReturn);
+
 
   function isValidDate(date) {
     return date && !isNaN(new Date(date).getTime()); // Kiểm tra ngày hợp lệ
@@ -72,11 +76,12 @@ const TrainSchedule = ({
     }
   };
 
+  // Chiều đi
   useEffect(() => {
     async function loadSeatsForAllTrains() {
       const results = {};
       const normalize = (str) => str?.toLowerCase().trim();
-  
+
       await Promise.all(
         trains.map(async (train) => {
           const departureStationID = train.train_stop.find(
@@ -84,77 +89,148 @@ const TrainSchedule = ({
               normalize(stop.station.station_name) ===
               normalize(station.departureStation)
           )?.station.station_id;
-  
+
           const arrivalStationID = train.train_stop.find(
             (stop) =>
               normalize(stop.station.station_name) ===
               normalize(station.arrivalStation)
           )?.station.station_id;
-  
+
           if (!departureStationID || !arrivalStationID) {
             console.warn(
-              `❗Không tìm thấy station ID cho tàu ${train.train_name}:`,
-              {
-                departureStation: station.departureStation,
-                arrivalStation: station.arrivalStation,
-              }
+              `❗Không tìm thấy station ID cho tàu ${train.train_name}`
             );
             results[train.trainID] = [];
             return;
           }
-  
+
           const seats = await fetchSeatAvailability({
             trainID: train.trainID,
             travelDate: station.departureDate,
             fromStationID: departureStationID,
             toStationID: arrivalStationID,
           });
-  
-          console.log("✅ Ghế lấy về:", seats);
+
           results[train.trainID] = seats;
         })
       );
-  
+
       const trainsWithSeats = trains.map((train) => ({
         ...train,
         seats: results[train.trainID] || [],
       }));
-  
+
       setEnrichedTrains(trainsWithSeats);
     }
-  
+
     if (Array.isArray(trains) && trains.length > 0 && station) {
-      console.log("🚀 Bắt đầu fetch ghế cho từng chuyến tàu...");
+      console.log("🚆 Bắt đầu fetch ghế cho chiều đi...");
       loadSeatsForAllTrains();
     } else {
       setEnrichedTrains([]);
     }
   }, [trains, station]);
-  
 
+  // Chiều về (khứ hồi)
+  useEffect(() => {
+    async function loadSeatsForAllTrainsReturn() {
+      const results = {};
+      const normalize = (str) => str?.toLowerCase().trim();
+
+      await Promise.all(
+        trainsReturn.map(async (train) => {
+          const departureStationID = train.train_stop.find(
+            (stop) =>
+              normalize(stop.station.station_name) ===
+              normalize(station.arrivalStation)
+          )?.station.station_id;
+
+          const arrivalStationID = train.train_stop.find(
+            (stop) =>
+              normalize(stop.station.station_name) ===
+              normalize(station.departureStation)
+          )?.station.station_id;
+
+          if (!departureStationID || !arrivalStationID) {
+            console.warn(
+              `❗Không tìm thấy station ID chiều về cho tàu ${train.train_name}`
+            );
+            results[train.trainID] = [];
+            return;
+          }
+
+          const seats = await fetchSeatAvailability({
+            trainID: train.trainID,
+            travelDate: station.returnDate,
+            fromStationID: departureStationID,
+            toStationID: arrivalStationID,
+          });
+
+          results[train.trainID] = seats;
+        })
+      );
+
+      const trainsWithSeatsReturn = trainsReturn.map((train) => ({
+        ...train,
+        seats: results[train.trainID] || [],
+      }));
+
+      setEnrichedTrainsReturn(trainsWithSeatsReturn);
+    }
+
+    if (
+      Array.isArray(trainsReturn) &&
+      trainsReturn.length > 0 &&
+      station.ticketType === "roundTrip"
+    ) {
+      console.log("🚆 Bắt đầu fetch ghế cho chiều về...");
+      loadSeatsForAllTrainsReturn();
+    } else {
+      setEnrichedTrainsReturn([]);
+    }
+  }, [trainsReturn, station]);
 
   // Tải dữ liệu tàu chiều đi
   console.log(departureDate, departureStation, arrivalStation);
   console.log("hii", trains);
 
-  // Hàm xử lý khi chọn ghế
-  const handleSeatClick = (trainId, seatType, seatPrice, e) => {
+  const handleSeatClick = (trainId, seatType, seatPrice, e, tripType) => {
     e.preventDefault();
-
-    console.log("✅ CLICKED", { trainId, seatType, seatPrice });
-
-    setSelectedSeats((prevState) => ({
-      ...prevState,
-      [trainId]: prevState[trainId] === seatType ? null : seatType,
-    }));
-
-    setSelectedSeatPrices((prevState) => ({
-      ...prevState,
-      [trainId]: prevState[trainId] === seatType ? null : seatPrice,
-    }));
-
+  
+    console.log("✅ CLICKED", { trainId, seatType, seatPrice, tripType });
+  
+    // Xử lý cho chiều đi hoặc chiều về
+    if (tripType === "return") {
+      // Cập nhật ghế cho chiều về
+      setSelectedSeatsReturn((prevState) => ({
+        ...prevState,
+        [trainId]: prevState[trainId] === seatType ? null : seatType,
+      }));
+  
+      setSelectedSeatPricesReturn((prevState) => ({
+        ...prevState,
+        [trainId]: prevState[trainId] === seatType ? null : seatPrice,
+      }));
+    } else {
+      // Cập nhật ghế cho chiều đi
+      setSelectedSeats((prevState) => ({
+        ...prevState,
+        [trainId]: prevState[trainId] === seatType ? null : seatType,
+      }));
+  
+      setSelectedSeatPrices((prevState) => ({
+        ...prevState,
+        [trainId]: prevState[trainId] === seatType ? null : seatPrice,
+      }));
+    }
+  
+    // Cập nhật kiểu ghế đã chọn (cho chiều đi hoặc chiều về)
     setSelectedSeatType(seatType);
   };
+  
+  console.log("Dữ liệu cho chiều đi:", enrichedTrains); 
+console.log("Dữ liệu cho chiều về:", enrichedTrainsReturn); // Kiểm tra dữ liệu chiều về
+
 
   const renderSeatComponent = (train, stationtype = "Chiều Đi") => {
     const dynamicCars = [];
@@ -173,99 +249,101 @@ const TrainSchedule = ({
         }
       });
     }
-
+  
     dynamicCars.sort((a, b) => b.id.localeCompare(a.id));
+  
 
+    const schedule = train.schedule?.[0];
+    const departTime = schedule?.departTime;
+    const arrivalTime = schedule?.arrivalTime;
+
+    // Kiểm tra là chiều đi hay chiều về
+    const isReturn = stationtype === "Chiều Về"; // Nếu là "Chiều Về" thì chọn chiều về
+  
+    // Chọn state phù hợp với chiều đi hoặc chiều về
+    const selectedSeat = isReturn
+      ? selectedSeatsReturn[train.trainID] // Sử dụng state chiều về
+      : selectedSeats[train.trainID]; // Sử dụng state chiều đi
+  
+    // Hàm setSelectedSeat cho cả 2 chiều đi và chiều về
+    const setSelectedSeat = (seat) => {
+      if (isReturn) {
+        setSelectedSeatsReturn((prev) => ({
+          ...prev,
+          [train.trainID]: seat,
+        }));
+      } else {
+        setSelectedSeats((prev) => ({
+          ...prev,
+          [train.trainID]: seat,
+        }));
+      }
+    };
+    const trainid = train.trainID
+    const seatPrice = isReturn
+      ? selectedSeatPricesReturn[train.trainID] // Giá vé chiều về
+      : selectedSeatPrices[train.trainID]; // Giá vé chiều đi
+  
+    // Dữ liệu props cho tất cả các component seat
+    const componentProps = {
+      trainid,
+      stationtype, // "Chiều Đi" hoặc "Chiều Về"
+      selectedSeat,
+      setSelectedSeat,
+      seatPrice,
+      selectedCar,
+      setSelectedCar,
+      selectedSeatType: selectedSeatType, // Kiểu ghế
+      cars: dynamicCars,
+      trainName: train.train_name,
+      departTime, // Thêm giờ đi
+      arrivalTime, // Thêm giờ đến
+      onAddToCart: (ticketData) => {
+        // Thêm tripType vào vé trước khi thêm vào giỏ
+        const ticketWithTripType = {
+          ...ticketData,
+          tripType: isReturn ? "return" : "depart",
+          price: isReturn ? selectedSeatPricesReturn[train.trainID] : selectedSeatPrices[train.trainID],
+          departureDate: station.departureDate,
+          returnDate: station.returnDate,
+          departureStation: station.departureStation,
+          arrivalStation: station.arrivalStation,
+          selectedSeatType
+        };
+        onAddToCart(ticketWithTripType);
+      },
+      allSeats: train.seats,
+    };
+  
+    // Chuyển component tương ứng với kiểu ghế
     switch (selectedSeatType) {
       case "hard_sleeper_6":
         return (
           <SeatSelectHardSleeper6
-            stationtype={stationtype}
-            selectedSeat={selectedSeats[train.trainID]}
-            setSelectedSeat={(seat) =>
-              setSelectedSeats((prev) => ({
-                ...prev,
-                [train.trainID]: seat,
-              }))
-            }
-            seatPrice={selectedSeatPrices[train.trainID]}
-            selectedCar={selectedCar}
-            setSelectedCar={setSelectedCar}
-            selectedSeatType={selectedSeatType}
-            cars={dynamicCars}
-            trainName={train.train_name}
-            onAddToCart={onAddToCart}
-            allSeats={train.seats}
+            {...componentProps}
           />
         );
-    
       case "hard_sleeper_4":
         return (
           <SeatSelectHardSleeper4
-            stationtype={stationtype}
-            selectedSeat={selectedSeats[train.trainID]}
-            setSelectedSeat={(seat) =>
-              setSelectedSeats((prev) => ({
-                ...prev,
-                [train.trainID]: seat,
-              }))
-            }
-            seatPrice={selectedSeatPrices[train.trainID]}
-            selectedCar={selectedCar}
-            setSelectedCar={setSelectedCar}
-            selectedSeatType={selectedSeatType}
-            cars={dynamicCars}
-            trainName={train.train_name}
-            onAddToCart={onAddToCart}
-            allSeats={train.seats}
+            {...componentProps}
           />
         );
-    
       case "soft":
         return (
           <SeatSelectSoftSeat
-            stationtype={stationtype}
-            selectedSeat={selectedSeats[train.trainID]}
-            setSelectedSeat={(seat) =>
-              setSelectedSeats((prev) => ({
-                ...prev,
-                [train.trainID]: seat,
-              }))
-            }
-            seatPrice={selectedSeatPrices[train.trainID]}
-            selectedCar={selectedCar}
-            setSelectedCar={setSelectedCar}
-            selectedSeatType={selectedSeatType}
-            cars={dynamicCars}
-            trainName={train.train_name}
-            onAddToCart={onAddToCart}
-            allSeats={train.seats}
+            {...componentProps}
           />
         );
-    
       default:
         return (
           <SeatSelect
-            stationtype={stationtype}
-            selectedSeat={selectedSeats[train.trainID]}
-            setSelectedSeat={(seat) =>
-              setSelectedSeats((prev) => ({
-                ...prev,
-                [train.trainID]: seat,
-              }))
-            }
-            seatPrice={selectedSeatPrices[train.trainID]}
-            selectedCar={selectedCar}
-            setSelectedCar={setSelectedCar}
-            selectedSeatType={selectedSeatType}
-            cars={dynamicCars}
-            trainName={train.train_name}
-            onAddToCart={onAddToCart}
-            allSeats={train.seats}
+            {...componentProps}
           />
         );
-    };
+    }
   };
+  
 
   // Hiển thị spinner nếu đang tải dữ liệu
   if (loading || loadingReturn) {
@@ -355,6 +433,7 @@ const TrainSchedule = ({
                                         ).toLocaleTimeString([], {
                                           hour: "2-digit",
                                           minute: "2-digit",
+                                          timeZone: "UTC",
                                         })
                                       : "Giờ xuất phát không hợp lệ"}
                                   </div>
@@ -368,6 +447,7 @@ const TrainSchedule = ({
                                         ).toLocaleTimeString([], {
                                           hour: "2-digit",
                                           minute: "2-digit",
+                                          timeZone: "UTC", // ⭐ Quan trọng: Giữ nguyên giờ UTC
                                         })
                                       : "Giờ đến không hợp lệ"}
                                   </div>
@@ -455,7 +535,8 @@ const TrainSchedule = ({
                                             train.trainID,
                                             seat.seat_type,
                                             seat.price,
-                                            e
+                                            e,
+                                            "departure"
                                           )
                                         }
                                       >
@@ -469,7 +550,7 @@ const TrainSchedule = ({
                                             train.trainID,
                                             seat.seat_type,
                                             seat.price,
-                                            e
+                                            e,"departure"
                                           )
                                         }
                                       >
@@ -482,7 +563,7 @@ const TrainSchedule = ({
                                             train.trainID,
                                             seat.seat_type,
                                             seat.price,
-                                            e
+                                            e,"departure"
                                           )
                                         }
                                         style={{
@@ -517,7 +598,6 @@ const TrainSchedule = ({
               </form>
             </div>
           </div>
-          {/* Phần lịch trình chiều về (nếu là khứ hồi) */}
           {isRoundTrip && (
             <div className="card shadow mb-4">
               <div className="card-header text-primary d-flex justify-content-between p-2">
@@ -529,19 +609,15 @@ const TrainSchedule = ({
                   Tàu chiều về còn vé cho ngày này
                 </div>
               </div>
+
               <div className="card-body">
                 <form>
-                  {loadingReturn ? (
-                    <div className="text-center mt-3">
-                      <div className="spinner-border" role="status">
-                        <span className="sr-only">Đang tải...</span>
-                      </div>
-                    </div>
-                  ) : Array.isArray(trainsReturn) && trainsReturn.length > 0 ? (
-                    trainsReturn.map((train) => (
-                      <div key={train.id} className="card shadow-sm mb-4">
+                  {Array.isArray(enrichedTrainsReturn) &&
+                  enrichedTrainsReturn.length > 0 ? (
+                    enrichedTrainsReturn.map((train) => (
+                      <div key={train.trainID} className="card shadow-sm mb-4">
                         <div className="card-body shadow-lg">
-                          {/* Nội dung tàu chiều về */}
+                          {/* Thông tin tàu tương tự chiều đi */}
                           <div className="d-flex align-items-center border-bottom mt-1">
                             <div style={{ position: "relative" }}>
                               <img
@@ -562,7 +638,7 @@ const TrainSchedule = ({
                                   borderRadius: "5px",
                                 }}
                               >
-                                {train.name} {/* Tên tàu từ dữ liệu */}
+                                {train.train_name}
                               </div>
                             </div>
                             <div className="flex-grow-1">
@@ -571,45 +647,106 @@ const TrainSchedule = ({
                                   {train.duration}
                                 </p>
                                 <p className="text-warning giamgia">
-                                  {train.discount}
+                                  {train.discount || "Không có giảm giá"}
                                 </p>
                               </div>
-                              <div className="d-flex justify-content-between">
-                                <div className="font-weight-bold gadi">
-                                  {train.departureDate}
-                                </div>
-                                <span className="text-center">
-                                  <BsArrowRight className="muiten" />
-                                </span>
-                                <div className="font-weight-bold gaden">
-                                  {train.arrivalTime}
-                                </div>
-                              </div>
+                              {train.schedule && train.schedule.length > 0 ? (
+                                train.schedule.map((schedule, index) => (
+                                  <div
+                                    key={schedule.schedule_id}
+                                    className="d-flex justify-content-between"
+                                  >
+                                    <div className="font-weight-bold gadi">
+                                      {isValidDate(schedule.departTime)
+                                        ? new Date(
+                                            schedule.departTime
+                                          ).toLocaleTimeString([], {
+                                            hour: "2-digit",
+                                            minute: "2-digit",
+                                            timeZone: "UTC",
+                                          })
+                                        : "Giờ xuất phát không hợp lệ"}
+                                    </div>
+                                    <span className="text-center">
+                                      <BsArrowRight className="muiten" />
+                                    </span>
+                                    <div className="font-weight-bold gaden">
+                                      {isValidDate(schedule.arrivalTime)
+                                        ? new Date(
+                                            schedule.arrivalTime
+                                          ).toLocaleTimeString([], {
+                                            hour: "2-digit",
+                                            minute: "2-digit",
+                                            timeZone: "UTC",
+                                          })
+                                        : "Giờ đến không hợp lệ"}
+                                    </div>
+                                  </div>
+                                ))
+                              ) : (
+                                <p>Không có lịch trình tàu</p>
+                              )}
+
                               <div className="d-flex justify-content-between text-muted mt-1">
                                 <div className="gadi1">
-                                  {train.departureDate} từ{" "}
-                                  {train.departureStation}
+                                  {train.schedule && train.schedule.length > 0
+                                    ? isValidDate(train.schedule[0]?.departTime)
+                                      ? `${new Date(
+                                          train.schedule[0]?.departTime
+                                        ).toLocaleDateString("en-GB", {
+                                          day: "2-digit",
+                                          month: "2-digit",
+                                        })} từ ${
+                                          train.train_stop.find(
+                                            (stop) => stop.stop_order === 1
+                                          )?.station?.station_name
+                                        }`
+                                      : "Ngày xuất phát không hợp lệ"
+                                    : "Không có thông tin lịch trình xuất phát"}
                                 </div>
                                 <div className="gaden1">
-                                  {train.arrivalDate} đến {train.arrivalStation}
+                                  {train.schedule && train.schedule.length > 0
+                                    ? isValidDate(
+                                        train.schedule[0]?.arrivalTime
+                                      )
+                                      ? `${new Date(
+                                          train.schedule[0]?.arrivalTime
+                                        ).toLocaleDateString("en-GB", {
+                                          day: "2-digit",
+                                          month: "2-digit",
+                                        })} đến ${
+                                          train.train_stop.find(
+                                            (stop) =>
+                                              stop.stop_order ===
+                                              Math.max(
+                                                ...train.train_stop.map(
+                                                  (stop) => stop.stop_order
+                                                )
+                                              )
+                                          )?.station?.station_name
+                                        }`
+                                      : "Ngày đến không hợp lệ"
+                                    : "Không có thông tin lịch trình đến"}
                                 </div>
                               </div>
+
                               <a
                                 href="/"
                                 className="chitietkm text-primary"
-                                style={{
-                                  textDecoration: "none",
-                                }}
+                                style={{ textDecoration: "none" }}
                               >
                                 Chi tiết khuyến mãi
                               </a>
                             </div>
                           </div>
+
+                          {/* Danh sách ghế chiều về */}
                           <div className="row mt-4">
-                            {train.seats &&
+                            {Array.isArray(train.seats) &&
+                            train.seats.length > 0 ? (
                               train.seats.map((seat, index) => (
                                 <div
-                                  className="col text-center p-0"
+                                  className="col p-0"
                                   key={index}
                                   style={{
                                     border: "1px solid orange",
@@ -620,36 +757,40 @@ const TrainSchedule = ({
                                     className="btn border-0 seattype p-0"
                                     onClick={(e) =>
                                       handleSeatClick(
-                                        train.id,
-                                        seat.type,
+                                        train.trainID,
+                                        seat.seat_type,
                                         seat.price,
-                                        e
+                                        e,
+                                        "return"
                                       )
                                     }
                                   >
-                                    {seat.type}
+                                    {seatTypeDisplayName[seat.seat_type] ||
+                                      seat.seat_type}
                                   </button>
                                   <button
                                     className="btn border-0 seatprice p-0"
                                     onClick={(e) =>
                                       handleSeatClick(
-                                        train.id,
-                                        seat.type,
+                                        train.trainID,
+                                        seat.seat_type,
                                         seat.price,
-                                        e
+                                        e,
+                                        "return"
                                       )
                                     }
                                   >
-                                    Từ {seat.price}
+                                    Từ {seat.price.toLocaleString()}đ
                                   </button>
                                   <button
                                     className="btn border-0 seatavailabel p-0"
                                     onClick={(e) =>
                                       handleSeatClick(
-                                        train.id,
-                                        seat.type,
+                                        train.trainID,
+                                        seat.seat_type,
                                         seat.price,
-                                        e
+                                        e,
+                                        "return"
                                       )
                                     }
                                     style={{
@@ -660,28 +801,16 @@ const TrainSchedule = ({
                                     {seat.available} Chỗ còn
                                   </button>
                                 </div>
-                              ))}
+                              ))
+                            ) : (
+                              <p>Không có dữ liệu ghế</p>
+                            )}
                           </div>
-                          {/* Dòng thứ 2 sẽ chỉ hiển thị khi ghế được chọn */}
-                          {selectedSeats[train.id] && (
+
+                          {selectedSeatsReturn?.[train.trainID] && (
                             <div className="row mt-4">
                               <div className="col text-center">
-                                <SeatSelect
-                                  stationtype={"Chiều Về"}
-                                  selectedSeat={selectedSeats[train.id]}
-                                  setSelectedSeat={(seat) =>
-                                    setSelectedSeats((prev) => ({
-                                      ...prev,
-                                      [train.id]: seat,
-                                    }))
-                                  }
-                                  seatPrice={selectedSeatPrices[train.id]}
-                                  selectedCar={selectedCar}
-                                  setSelectedCar={setSelectedCar}
-                                  selectedSeatType={selectedSeatType}
-                                  trainName={train.name}
-                                  onAddToCart={onAddToCart}
-                                />
+                                {renderSeatComponent(train, "Chiều Về")}
                               </div>
                             </div>
                           )}
@@ -689,7 +818,7 @@ const TrainSchedule = ({
                       </div>
                     ))
                   ) : (
-                    <p></p>
+                    <p>Không có dữ liệu tàu chiều về</p>
                   )}
                 </form>
               </div>

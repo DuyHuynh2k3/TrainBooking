@@ -80,11 +80,6 @@ const Header = () => {
                 </a>
               </li>
               <li>
-                <a className="dropdown-item text-white" href="/timetickettrain">
-                  GIỜ TÀU - GIÁ VÉ
-                </a>
-              </li>
-              <li>
                 <a className="dropdown-item text-white" href="/">
                   HƯỚNG DẪN
                 </a>
@@ -98,9 +93,6 @@ const Header = () => {
           </div>
           <a href="/findbill" className="text-white text-decoration-none mx-3">
             TRA CỨU HÓA ĐƠN
-          </a>
-          <a href="/" className="text-white text-decoration-none mx-3">
-            ENGLISH
           </a>
         </nav>
       </div>

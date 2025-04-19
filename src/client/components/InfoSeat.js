@@ -3,13 +3,25 @@ import { Link } from "react-router-dom";
 import { FiAlignJustify } from "react-icons/fi";
 import "../../styles/InfoSeat.css";
 
-const InfoSeat = () => {
+const InfoSeat = ({ cart, onAddToCart }) => {
   const [ticketId, setTicketId] = useState("");
   const [email, setEmail] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [ticketInfo, setTicketInfo] = useState(null);
   const [error, setError] = useState("");
 
+  const seatTypeDisplayName = {
+    soft: "Ngồi mềm",
+    hard_sleeper_4: "Nằm khoang 4",
+    hard_sleeper_6: "Nằm khoang 6",
+  };
+
+  const DisplayName = {
+    Adult: "Người lớn",
+    Child: "Trẻ em",
+    Senior: "Người cao tuổi",
+    Student: "Sinh viên",
+  };
   // useEffect(() => {
   //   // Lấy thông tin từ localStorage khi component được tải
   //   const savedTicketInfo = localStorage.getItem("ticketInfo");
@@ -48,6 +60,8 @@ const InfoSeat = () => {
       // Nếu phản hồi thành công, đọc dữ liệu
       const data = await response.json();
       setTicketInfo(data);
+      console.log("hahahs", data);
+
       setError(""); // Xóa thông báo lỗi nếu có
     } catch (error) {
       console.error("Lỗi khi gọi API:", error);
@@ -156,18 +170,25 @@ const InfoSeat = () => {
                       <tr>
                         <td>{ticketInfo.customer?.fullName}</td>
                         <td>{ticketInfo.customer?.passport}</td>
-                        <td>Người lớn</td>
-                        <td>Ngôi mềm điều hòa</td>
+                        <td>{DisplayName[ticketInfo.passenger_type]} </td>
                         <td>
-                          {ticketInfo.train?.train_name} {ticketInfo.departTime}{" "}
-                          - {ticketInfo.arrivalTime}
+                          {seatTypeDisplayName[ticketInfo.seatType] ||
+                            ticketInfo.seatType}
+                        </td>
+                        <td className="">
+                         Tàu: {ticketInfo.train?.train_name}{" "} <br></br>
+                         Đi từ: {ticketInfo.journey_segments
+                            ? JSON.parse(ticketInfo.journey_segments)[0]
+                                ?.segment
+                            : ""}{" "}
+                           {ticketInfo.departTime} đến{" "}
+                          {ticketInfo.arrivalTime}
                           <br />
-                          Toa: {ticketInfo.seattrain?.coach} Chỗ số:{" "}
-                          {ticketInfo.seattrain?.seat_number}
+                          Toa - Ghế: {ticketInfo.coach_seat}
                         </td>
                         <td>{ticketInfo.price}</td>
                         <td>
-                          {ticketInfo.payment_status === "Paid"
+                          {ticketInfo.payment_status === "Pending"
                             ? "Đã thanh toán"
                             : "Chờ thanh toán"}
                         </td>

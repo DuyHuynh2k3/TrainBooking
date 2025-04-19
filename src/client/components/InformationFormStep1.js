@@ -69,7 +69,7 @@ const InformationFormStep1 = ({ onNext, onBack, formData, updateFormData }) => {
     hard_sleeper_4: "Nằm khoang 4",
     hard_sleeper_6: "Nằm khoang 6",
   };
-  
+
   const requiredFields = {
     passengerName: "Họ tên hành khách",
     passengerType: "Đối tượng",
@@ -141,6 +141,10 @@ const InformationFormStep1 = ({ onNext, onBack, formData, updateFormData }) => {
     }
 
     return isValid;
+  };
+
+  const isValidDate = (date) => {
+    return !isNaN(Date.parse(date));
   };
 
   const handleDeletePassenger = (index) => {
@@ -421,12 +425,12 @@ const InformationFormStep1 = ({ onNext, onBack, formData, updateFormData }) => {
                             }
                           >
                             <option value="">Chọn đối tượng</option>
-                            <option value="Người lớn">Người lớn</option>
-                            <option value="Trẻ em">Trẻ em</option>
-                            <option value="Người cao tuổi">
+                            <option value="0">Người lớn</option>
+                            <option value="1">Trẻ em</option>
+                            <option value="2">
                               Người cao tuổi
                             </option>
-                            <option value="Sinh Viên">Sinh viên</option>
+                            <option value="3">Sinh viên</option>
                           </select>
                           {errors[`passengerType-${index}`] && (
                             <div className="invalid-feedback">
@@ -471,12 +475,48 @@ const InformationFormStep1 = ({ onNext, onBack, formData, updateFormData }) => {
                       </div>
                     </td>
                     <td>
-                      <div>
-                      <TripInfo stationtype={"Chiều Đi"}/>
-                      Tàu: {ticket.trainName}<br></br>
-                      Toa: {ticket.car}<br></br>
-                      Ghế: {ticket.seat} <br></br>
-                      Loại  {seatTypeDisplayName[ticket.seatType] || ticket.seatType}.
+                      <div className="text-start">
+                        <TripInfo
+                          stationtype={
+                            ticket.tripType === "return"
+                              ? "Chiều Về"
+                              : "Chiều Đi"
+                          }
+                        />
+                        <div className="text-start">
+                          {" "}
+                          <p className="m-0 text-dark fw-normal ms-1" style={{fontSize:"16px"}}>Tàu: {ticket.trainName}</p>
+                          <p className="m-0 text-dark fw-normal ms-1" style={{fontSize:"16px"}}>Toa: {ticket.car}</p>
+                          <p className="m-0 text-dark fw-normal ms-1" style={{fontSize:"16px"}}> Ghế: {ticket.seat}</p>
+                          <p className="m-0 text-dark fw-normal ms-1" style={{fontSize:"16px"}}>
+                            Loại:{" "}
+                            {seatTypeDisplayName[ticket.seatType] ||
+                              ticket.seatType}
+                            .
+                          </p>
+                          <p className="m-0 text-dark fw-normal ms-1" style={{fontSize:"16px"}}>
+                            Thời gian chạy:{" "}
+                              {isValidDate(ticket.departTime)
+                                ? new Date(
+                                    ticket.departTime
+                                  ).toLocaleTimeString([], {
+                                    hour: "2-digit",
+                                    minute: "2-digit",
+                                    timeZone: "UTC",
+                                  })
+                                : "Giờ xuất phát không hợp lệ"}{" "}
+                              -{" "}
+                              {isValidDate(ticket.arrivalTime)
+                                ? new Date(
+                                    ticket.arrivalTime
+                                  ).toLocaleTimeString([], {
+                                    hour: "2-digit",
+                                    minute: "2-digit",
+                                    timeZone: "UTC",
+                                  })
+                                : "Giờ đến không hợp lệ"}
+                          </p>
+                        </div>
                       </div>
                     </td>
                     <td>{ticket.price.toLocaleString()} VND</td>

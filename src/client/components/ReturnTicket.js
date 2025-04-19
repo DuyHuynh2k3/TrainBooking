@@ -18,6 +18,20 @@ const ReturnTicket = () => {
   const [ticketInfo, setTicketInfo] = useState(null);
   const [loading, setLoading] = useState(false);
 
+  const DisplayName = {
+    Adult: "Người lớn",
+    Child: "Trẻ em",
+    Senior: "Người cao tuổi",
+    Student: "Sinh viên",
+  };
+
+  
+  const seatTypeDisplayName = {
+    soft: "Ngồi mềm",
+    hard_sleeper_4: "Nằm khoang 4",
+    hard_sleeper_6: "Nằm khoang 6",
+  };
+
   const validateInput = () => {
     if (!bookingCode && !email && !phone) {
       message.error(
@@ -218,18 +232,25 @@ const ReturnTicket = () => {
                   <tr>
                     <td>{ticketInfo.customer?.fullName}</td>
                     <td>{ticketInfo.customer?.passport}</td>
-                    <td>Người lớn</td>
-                    <td>Ngôi mềm điều hòa</td>
+                    <td>{DisplayName[ticketInfo.passenger_type]} </td>
                     <td>
-                      {ticketInfo.train?.train_name} {ticketInfo.departTime} -{" "}
-                      {ticketInfo.arrivalTime}
-                      <br />
-                      Toa: {ticketInfo.seattrain?.coach} Chỗ số:{" "}
-                      {ticketInfo.seattrain?.seat_number}
-                    </td>
+                          {seatTypeDisplayName[ticketInfo.seatType] ||
+                            ticketInfo.seatType}
+                        </td>
+                        <td className="">
+                         Tàu: {ticketInfo.train?.train_name}{" "} <br></br>
+                         Đi từ: {ticketInfo.journey_segments
+                            ? JSON.parse(ticketInfo.journey_segments)[0]
+                                ?.segment
+                            : ""}{" "}
+                           {ticketInfo.departTime} đến{" "}
+                          {ticketInfo.arrivalTime}
+                          <br />
+                          Toa - Ghế: {ticketInfo.coach_seat}
+                        </td>
                     <td>{ticketInfo.price}</td>
                     <td>
-                      {ticketInfo.payment_status === "Paid"
+                      {ticketInfo.payment_status === "Pending"
                         ? "Đã thanh toán"
                         : "Chờ thanh toán"}
                     </td>

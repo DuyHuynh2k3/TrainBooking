@@ -18,6 +18,9 @@ const SeatSelectHardSleeper6 = ({
   trainName,
   onAddToCart,
   departureDate,
+  departTime,
+  arrivalTime,
+  trainid
 }) => {
   const [seatsData, setSeatsData] = useState([]);
 
@@ -68,12 +71,15 @@ const SeatSelectHardSleeper6 = ({
     } else {
       setSelectedSeat(seatNumber);
       const ticket = {
+        trainid,
         trainName,
         seat: seatNumber,
         price: seatPrice,
         car: selectedCar,
         seatType: selectedSeatType,
         departureDate,
+        departTime,
+        arrivalTime,
       };
       onAddToCart(ticket);
     }

@@ -52,9 +52,11 @@ const BookForm = ({ cart, onAddToCart, formatDate }) => {
   const [departureDate, setDepartureDate] = useState("");
   const [arrivalDate, setArrivalDate] = useState("");
   const navigate = useNavigate();
-  const [ticketType, setTicketType] = useState(localStorage.getItem("ticketType") || ""); // Mặc định là "Khứ hồi"
-  const { station, setStation } = useStore(); 
-  
+  const [ticketType, setTicketType] = useState(
+    localStorage.getItem("ticketType") || ""
+  ); // Mặc định là "Khứ hồi"
+  const { station, setStation } = useStore();
+
   const handleTicketTypeChange = (e) => {
     const selectedTicketType = e.target.value;
     setTicketType(selectedTicketType);
@@ -65,8 +67,17 @@ const BookForm = ({ cart, onAddToCart, formatDate }) => {
     }
   };
 
-  const handleSearchClick = (event) => {
+  const isValidDate = (date) => {
+    return !isNaN(Date.parse(date));
+  };
 
+  const seatTypeLabels = {
+    soft: "Ngồi mềm",
+    hard_sleeper_4: "Nằm khoang 4",
+    hard_sleeper_6: "Nằm khoang 6",
+  };
+
+  const handleSearchClick = (event) => {
     event.preventDefault();
     const dataTrain = {
       departureStation,
@@ -74,9 +85,9 @@ const BookForm = ({ cart, onAddToCart, formatDate }) => {
       departureDate,
       returnDate: ticketType === "roundTrip" ? arrivalDate : "",
       ticketType,
-    }
+    };
     console.log(dataTrain);
-    setStation(dataTrain)
+    setStation(dataTrain);
     if (!departureStation || !arrivalStation || !departureDate) {
       alert("Vui lòng chọn đầy đủ Ga đi, Ga đến và Ngày đi!");
       return;
@@ -84,7 +95,7 @@ const BookForm = ({ cart, onAddToCart, formatDate }) => {
 
     navigate("/resultticket");
   };
-  
+
   return (
     <div className="container-fluid mt-2 ">
       <div className="row d-flex justify-content-center">
@@ -106,7 +117,7 @@ const BookForm = ({ cart, onAddToCart, formatDate }) => {
                   <div className="col-md-4">
                     <label className="form-label text-primary">Ga đi</label>
                     <Autocomplete
-                      value={station.departureStation|| ""}
+                      value={station.departureStation || ""}
                       freeSolo
                       options={stations.map((station) => station.title)}
                       onInputChange={(e, newValue) =>
@@ -125,7 +136,7 @@ const BookForm = ({ cart, onAddToCart, formatDate }) => {
                   <div className="col-md-4">
                     <label className="form-label text-primary">Ga đến</label>
                     <Autocomplete
-                    value={station.arrivalStation|| ""}
+                      value={station.arrivalStation || ""}
                       freeSolo
                       options={stations.map((station) => station.title)}
                       onInputChange={(e, newValue) =>
@@ -180,7 +191,7 @@ const BookForm = ({ cart, onAddToCart, formatDate }) => {
                     <input
                       type="date"
                       className="form-control"
-                      value={ departureDate || station.departureDate }
+                      value={departureDate || station.departureDate}
                       onChange={(e) => setDepartureDate(e.target.value)}
                     />
                   </div>
@@ -190,7 +201,7 @@ const BookForm = ({ cart, onAddToCart, formatDate }) => {
                     <input
                       type="date"
                       className="form-control"
-                      value={ arrivalDate || station.returnDate }
+                      value={arrivalDate || station.returnDate}
                       onChange={(e) => setArrivalDate(e.target.value)}
                       disabled={ticketType === "oneWay"} // Vô hiệu hóa thay vì ẩn đi
                       style={{
@@ -205,7 +216,8 @@ const BookForm = ({ cart, onAddToCart, formatDate }) => {
                     <button
                       type="submit"
                       className="btn btn-primary w-100"
-                      onClick={handleSearchClick}>
+                      onClick={handleSearchClick}
+                    >
                       Tìm kiếm
                     </button>
                   </div>
@@ -236,17 +248,48 @@ const BookForm = ({ cart, onAddToCart, formatDate }) => {
                 <div className="">
                   {cart?.map((ticket, index) => (
                     <div key={index} className="mb-1">
-                      <TripInfo  stationtype={"Chiều Đi"} />
+                      <TripInfo
+                        stationtype={
+                          ticket.tripType === "return" ? "Chiều Về" : "Chiều Đi"
+                        }
+                      />
                       <div className="ticket-info d-flex justify-content-between align-items-start">
-                        <div className="d-flex flex-column flex-grow-1 mt-2">
-                          <strong>Tàu:</strong>
-                          <strong>Toa:</strong>
-                          <strong>Ghế:</strong>
-                          <strong>Giá:</strong>
+                        <div className="d-flex flex-column flex-grow-1 mt-2 text-start ">
+                          <strong className="w-100 ms-4">Tàu:</strong>
+                          <strong className="w-100 ms-4">Thời gian chạy:</strong>
+                          <strong className="w-100 ms-4">Toa:</strong>
+                          <strong className="w-100 ms-4">Loại:</strong>
+                          <strong className="w-100 ms-4">Ghế:</strong>
+                          <strong className="w-100 ms-4">Giá:</strong>
                         </div>
+
                         <div className="d-flex flex-column flex-grow-1 align-items-start mt-2">
                           <span>{ticket.trainName}</span>
+                          <span>
+                            {isValidDate(ticket.departTime)
+                              ? new Date(ticket.departTime).toLocaleTimeString(
+                                  [],
+                                  {
+                                    hour: "2-digit",
+                                    minute: "2-digit",
+                                    timeZone: "UTC",
+                                  }
+                                )
+                              : "Giờ xuất phát không hợp lệ"}{" "}
+                            -{" "}
+                            {isValidDate(ticket.arrivalTime)
+                              ? new Date(ticket.arrivalTime).toLocaleTimeString(
+                                  [],
+                                  {
+                                    hour: "2-digit",
+                                    minute: "2-digit",
+                                    timeZone: "UTC",
+                                  }
+                                )
+                              : "Giờ đến không hợp lệ"}
+                          </span>
                           <span>{ticket.car}</span>
+                          <span>{seatTypeLabels[ticket.seatType]}</span>
                           <span>{ticket.seat}</span>
                           <span>{ticket.price.toLocaleString()} VND</span>
                         </div>

@@ -18,6 +18,9 @@ const SeatSelectSoftSeat = ({
   trainName,
   onAddToCart,
   departureDate,
+  departTime,
+  arrivalTime,
+  trainid
 }) => {
   const [seatsData, setSeatsData] = useState([]);
 
@@ -68,14 +71,19 @@ const SeatSelectSoftSeat = ({
     } else {
       setSelectedSeat(seatNumber);
       const ticket = {
+        trainid,
         trainName,
         seat: seatNumber,
         price: seatPrice,
         car: selectedCar,
         seatType: selectedSeatType,
         departureDate,
+        departTime,
+        arrivalTime,
       };
       onAddToCart(ticket);
+      console.log(ticket);
+      
     }
   };
 

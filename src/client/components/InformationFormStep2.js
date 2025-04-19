@@ -25,16 +25,36 @@ const InformationFormStep2 = ({ onNext, onBack, formData }) => {
   const [timeLeft, setTimeLeft] = useState(478);
   const navigate = useNavigate();
   const { station, setstation, isRound } = useStore();
+  const [stationList, setStationList] = useState([]);
   const totalAmount = (cartTickets || []).reduce(
     (total, ticket) => total + (ticket.price || 0) + 1000,
     0
   );
-
+  const isValidDate = (date) => {
+    return !isNaN(Date.parse(date));
+  };
   const seatTypeDisplayName = {
     soft: "Ngồi mềm",
     hard_sleeper_4: "Nằm khoang 4",
     hard_sleeper_6: "Nằm khoang 6",
   };
+  console.log("1", formData);
+  console.log(formData.passengerInfo.passengerType - 0);
+  console.log("hahaha", cartTickets);
+
+  useEffect(() => {
+    const fetchStations = async () => {
+      try {
+        const response = await fetch("/api/station");
+        const data = await response.json();
+        setStationList(data);
+      } catch (error) {
+        console.error("Lỗi khi tải danh sách ga:", error);
+      }
+    };
+
+    fetchStations();
+  }, []);
 
   useEffect(() => {
     if (timeLeft === 0) {
@@ -64,6 +84,13 @@ const InformationFormStep2 = ({ onNext, onBack, formData }) => {
   };
 
   const handleNextLocal = async () => {
+    // Thêm vào đầu handleNextLocal trong InformationFormStep2.js
+    console.group("Debug passengerInfo");
+    console.log("Full passengerInfo object:", passengerInfo);
+    console.log("All keys:", Object.keys(passengerInfo));
+    console.log("passengerType-0 value:", passengerInfo["passengerType-0"]);
+    console.groupEnd();
+
     console.log(
       "Selected paymentMethod in Step2:",
       passengerInfo.paymentMethod
@@ -77,49 +104,92 @@ const InformationFormStep2 = ({ onNext, onBack, formData }) => {
     setIsLoading(true);
 
     try {
-      // 1. Chuẩn bị dữ liệu
       const customerData = {
         passport: passengerInfo.idNumber,
         fullName: passengerInfo.fullName,
         email: passengerInfo.email,
         phoneNumber: passengerInfo.phone,
+        passenger_type: passengerInfo[`passengerType-0`] || "Người lớn",
       };
 
-      // Tạo ngày đi (ngày mai)
-      const travelDate = new Date();
-      travelDate.setDate(travelDate.getDate() + 1);
+      const normalize = (str) =>
+        str
+          .normalize("NFD")
+          .replace(/[\u0300-\u036f]/g, "")
+          .toLowerCase()
+          .trim();
 
-      // Tạo thời gian khởi hành và đến (dùng ngày hôm nay làm base, chỉ quan tâm giờ phút)
-      const departTime = new Date();
-      departTime.setHours(6, 0, 0); // 06:00:00
+      const ticketDataList = cartTickets.map((ticket, index) => {
+        const fromStation = stationList.find(
+          (s) =>
+            normalize(s.station_name) === normalize(ticket.departureStation)
+        );
+        const toStation = stationList.find(
+          (s) => normalize(s.station_name) === normalize(ticket.arrivalStation)
+        );
 
-      const arrivalTime = new Date();
-      arrivalTime.setHours(13, 39, 0); // 13:39:00
+        if (!fromStation || !toStation) {
+          throw new Error(
+            ` Không tìm thấy ga khớp: ${ticket.departureStation} hoặc ${ticket.arrivalStation}`
+          );
+        }
 
-      const ticketData = {
-        fullName: passengerInfo.fullName,
-        passport: passengerInfo.idNumber,
-        phoneNumber: passengerInfo.phone,
-        email: passengerInfo.email,
-        q_code: "QR_" + Math.random().toString(36).substr(2, 9),
-        seatID: 1, // Nên thay bằng giá trị thực tế
-        coach_seat: "1B", // Nên thay bằng giá trị thực tế
-        trainID: 1, // Nên thay bằng giá trị thực tế
-        travel_date: travelDate.toISOString().split("T")[0], // Format YYYY-MM-DD
-        from_station_id: 8,
-        to_station_id: 34,
-        departTime: departTime.toISOString().split("T")[1].split(".")[0], // Format HH:MM:SS
-        arrivalTime: arrivalTime.toISOString().split("T")[1].split(".")[0], // Format HH:MM:SS
-        price: totalAmount,
-        payment_status: "Pending",
-        refund_status: "None",
-        passenger_type: "Adult",
-        journey_segments: JSON.stringify([{ segment: "HN-SG", duration: 450 }]),
-      };
+        return {
+          fullName: passengerInfo.fullName,
+          passport: passengerInfo.idNumber,
+          phoneNumber: passengerInfo.phone,
+          email: passengerInfo.email,
+          q_code: "QR_" + Math.random().toString(36).substr(2, 9),
+          seatID: null,
+          coach_seat: `${ticket.car}-${ticket.seat}`,
+          trainID: ticket.trainid,
+          seatType: ticket.seatType,
+          travel_date: ticket.departureDate,
+          from_station_id: fromStation.station_id,
+          to_station_id: toStation.station_id,
+          departTime: isValidDate(ticket.departTime)
+            ? new Date(ticket.departTime)
+                .getUTCHours()
+                .toString()
+                .padStart(2, "0") +
+              ":" +
+              new Date(ticket.departTime)
+                .getUTCMinutes()
+                .toString()
+                .padStart(2, "0")
+            : null,
+          arrivalTime: isValidDate(ticket.arrivalTime)
+            ? new Date(ticket.arrivalTime)
+                .getUTCHours()
+                .toString()
+                .padStart(2, "0") +
+              ":" +
+              new Date(ticket.arrivalTime)
+                .getUTCMinutes()
+                .toString()
+                .padStart(2, "0")
+            : null,
+          price: ticket.price + 1000,
+          payment_status: "Pending",
+          refund_status: "None",
+          passenger_type: passengerInfo[`passengerType-${index}`] || "0", // dạng chuỗi số
+          journey_segments: `${ticket.departureStation} - ${ticket.arrivalStation}`,
+        };
+      });
+
+      console.log("All passenger info keys:", Object.keys(passengerInfo));
+      console.log(
+        "Passenger types:",
+        cartTickets.map((_, i) => passengerInfo[`passengerType-${i}`])
+      );
 
       const paymentData = {
         payment_method:
-          passengerInfo.paymentMethod === "zalo" ? "Zalopay" : "Momo",
+          passengerInfo.paymentMethod === "zalo"
+            ? "Zalopay"
+            : passengerInfo.paymentMethod === "momo"
+            ? "Momo"
+            : "Khác",
         payment_amount: totalAmount,
         payment_status: "Pending",
         payment_date: new Date().toISOString(),
@@ -127,15 +197,14 @@ const InformationFormStep2 = ({ onNext, onBack, formData }) => {
 
       console.log("Sending data to save-booking:", {
         customerData,
-        ticketData,
+        ticketDataList,
         paymentData,
       });
 
-      // 2. Gọi API save-booking
       const saveResponse = await fetch("/api/save-booking", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ customerData, ticketData, paymentData }),
+        body: JSON.stringify({ customerData, ticketDataList, paymentData }),
       });
 
       if (!saveResponse.ok) {
@@ -157,7 +226,6 @@ const InformationFormStep2 = ({ onNext, onBack, formData }) => {
       const saveResult = await saveResponse.json();
       console.log("Save booking success:", saveResult);
 
-      // 3. Xử lý thanh toán
       let endpoint = "";
       if (passengerInfo.paymentMethod === "momo") {
         endpoint = "/api/payment/momo";
@@ -172,7 +240,7 @@ const InformationFormStep2 = ({ onNext, onBack, formData }) => {
           amount: totalAmount,
           orderId: `ORDER_${saveResult.ticket_id}_${new Date().getTime()}`,
           orderInfo: "Thanh toán vé tàu",
-          ticketId: saveResult.ticket_id,
+          ticketIds: saveResult.ticket_ids || [],
         }),
       });
 
@@ -414,17 +482,70 @@ const InformationFormStep2 = ({ onNext, onBack, formData }) => {
                         <tr key={index}>
                           <td>{index + 1}</td>
                           <td className="text-center">
-                            <div className="d-flex flex-column justify-content-center align-items-center">
-                              <TripInfo stationtype={"Chiều Đi"}/>
-                              Tàu: {ticket.trainName}
-                              <br />
-                              Loại:
-                              {seatTypeDisplayName[ticket.seatType] ||
-                                ticket.seatType}
-                              <br />
-                              Toa: {ticket.car}
-                              <br />
-                              Ghế: {ticket.seat}
+                            <div className="d-flex justify-content-center">
+                              <div>
+                                <TripInfo
+                                  stationtype={
+                                    ticket.tripType === "return"
+                                      ? "Chiều Về"
+                                      : "Chiều Đi"
+                                  }
+                                />
+                                <div className="text-start">
+                                  <p
+                                    className="m-0 text-dark fw-normal ms-2"
+                                    style={{ fontSize: "16px" }}
+                                  >
+                                    Tàu: {ticket.trainName}
+                                  </p>
+                                  <p
+                                    className="m-0 text-dark fw-normal ms-2"
+                                    style={{ fontSize: "16px" }}
+                                  >
+                                    Toa: {ticket.car}
+                                  </p>
+                                  <p
+                                    className="m-0 text-dark fw-normal ms-2"
+                                    style={{ fontSize: "16px" }}
+                                  >
+                                    Ghế: {ticket.seat}
+                                  </p>
+                                  <p
+                                    className="m-0 text-dark fw-normal ms-2"
+                                    style={{ fontSize: "16px" }}
+                                  >
+                                    Loại:{" "}
+                                    {seatTypeDisplayName[ticket.seatType] ||
+                                      ticket.seatType}
+                                    .
+                                  </p>
+                                  <p
+                                    className="m-0 text-dark fw-normal ms-2"
+                                    style={{ fontSize: "16px" }}
+                                  >
+                                    Thời gian chạy:{" "}
+                                    {isValidDate(ticket.departTime)
+                                      ? new Date(
+                                          ticket.departTime
+                                        ).toLocaleTimeString([], {
+                                          hour: "2-digit",
+                                          minute: "2-digit",
+                                          timeZone: "UTC",
+                                        })
+                                      : "Giờ xuất phát không hợp lệ"}{" "}
+                                    -{" "}
+                                    {isValidDate(ticket.arrivalTime)
+                                      ? new Date(
+                                          ticket.arrivalTime
+                                        ).toLocaleTimeString([], {
+                                          hour: "2-digit",
+                                          minute: "2-digit",
+                                          timeZone: "UTC",
+                                        })
+                                      : "Giờ đến không hợp lệ"}
+                                  </p>
+                                </div>
+                              </div>
                             </div>
                           </td>
                           <td>Còn {timeLeft} giây</td>
