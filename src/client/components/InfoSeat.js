@@ -3,29 +3,29 @@ import { Link } from "react-router-dom";
 import { FiAlignJustify } from "react-icons/fi";
 import "../../styles/InfoSeat.css";
 
-const InfoSeat = () => {
+const InfoSeat = ({ cart, onAddToCart }) => {
   const [ticketId, setTicketId] = useState("");
   const [email, setEmail] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [ticketInfo, setTicketInfo] = useState(null);
   const [error, setError] = useState("");
 
-  // useEffect(() => {
-  //   // Lấy thông tin từ localStorage khi component được tải
-  //   const savedTicketInfo = localStorage.getItem("ticketInfo");
-  //   if (savedTicketInfo) {
-  //     const parsedTicketInfo = JSON.parse(savedTicketInfo);
-  //     setTicketId(parsedTicketInfo.orderId || "");
-  //     setEmail(parsedTicketInfo.email || "");
-  //     setPhoneNumber(parsedTicketInfo.phone || "");
-  //     setTicketInfo(parsedTicketInfo);
-  //   }
-  // }, []);
+  const seatTypeDisplayName = {
+    soft: "Ngồi mềm",
+    hard_sleeper_4: "Nằm khoang 4",
+    hard_sleeper_6: "Nằm khoang 6",
+  };
+
+  const DisplayName = {
+    Adult: "Người lớn",
+    Child: "Trẻ em",
+    Senior: "Người cao tuổi",
+    Student: "Sinh viên",
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Kiểm tra nếu thiếu thông tin
     if (!ticketId && !email && !phoneNumber) {
       setError(
         "Vui lòng nhập ít nhất một thông tin (mã đặt chỗ, email hoặc số điện thoại)."
@@ -38,25 +38,31 @@ const InfoSeat = () => {
         `/api/infoSeat?ticket_id=${ticketId}&email=${email}&phoneNumber=${phoneNumber}`
       );
 
-      // Nếu phản hồi không thành công (status code không phải 2xx)
       if (!response.ok) {
-        // Đọc thông báo lỗi từ phản hồi của API
         const errorData = await response.json();
-        throw new Error(errorData.message || "Lỗi không xác định từ server");
+        throw new Error(errorData.error || "Lỗi không xác định từ server");
       }
 
-      // Nếu phản hồi thành công, đọc dữ liệu
       const data = await response.json();
+      console.log("API response:", data);
       setTicketInfo(data);
-      setError(""); // Xóa thông báo lỗi nếu có
+      setError("");
     } catch (error) {
       console.error("Lỗi khi gọi API:", error);
-      // Hiển thị thông báo lỗi từ API hoặc thông báo mặc định
       setError(
         error.message || "Lỗi kết nối đến server hoặc dữ liệu không hợp lệ."
       );
-      setTicketInfo(null); // Xóa thông tin vé nếu có lỗi
+      setTicketInfo(null);
     }
+  };
+
+  const handlePrintTicket = () => {
+    if (!ticketInfo) {
+      alert("Vui lòng tra cứu thông tin vé trước khi in!");
+      return;
+    }
+    const printUrl = `/ticket-print?ticket_id=${ticketInfo.ticket_id}&email=${email}&phoneNumber=${phoneNumber}`;
+    window.open(printUrl, "_blank");
   };
 
   return (
@@ -70,7 +76,7 @@ const InfoSeat = () => {
                 style={{ gap: "5px" }}
               >
                 <i className="bi bi-list"></i> <FiAlignJustify />
-                TRA CỨU THÔNG TIN ĐẶT CHỖ
+                TRA CỨU THÔNG TIN ĐẶT VÉ
               </h5>
             </div>
             <div className="card-body">
@@ -140,6 +146,10 @@ const InfoSeat = () => {
               {ticketInfo && (
                 <div className="mt-3">
                   <h5>Thông Tin Vé</h5>
+                  {console.log(
+                    "QR Code URL in InfoSeat:",
+                    ticketInfo.qr_code_url
+                  )}
                   <table className="table table-bordered">
                     <thead>
                       <tr>
@@ -154,28 +164,72 @@ const InfoSeat = () => {
                     </thead>
                     <tbody>
                       <tr>
-                        <td>{ticketInfo.customer?.fullName}</td>
-                        <td>{ticketInfo.customer?.passport}</td>
-                        <td>Người lớn</td>
-                        <td>Ngôi mềm điều hòa</td>
+                        <td>{ticketInfo.fullName}</td>
+                        <td>{ticketInfo.passport || "N/A"}</td>
+                        <td>{DisplayName[ticketInfo.passenger_type]}</td>
                         <td>
-                          {ticketInfo.train?.train_name} {ticketInfo.departTime}{" "}
-                          - {ticketInfo.arrivalTime}
-                          <br />
-                          Toa: {ticketInfo.seattrain?.coach} Chỗ số:{" "}
-                          {ticketInfo.seattrain?.seat_number}
+                          {seatTypeDisplayName[ticketInfo.seatType] ||
+                            ticketInfo.seatType ||
+                            "Không xác định"}
                         </td>
-                        <td>{ticketInfo.price}</td>
+                        <td>
+                          Tàu:{" "}
+                          {ticketInfo.train?.train_name || "Không xác định"}{" "}
+                          <br />
+                          Đi từ:{" "}
+                          {ticketInfo.journey_segments
+                            ? JSON.parse(ticketInfo.journey_segments)?.[0]
+                                ?.segment || "Không xác định"
+                            : ticketInfo.station_ticket_from_station_idTostation
+                                ?.station_name || "Không xác định"}{" "}
+                          {ticketInfo.departTime || "Không xác định"} đến{" "}
+                          {ticketInfo.arrivalTime || "Không xác định"}
+                          <br />
+                          Toa - Ghế: {ticketInfo.coach_seat || "Không xác định"}
+                        </td>
+                        <td>{ticketInfo.price.toLocaleString()} VNĐ</td>
                         <td>
                           {ticketInfo.payment_status === "Paid"
                             ? "Đã thanh toán"
-                            : "Chờ thanh toán"}
+                            : ticketInfo.payment_status === "Pending"
+                            ? "Chờ thanh toán"
+                            : "Không xác định"}
                         </td>
                       </tr>
                     </tbody>
                   </table>
                   <div className="text-end">
-                    <strong>Tổng tiền: {ticketInfo.price} VNĐ</strong>
+                    <strong>
+                      Tổng tiền: {ticketInfo.price.toLocaleString()} VNĐ
+                    </strong>
+                  </div>
+
+                  <div className="mt-3 text-center">
+                    <button
+                      onClick={handlePrintTicket}
+                      className="btn btn-success"
+                    >
+                      <i className="bi bi-printer"></i> In vé (PDF)
+                    </button>
+
+                    {ticketInfo.qr_code_url ? (
+                      <div className="mt-3 text-center">
+                        <img
+                          src={ticketInfo.qr_code_url}
+                          alt="QR Code"
+                          style={{ width: "150px", height: "150px" }}
+                          className="img-thumbnail"
+                          onError={(e) => {
+                            e.target.onerror = null;
+                            e.target.src =
+                              "https://via.placeholder.com/150?text=QR+Error";
+                          }}
+                        />
+                        <p className="mt-2">Quét mã QR để kiểm tra vé</p>
+                      </div>
+                    ) : (
+                      <p className="mt-3 text-danger">Mã QR không khả dụng</p>
+                    )}
                   </div>
                 </div>
               )}

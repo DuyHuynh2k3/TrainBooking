@@ -94,15 +94,15 @@ const InformationFormStep2 = ({ onNext, onBack, formData }) => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          amount: totalAmount, // Sử dụng tổng giá trị từ cartTickets
+          amount: totalAmount,
           orderId: `ORDER_${new Date().getTime()}`,
           orderInfo: "Thanh toán vé tàu",
         }),
       });
 
       if (!response.ok) {
-        const errorData = await response.json(); // Lấy thông tin lỗi từ server
-        console.error("API Error:", errorData); // Log thông tin lỗi
+        const errorData = await response.json();
+        console.error("API Error:", errorData);
         throw new Error(
           `HTTP error! status: ${response.status}, message: ${errorData.message}`
         );
@@ -123,7 +123,10 @@ const InformationFormStep2 = ({ onNext, onBack, formData }) => {
         alert("Không thể tạo đơn hàng. Vui lòng thử lại.");
       }
 
-      // Lưu thông tin vào cơ sở dữ liệu sau khi thanh toán thành công
+      // Chuẩn bị dữ liệu để lưu vào database
+      const now = new Date();
+      const travelDate = new Date(now.setDate(now.getDate() + 1)); // Ngày mai
+
       const customerData = {
         passport: passengerInfo.idNumber,
         fullName: passengerInfo.fullName,
@@ -133,55 +136,52 @@ const InformationFormStep2 = ({ onNext, onBack, formData }) => {
 
       const ticketData = {
         fullName: passengerInfo.fullName,
-        passport: passengerInfo.idNumber,
         phoneNumber: passengerInfo.phone,
         email: passengerInfo.email,
-        qr_code: "QR11111",
+        q_code: "QR_" + Math.random().toString(36).substr(2, 9),
         seatID: 1,
         coach_seat: "1B",
         trainID: 1,
-        travel_date: new Date("2023-10-01").toISOString(), // Chuyển đổi sang định dạng ISO (UTC)
-        startStation: "Hà Nội",
-        endStation: "Sài Gòn",
-        departTime: new Date("1970-01-01T06:00:00Z").toISOString(), // Chuyển đổi sang định dạng ISO (UTC)
-        arrivalTime: new Date("1970-01-01T13:39:00Z").toISOString(), // Chuyển đổi sang định dạng ISO (UTC)
+        travel_date: travelDate.toISOString().split("T")[0], // Chỉ lấy phần YYYY-MM-DD
+        from_station_id: 8,
+        to_station_id: 34,
+        departTime: "06:00:00", // Định dạng HH:mm:ss
+        arrivalTime: "13:39:00", // Định dạng HH:mm:ss
         price: totalAmount,
-        payment_status: "Paid",
+        payment_status: "Pending",
         refund_status: "None",
-      };  
+        passenger_type: "Adult",
+        journey_segments: JSON.stringify([{ segment: "HN-SG", duration: 450 }]),
+      };
 
       const paymentData = {
         payment_method:
           passengerInfo.paymentMethod === "zalo" ? "Zalopay" : "Momo",
         payment_amount: totalAmount,
         payment_status: "Success",
-        payment_date: new Date().toISOString(), // Chuyển đổi thời gian sang định dạng ISO (UTC)
+        payment_date: new Date().toISOString(),
       };
 
-      // Gọi API để lưu thông tin vào cơ sở dữ liệu
-      await fetch("/api/save-booking", {
+      // Gọi API để lưu thông tin đặt vé
+      const saveResponse = await fetch("/api/save-booking", {
         method: "POST",
-        headers: {  
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ customerData, ticketData, paymentData }),
       });
+
+      if (!saveResponse.ok) {
+        const errorData = await saveResponse.json();
+        throw new Error(errorData.message || "Lỗi khi lưu thông tin đặt vé");
+      }
+
+      const saveData = await saveResponse.json();
+      console.log("Booking saved:", saveData);
     } catch (error) {
       console.error("Error creating order:", error);
       alert(`Đã xảy ra lỗi: ${error.message}`);
     } finally {
       setIsLoading(false);
     }
-
-    let newSkipped = skipped;
-    if (isStepSkipped(activeStep)) {
-      newSkipped = new Set(newSkipped.values());
-      newSkipped.delete(activeStep);
-    }
-
-    setActiveStep((prevActiveStep) => prevActiveStep + 1);
-    setSkipped(newSkipped);
-    onNext();
   };
 
   const handleBackLocal = () => {
