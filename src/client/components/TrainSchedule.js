@@ -29,8 +29,11 @@ const TrainSchedule = ({
   const [selectedSeatsReturn, setSelectedSeatsReturn] = useState({});
   const [selectedSeatPrices, setSelectedSeatPrices] = useState({}); // Lưu giá ghế đã chọn
   const [selectedSeatPricesReturn, setSelectedSeatPricesReturn] = useState({});
-  const [selectedCar, setSelectedCar] = useState(null); // Lưu toa tàu được chọn
-  const [selectedSeatType, setSelectedSeatType] = useState(null); // Lưu loại ghế được chọn
+  const [selectedCarDeparture, setSelectedCarDeparture] = useState(null);
+  const [selectedCarReturn, setSelectedCarReturn] = useState(null);
+  const [selectedSeatTypeDeparture, setSelectedSeatTypeDeparture] = useState(null);
+  const [selectedSeatTypeReturn, setSelectedSeatTypeReturn] = useState(null);
+
   const [enrichedTrains, setEnrichedTrains] = useState([]);
   const [enrichedTrainsReturn, setEnrichedTrainsReturn] = useState([]);
 
@@ -40,9 +43,9 @@ const TrainSchedule = ({
     hard_sleeper_6: "Nằm khoang 6",
   };
 
-  console.log("aa",trains);
-console.log("bb",trainsReturn);
-
+  console.log("aa", trains);
+  console.log("bb", trainsReturn);
+  console.log(enrichedTrains);
 
   function isValidDate(date) {
     return date && !isNaN(new Date(date).getTime()); // Kiểm tra ngày hợp lệ
@@ -69,7 +72,20 @@ console.log("bb",trainsReturn);
       }
 
       const data = await res.json();
-      return data;
+      console.log(data);
+
+      return data.map((seatType) => ({
+        ...seatType,
+        coaches: seatType.coaches.map((coach) => ({
+          ...coach,
+          seat_numbers: coach.seat_numbers.map((seat) => ({
+            ...seat,
+            is_available:
+              typeof seat.is_available === "boolean" ? seat.is_available : true,
+            // Mặc định là 1 nếu không có giá trị
+          })),
+        })),
+      }));
     } catch (error) {
       console.error("Lỗi khi fetch seat availability:", error.message);
       return [];
@@ -153,7 +169,7 @@ console.log("bb",trainsReturn);
 
           if (!departureStationID || !arrivalStationID) {
             console.warn(
-              `❗Không tìm thấy station ID chiều về cho tàu ${train.train_name}`
+              `Không tìm thấy station ID chiều về cho tàu ${train.train_name}`
             );
             results[train.trainID] = [];
             return;
@@ -194,43 +210,47 @@ console.log("bb",trainsReturn);
   console.log(departureDate, departureStation, arrivalStation);
   console.log("hii", trains);
 
-  const handleSeatClick = (trainId, seatType, seatPrice, e, tripType) => {
-    e.preventDefault();
-  
-    console.log("✅ CLICKED", { trainId, seatType, seatPrice, tripType });
-  
-    // Xử lý cho chiều đi hoặc chiều về
-    if (tripType === "return") {
-      // Cập nhật ghế cho chiều về
-      setSelectedSeatsReturn((prevState) => ({
-        ...prevState,
-        [trainId]: prevState[trainId] === seatType ? null : seatType,
-      }));
-  
-      setSelectedSeatPricesReturn((prevState) => ({
-        ...prevState,
-        [trainId]: prevState[trainId] === seatType ? null : seatPrice,
-      }));
-    } else {
-      // Cập nhật ghế cho chiều đi
-      setSelectedSeats((prevState) => ({
-        ...prevState,
-        [trainId]: prevState[trainId] === seatType ? null : seatType,
-      }));
-  
-      setSelectedSeatPrices((prevState) => ({
-        ...prevState,
-        [trainId]: prevState[trainId] === seatType ? null : seatPrice,
-      }));
-    }
-  
-    // Cập nhật kiểu ghế đã chọn (cho chiều đi hoặc chiều về)
-    setSelectedSeatType(seatType);
-  };
-  
-  console.log("Dữ liệu cho chiều đi:", enrichedTrains); 
-console.log("Dữ liệu cho chiều về:", enrichedTrainsReturn); // Kiểm tra dữ liệu chiều về
+ // Thay thế hàm handleSeatClick trong TrainSchedule.js với hàm này:
 
+const handleSeatClick = (trainId, seatType, seatPrice, e, tripType) => {
+  e.preventDefault();
+  
+  // Chuẩn hóa tripType để đảm bảo các giá trị nhất quán
+  const normalizedTripType = tripType === "return" ? "return" : "oneway";
+
+  if (normalizedTripType === "return") {
+    setSelectedSeatsReturn(prev => ({
+      ...prev,
+      [trainId]: prev[trainId] === seatType ? null : seatType,
+    }));
+    setSelectedSeatPricesReturn(prev => ({
+      ...prev,
+      [trainId]: seatPrice,
+    }));
+    setSelectedSeatTypeReturn(seatType);
+  } else {
+    setSelectedSeats(prev => ({
+      ...prev,
+      [trainId]: prev[trainId] === seatType ? null : seatType,
+    }));
+    setSelectedSeatPrices(prev => ({
+      ...prev,
+      [trainId]: seatPrice,
+    }));
+    setSelectedSeatTypeDeparture(seatType);
+  }
+  
+  console.log(`Đã chọn ghế loại ${seatType} cho ${normalizedTripType === "return" ? "chiều về" : "chiều đi"}`);
+};
+
+// Cập nhật những nơi gọi handleSeatClick cho chiều đi
+// Thay đổi từ "departure" thành "oneway"
+// Ví dụ:
+// onClick={(e) => handleSeatClick(train.trainID, seat.seat_type, seat.price, e, "oneway")}
+  
+
+  console.log("Dữ liệu cho chiều đi:", enrichedTrains);
+  console.log("Dữ liệu cho chiều về:", enrichedTrainsReturn); // Kiểm tra dữ liệu chiều về
 
   const renderSeatComponent = (train, stationtype = "Chiều Đi") => {
     const dynamicCars = [];
@@ -252,20 +272,18 @@ console.log("Dữ liệu cho chiều về:", enrichedTrainsReturn); // Kiểm tr
   
     dynamicCars.sort((a, b) => b.id.localeCompare(a.id));
   
-
     const schedule = train.schedule?.[0];
     const departTime = schedule?.departTime;
     const arrivalTime = schedule?.arrivalTime;
-
-    // Kiểm tra là chiều đi hay chiều về
-    const isReturn = stationtype === "Chiều Về"; // Nếu là "Chiều Về" thì chọn chiều về
   
-    // Chọn state phù hợp với chiều đi hoặc chiều về
+    const isReturn = stationtype === "Chiều Về";
+    const tripType = isReturn ? "return" : "oneway";
+  
+    // State tương ứng
     const selectedSeat = isReturn
-      ? selectedSeatsReturn[train.trainID] // Sử dụng state chiều về
-      : selectedSeats[train.trainID]; // Sử dụng state chiều đi
+      ? selectedSeatsReturn[train.trainID]
+      : selectedSeats[train.trainID];
   
-    // Hàm setSelectedSeat cho cả 2 chiều đi và chiều về
     const setSelectedSeat = (seat) => {
       if (isReturn) {
         setSelectedSeatsReturn((prev) => ({
@@ -279,68 +297,61 @@ console.log("Dữ liệu cho chiều về:", enrichedTrainsReturn); // Kiểm tr
         }));
       }
     };
-    const trainid = train.trainID
+    console.log("Selected Seats (Departure): ", selectedSeats);
+    console.log("Selected Seats (Return): ", selectedSeatsReturn);
+    const trainid = train.trainID;
     const seatPrice = isReturn
-      ? selectedSeatPricesReturn[train.trainID] // Giá vé chiều về
-      : selectedSeatPrices[train.trainID]; // Giá vé chiều đi
+      ? selectedSeatPricesReturn[train.trainID]
+      : selectedSeatPrices[train.trainID];
   
-    // Dữ liệu props cho tất cả các component seat
+      const seatTypeToRender =
+      stationtype === "Chiều Về"
+        ? selectedSeatTypeReturn
+        : selectedSeatTypeDeparture;
+    
+      const selectedCar = isReturn ? selectedCarReturn : selectedCarDeparture;
+      const setSelectedCar = isReturn ? setSelectedCarReturn : setSelectedCarDeparture;
     const componentProps = {
       trainid,
-      stationtype, // "Chiều Đi" hoặc "Chiều Về"
+      stationtype,
       selectedSeat,
       setSelectedSeat,
       seatPrice,
       selectedCar,
       setSelectedCar,
-      selectedSeatType: selectedSeatType, // Kiểu ghế
+      selectedSeatType: seatTypeToRender, // ✅ sửa ở đây
       cars: dynamicCars,
       trainName: train.train_name,
-      departTime, // Thêm giờ đi
-      arrivalTime, // Thêm giờ đến
+      departTime,
+      arrivalTime,
+      tripType,
       onAddToCart: (ticketData) => {
-        // Thêm tripType vào vé trước khi thêm vào giỏ
         const ticketWithTripType = {
           ...ticketData,
-          tripType: isReturn ? "return" : "depart",
-          price: isReturn ? selectedSeatPricesReturn[train.trainID] : selectedSeatPrices[train.trainID],
-          departureDate: station.departureDate,
-          returnDate: station.returnDate,
-          departureStation: station.departureStation,
-          arrivalStation: station.arrivalStation,
-          selectedSeatType
+          tripType,
+          price: seatPrice,
+          departureDate: tripType === "return" ? station.returnDate : station.departureDate,
+          departureStation: tripType === "return" ? station.arrivalStation : station.departureStation,
+          arrivalStation: tripType === "return" ? station.departureStation : station.arrivalStation,
+          selectedSeatType: seatTypeToRender, // ✅ sửa ở đây
+          departTime,
+          arrivalTime,
         };
+        console.log("Ticket to Add: ", ticketWithTripType);
         onAddToCart(ticketWithTripType);
       },
       allSeats: train.seats,
     };
   
-    // Chuyển component tương ứng với kiểu ghế
-    switch (selectedSeatType) {
+    switch (seatTypeToRender) {
       case "hard_sleeper_6":
-        return (
-          <SeatSelectHardSleeper6
-            {...componentProps}
-          />
-        );
+        return <SeatSelectHardSleeper6 {...componentProps} />;
       case "hard_sleeper_4":
-        return (
-          <SeatSelectHardSleeper4
-            {...componentProps}
-          />
-        );
+        return <SeatSelectHardSleeper4 {...componentProps} />;
       case "soft":
-        return (
-          <SeatSelectSoftSeat
-            {...componentProps}
-          />
-        );
+        return <SeatSelectSoftSeat {...componentProps} />;
       default:
-        return (
-          <SeatSelect
-            {...componentProps}
-          />
-        );
+        return <SeatSelect {...componentProps} />;
     }
   };
   
@@ -536,7 +547,7 @@ console.log("Dữ liệu cho chiều về:", enrichedTrainsReturn); // Kiểm tr
                                             seat.seat_type,
                                             seat.price,
                                             e,
-                                            "departure"
+                                            "oneway"
                                           )
                                         }
                                       >
@@ -550,7 +561,8 @@ console.log("Dữ liệu cho chiều về:", enrichedTrainsReturn); // Kiểm tr
                                             train.trainID,
                                             seat.seat_type,
                                             seat.price,
-                                            e,"departure"
+                                            e,
+                                            "oneway"
                                           )
                                         }
                                       >
@@ -563,7 +575,8 @@ console.log("Dữ liệu cho chiều về:", enrichedTrainsReturn); // Kiểm tr
                                             train.trainID,
                                             seat.seat_type,
                                             seat.price,
-                                            e,"departure"
+                                            e,
+                                            "oneway"
                                           )
                                         }
                                         style={{

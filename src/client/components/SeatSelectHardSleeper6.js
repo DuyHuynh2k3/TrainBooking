@@ -1,10 +1,10 @@
 // components/SeatSelectHardSleeper6.jsx
 import React, { useEffect, useState } from "react";
-import { Button } from "react-bootstrap";
 import Tooltip from "@mui/material/Tooltip";
 import "../../styles/SeatSelect.css";
 import headtrain from "../../assets/img/train1.png";
 import train from "../../assets/img/train2.png";
+import useStore from "../../store/trains";
 
 const SeatSelectHardSleeper6 = ({
   selectedSeat,
@@ -20,10 +20,12 @@ const SeatSelectHardSleeper6 = ({
   departureDate,
   departTime,
   arrivalTime,
-  trainid
+  trainid,
+  stationtype,
+  tripType,
 }) => {
   const [seatsData, setSeatsData] = useState([]);
-
+  const { station } = useStore();
   const seatTypeLabels = {
     hard_sleeper_6: "Nằm khoang 6",
   };
@@ -42,34 +44,49 @@ const SeatSelectHardSleeper6 = ({
   }, [selectedSeatType]);
 
   useEffect(() => {
-    if (selectedCar && allSeats) {
-      const seatTypeData = allSeats.find(
-        (st) => st.seat_type === selectedSeatType
-      );
-      const coachData = seatTypeData?.coaches.find(
-        (c) => c.coach === selectedCar
-      );
-
-      const seats = Array(48)
-        .fill(null)
-        .map((_, index) => {
-          const seatNumber = (index + 1).toString().padStart(2, "0");
-          const realSeat = coachData?.seat_numbers?.find(
-            (s) => s.seat_number === seatNumber
-          );
-          return realSeat || null;
-        });
-
-      setSeatsData(seats);
-    }
-  }, [selectedCar, allSeats, selectedSeatType]);
+     if (filteredCars.length > 0) {
+       setSelectedCar(filteredCars[0].id);
+     }
+   }, [selectedSeatType, filteredCars, setSelectedCar]);
+ 
+   useEffect(() => {
+     if (selectedCar && allSeats) {
+       const seatTypeData = allSeats.find(
+         (st) => st.seat_type === selectedSeatType
+       );
+       const coachData = seatTypeData?.coaches.find(
+         (c) => c.coach === selectedCar
+       );
+   
+       const seats = Array(48)
+         .fill(null)
+         .map((_, index) => {
+           const seatNumber = (index + 1).toString().padStart(2, "0");
+           const realSeat = coachData?.seat_numbers?.find(
+             (s) => s.seat_number === seatNumber
+           );
+           return realSeat || null;
+         });
+   
+       setSeatsData(seats);
+       console.log("Updated seatsData:", seats);
+     }
+   }, [selectedCar, allSeats, selectedSeatType]);
+   
 
   const handleSeatSelect = (seatNumber) => {
+    console.log("Seat Selected: ", seatNumber);
+    console.log("Current selectedSeat: ", selectedSeat);
+    
     if (selectedSeat === seatNumber) {
       setSelectedSeat(null);
+      // Gửi null để xóa vé khỏi giỏ hàng
       onAddToCart(null);
     } else {
       setSelectedSeat(seatNumber);
+      const isReturn = tripType === "return";
+      console.log("Is Return Journey:", isReturn);
+      
       const ticket = {
         trainid,
         trainName,
@@ -77,10 +94,15 @@ const SeatSelectHardSleeper6 = ({
         price: seatPrice,
         car: selectedCar,
         seatType: selectedSeatType,
-        departureDate,
+        departureDate: isReturn ? station.returnDate : station.departureDate,
+        departureStation: isReturn ? station.arrivalStation : station.departureStation,
+        arrivalStation: isReturn ? station.departureStation : station.arrivalStation,
+        tripType: isReturn ? "return" : "oneway",
         departTime,
         arrivalTime,
       };
+      
+      console.log("Ticket Info to add to cart:", ticket);
       onAddToCart(ticket);
     }
   };
@@ -176,24 +198,52 @@ const SeatSelectHardSleeper6 = ({
                       <div className="et-bed-router">
                         <div className="et-bed-illu">
                           {seat ? (
-                            <Button
-                              className={`seat ${
-                                selectedSeat === seat.seat_number
-                                  ? "selected"
-                                  : ""
-                              }`}
-                              onClick={() => handleSeatSelect(seat.seat_number)}
-                              style={{
-                                backgroundColor:
+                            seat.is_available ? (
+                              <div
+                                className={`seat ${
                                   selectedSeat === seat.seat_number
-                                    ? "orange"
-                                    : "#fff",
-                                color: "black",
-                                border: "1px solid black",
-                              }}
-                            >
-                              {seat.seat_number}
-                            </Button>
+                                    ? "selected"
+                                    : ""
+                                }`}
+                                onClick={() =>
+                                  handleSeatSelect(seat.seat_number)
+                                }
+                                style={{
+                                  backgroundColor:
+                                    selectedSeat === seat.seat_number
+                                      ? "orange"
+                                      : "#fff",
+                                  color: "black",
+                                  border: "1px solid black",
+                                  cursor: "pointer",
+                                  opacity: 1,
+                                  fontWeight: "normal",
+                                  borderRadius: "5px"
+                                }}
+                              >
+                                {seat.seat_number}
+                              </div>
+                            ) : (
+                              <Tooltip title="Ghế đã được đặt" placement="top">
+                              
+                                  <div
+                                    className="seat"
+                                    disabled
+                                    style={{
+                                      backgroundColor: "#ffcdd2",
+                                      color: "black",
+                                      border: "1px solid black",
+                                      cursor: "not-allowed",
+                                      opacity: 1,
+                                      fontWeight: "normal",
+                                      borderRadius: "5px"
+                                    }}
+                                  >
+                                    {seat.seat_number}
+                                  </div>
+                      
+                              </Tooltip>
+                            )
                           ) : (
                             <div className="seat-empty"></div>
                           )}

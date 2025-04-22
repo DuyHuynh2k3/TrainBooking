@@ -18,18 +18,17 @@ const ReturnTicket = () => {
   const [ticketInfo, setTicketInfo] = useState(null);
   const [loading, setLoading] = useState(false);
 
+  const seatTypeDisplayName = {
+    soft: "Ngồi mềm",
+    hard_sleeper_4: "Nằm khoang 4",
+    hard_sleeper_6: "Nằm khoang 6",
+  };
+
   const DisplayName = {
     Adult: "Người lớn",
     Child: "Trẻ em",
     Senior: "Người cao tuổi",
     Student: "Sinh viên",
-  };
-
-  
-  const seatTypeDisplayName = {
-    soft: "Ngồi mềm",
-    hard_sleeper_4: "Nằm khoang 4",
-    hard_sleeper_6: "Nằm khoang 6",
   };
 
   const validateInput = () => {
@@ -58,10 +57,12 @@ const ReturnTicket = () => {
     setLoading(true);
 
     try {
-      const response = await fetch(
-        `/api/infoSeat?ticket_id=${bookingCode}&email=${email}&phoneNumber=${phone}`
-      );
+      // Nếu có bookingCode (ticket_id), ưu tiên tìm kiếm bằng ticket_id
+      let query = bookingCode
+        ? `/api/infoSeat?ticket_id=${bookingCode}`
+        : `/api/infoSeat?email=${email}&phoneNumber=${phone}`;
 
+      const response = await fetch(query);
       const data = await response.json();
 
       if (response.ok) {
@@ -69,7 +70,7 @@ const ReturnTicket = () => {
         message.success("Tra cứu thông tin vé thành công");
         setCurrentStep(currentStep + 1);
       } else {
-        message.error(data.message || "Có lỗi xảy ra");
+        message.error(data.error || "Có lỗi xảy ra");
       }
     } catch (error) {
       message.error("Lỗi khi tra cứu thông tin vé: " + error.message);
@@ -119,13 +120,13 @@ const ReturnTicket = () => {
           <form onSubmit={handleSubmit}>
             <div className="mb-2">
               <label htmlFor="bookingCode" className="form-label">
-                Mã đặt vé
+                Mã đặt chỗ
               </label>
               <input
                 type="text"
                 className="form-control"
                 id="bookingCode"
-                placeholder="Nhập mã đặt vé"
+                placeholder="Nhập mã đặt chỗ"
                 value={bookingCode}
                 onChange={(e) => setBookingCode(e.target.value)}
               />
@@ -166,7 +167,7 @@ const ReturnTicket = () => {
                 {loading ? "Đang xử lý..." : "Tra cứu"}
               </button>
               <a href="/" className="text-primary text-decoration-none">
-                Quên mã đặt vé?
+                Quên mã đặt chỗ?
               </a>
             </div>
           </form>
@@ -230,36 +231,43 @@ const ReturnTicket = () => {
                 </thead>
                 <tbody>
                   <tr>
-                    <td>{ticketInfo.customer?.fullName}</td>
-                    <td>{ticketInfo.customer?.passport}</td>
-                    <td>{DisplayName[ticketInfo.passenger_type]} </td>
+                    <td>{ticketInfo.fullName || "Không xác định"}</td>
+                    <td>{ticketInfo.passport || "N/A"}</td>
                     <td>
-                          {seatTypeDisplayName[ticketInfo.seatType] ||
-                            ticketInfo.seatType}
-                        </td>
-                        <td className="">
-                         Tàu: {ticketInfo.train?.train_name}{" "} <br></br>
-                         Đi từ: {ticketInfo.journey_segments
-                            ? JSON.parse(ticketInfo.journey_segments)[0]
-                                ?.segment
-                            : ""}{" "}
-                           {ticketInfo.departTime} đến{" "}
-                          {ticketInfo.arrivalTime}
-                          <br />
-                          Toa - Ghế: {ticketInfo.coach_seat}
-                        </td>
-                    <td>{ticketInfo.price}</td>
+                      {DisplayName[ticketInfo.passenger_type] ||
+                        "Không xác định"}
+                    </td>
                     <td>
-                      {ticketInfo.payment_status === "Pending"
+                      {seatTypeDisplayName[ticketInfo.seatType] ||
+                        ticketInfo.seatType ||
+                        "Không xác định"}
+                    </td>
+                    <td>
+                      Tàu: {ticketInfo.trainName || "Không xác định"} <br />
+                      Đi từ: {ticketInfo.fromStationName ||
+                        "Không xác định"}{" "}
+                      {ticketInfo.departTime || "Không xác định"} đến{" "}
+                      {ticketInfo.toStationName || "Không xác định"}{" "}
+                      {ticketInfo.arrivalTime || "Không xác định"}
+                      <br />
+                      Toa - Ghế: {ticketInfo.coach_seat || "Không xác định"}
+                    </td>
+                    <td>{ticketInfo.price.toLocaleString()} VNĐ</td>
+                    <td>
+                      {ticketInfo.payment_status === "Paid"
                         ? "Đã thanh toán"
-                        : "Chờ thanh toán"}
+                        : ticketInfo.payment_status === "Pending"
+                        ? "Chờ thanh toán"
+                        : "Không xác định"}
                     </td>
                   </tr>
                 </tbody>
               </table>
             )}
             <div className="text-end">
-              <strong>Tổng tiền: {ticketInfo?.price} VNĐ</strong>
+              <strong>
+                Tổng tiền: {ticketInfo?.price.toLocaleString()} VNĐ
+              </strong>
             </div>
             <div className="mt-3">
               <button

@@ -5,6 +5,7 @@ import Tooltip from "@mui/material/Tooltip";
 import "../../styles/SeatSelect.css";
 import headtrain from "../../assets/img/train1.png";
 import train from "../../assets/img/train2.png";
+import useStore from "../../store/trains";
 
 const SeatSelectSoftSeat = ({
   selectedSeat,
@@ -20,10 +21,12 @@ const SeatSelectSoftSeat = ({
   departureDate,
   departTime,
   arrivalTime,
-  trainid
+  trainid,
+  stationtype,
+  tripType
 }) => {
   const [seatsData, setSeatsData] = useState([]);
-
+  const { station } = useStore();
   const seatTypeLabels = {
     soft: "Ngồi mềm",
   };
@@ -42,34 +45,49 @@ const SeatSelectSoftSeat = ({
   }, [selectedSeatType]);
 
   useEffect(() => {
-    if (selectedCar && allSeats) {
-      const seatTypeData = allSeats.find(
-        (st) => st.seat_type === selectedSeatType
-      );
-      const coachData = seatTypeData?.coaches.find(
-        (c) => c.coach === selectedCar
-      );
-
-      const seats = Array(48)
-        .fill(null)
-        .map((_, index) => {
-          const seatNumber = (index + 1).toString().padStart(2, "0");
-          const realSeat = coachData?.seat_numbers?.find(
-            (s) => s.seat_number === seatNumber
-          );
-          return realSeat || null;
-        });
-
-      setSeatsData(seats);
+    if (!selectedCar && filteredCars.length > 0) {
+      setSelectedCar(filteredCars[0].id);
     }
-  }, [selectedCar, allSeats, selectedSeatType]);
+  }, [selectedCar, selectedSeatType, filteredCars, setSelectedCar]);
+ 
+   useEffect(() => {
+     if (selectedCar && allSeats) {
+       const seatTypeData = allSeats.find(
+         (st) => st.seat_type === selectedSeatType
+       );
+       const coachData = seatTypeData?.coaches.find(
+         (c) => c.coach === selectedCar
+       );
+   
+       const seats = Array(48)
+         .fill(null)
+         .map((_, index) => {
+           const seatNumber = (index + 1).toString().padStart(2, "0");
+           const realSeat = coachData?.seat_numbers?.find(
+             (s) => s.seat_number === seatNumber
+           );
+           return realSeat || null;
+         });
+   
+       setSeatsData(seats);
+       console.log("Updated seatsData:", seats);
+     }
+   }, [selectedCar, allSeats, selectedSeatType]);
+   
 
-  const handleSeatSelect = (seatNumber) => {
+   const handleSeatSelect = (seatNumber) => {
+    console.log("Seat Selected: ", seatNumber);
+    console.log("Current selectedSeat: ", selectedSeat);
+    
     if (selectedSeat === seatNumber) {
       setSelectedSeat(null);
+      // Gửi null để xóa vé khỏi giỏ hàng
       onAddToCart(null);
     } else {
       setSelectedSeat(seatNumber);
+      const isReturn = tripType === "return";
+      console.log("Is Return Journey:", isReturn);
+      
       const ticket = {
         trainid,
         trainName,
@@ -77,15 +95,19 @@ const SeatSelectSoftSeat = ({
         price: seatPrice,
         car: selectedCar,
         seatType: selectedSeatType,
-        departureDate,
+        departureDate: isReturn ? station.returnDate : station.departureDate,
+        departureStation: isReturn ? station.arrivalStation : station.departureStation,
+        arrivalStation: isReturn ? station.departureStation : station.arrivalStation,
+        tripType: isReturn ? "return" : "oneway",
         departTime,
         arrivalTime,
       };
-      onAddToCart(ticket);
-      console.log(ticket);
       
+      console.log("Ticket Info to add to cart:", ticket);
+      onAddToCart(ticket);
     }
   };
+
 
   return (
     <div className="container mt-2">
@@ -154,22 +176,55 @@ const SeatSelectSoftSeat = ({
                         >
                           <div className="et-col-16 et-sit-side"></div>
                           <div className="et-col-84 et-sit-sur-outer">
-                            <div
-                              className={`et-sit-sur text-center ${
-                                seat ? "et-sit-empty" : "et-sit-bought"
-                              }`}
-                              onClick={() =>
-                                seat && handleSeatSelect(seat.seat_number)
-                              }
-                              style={{
-                                backgroundColor:
-                                  seat && selectedSeat === seat.seat_number
-                                    ? "orange"
-                                    : "",
-                              }}
-                            >
-                              {seat ? seat.seat_number : ""}
-                            </div>
+                            {seat ? (
+                              seat.is_available ? (
+                                <div
+                                  className={`et-sit-sur text-center ${
+                                    seat.is_available
+                                      ? "et-sit-empty"
+                                      : "et-sit-bought"
+                                  }`}
+                                  onClick={() =>
+                                    seat.is_available &&
+                                    selectedSeat !== seat.seat_number
+                                      ? handleSeatSelect(seat.seat_number)
+                                      : null
+                                  }
+                                  style={{
+                                    backgroundColor:
+                                      selectedSeat === seat.seat_number
+                                        ? "orange"
+                                        : "#fff",
+                                    color: "black",
+                                    cursor: "pointer",
+                                    opacity: 1,
+                                    fontWeight: "normal",
+                                  }}
+                                >
+                                  {seat.seat_number}
+                                </div>
+                              ) : (
+                                <Tooltip
+                                  title="Ghế đã được đặt"
+                                  placement="top"
+                                >
+                                  <div
+                                    className="et-sit-sur text-center et-sit-bought"
+                                    style={{
+                                      backgroundColor: "#ffcdd2",
+                                      color: "black",
+                                      cursor: "not-allowed",
+                                      opacity: 1,
+                                      fontWeight: "normal",
+                                    }}
+                                  >
+                                    {seat.seat_number}
+                                  </div>
+                                </Tooltip>
+                              )
+                            ) : (
+                              <div className="et-sit-sur text-center et-sit-bought"></div>
+                            )}
                           </div>
                         </div>
                       ))}
@@ -203,22 +258,55 @@ const SeatSelectSoftSeat = ({
                         >
                           <div className="et-col-16 et-sit-side"></div>
                           <div className="et-col-84 et-sit-sur-outer">
-                            <div
-                              className={`et-sit-sur text-center ${
-                                seat ? "et-sit-empty" : "et-sit-bought"
-                              }`}
-                              onClick={() =>
-                                seat && handleSeatSelect(seat.seat_number)
-                              }
-                              style={{
-                                backgroundColor:
-                                  seat && selectedSeat === seat.seat_number
-                                    ? "orange"
-                                    : "",
-                              }}
-                            >
-                              {seat ? seat.seat_number : ""}
-                            </div>
+                          {seat ? (
+                              seat.is_available ? (
+                                <div
+                                  className={`et-sit-sur text-center ${
+                                    seat.is_available
+                                      ? "et-sit-empty"
+                                      : "et-sit-bought"
+                                  }`}
+                                  onClick={() =>
+                                    seat.is_available &&
+                                    selectedSeat !== seat.seat_number
+                                      ? handleSeatSelect(seat.seat_number)
+                                      : null
+                                  }
+                                  style={{
+                                    backgroundColor:
+                                      selectedSeat === seat.seat_number
+                                        ? "orange"
+                                        : "#fff",
+                                    color: "black",
+                                    cursor: "pointer",
+                                    opacity: 1,
+                                    fontWeight: "normal",
+                                  }}
+                                >
+                                  {seat.seat_number}
+                                </div>
+                              ) : (
+                                <Tooltip
+                                  title="Ghế đã được đặt"
+                                  placement="top"
+                                >
+                                  <div
+                                    className="et-sit-sur text-center et-sit-bought"
+                                    style={{
+                                      backgroundColor: "#ffcdd2",
+                                      color: "black",
+                                      cursor: "not-allowed",
+                                      opacity: 1,
+                                      fontWeight: "normal",
+                                    }}
+                                  >
+                                    {seat.seat_number}
+                                  </div>
+                                </Tooltip>
+                              )
+                            ) : (
+                              <div className="et-sit-sur text-center et-sit-bought"></div>
+                            )}
                           </div>
                         </div>
                       ))}

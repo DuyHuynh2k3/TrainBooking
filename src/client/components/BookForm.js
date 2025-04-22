@@ -46,7 +46,7 @@ const stations = [
   { title: "Sài Gòn" },
 ];
 
-const BookForm = ({ cart, onAddToCart, formatDate }) => {
+const BookForm = ({ cart, onAddToCart, formatDate,onRemoveFromCart }) => {
   const [departureStation, setDepartureStation] = useState("");
   const [arrivalStation, setArrivalStation] = useState("");
   const [departureDate, setDepartureDate] = useState("");
@@ -55,17 +55,26 @@ const BookForm = ({ cart, onAddToCart, formatDate }) => {
   const [ticketType, setTicketType] = useState(
     localStorage.getItem("ticketType") || ""
   ); // Mặc định là "Khứ hồi"
+  
   const { station, setStation } = useStore();
 
   const handleTicketTypeChange = (e) => {
     const selectedTicketType = e.target.value;
     setTicketType(selectedTicketType);
     localStorage.setItem("ticketType", selectedTicketType);
-    // Nếu chọn "Một chiều", reset ngày về
+  
     if (selectedTicketType === "oneWay") {
-      setArrivalDate(""); // Reset ngày về
+      setArrivalDate(""); 
     }
+  
+    // ✅ Đồng bộ với zustand store
+    setStation({
+      ...station,
+      ticketType: selectedTicketType,
+      returnDate: selectedTicketType === "oneWay" ? "" : station.returnDate,
+    });
   };
+  
 
   const isValidDate = (date) => {
     return !isNaN(Date.parse(date));
@@ -76,6 +85,7 @@ const BookForm = ({ cart, onAddToCart, formatDate }) => {
     hard_sleeper_4: "Nằm khoang 4",
     hard_sleeper_6: "Nằm khoang 6",
   };
+
 
   const handleSearchClick = (event) => {
     event.preventDefault();
@@ -111,7 +121,7 @@ const BookForm = ({ cart, onAddToCart, formatDate }) => {
                 Thông tin hành trình
               </h5>
             </div>
-            <div className="card-body">
+            <div className="card-body" style={{ maxHeight: "400px", overflowY: "auto" }}>
               <form>
                 <div className="row mb-3">
                   <div className="col-md-4">
@@ -227,7 +237,7 @@ const BookForm = ({ cart, onAddToCart, formatDate }) => {
           </div>
         </div>
         <div className="col-lg-3 d-flex flex-column">
-          <div className="card mb-3 shadow">
+          <div className="card mb-3 shadow" style={{ maxHeight: "350px", overflowY: "auto" }}>
             <div className="card-header text-white">
               <h5
                 className="card-title text-primary text-main m-0"
@@ -295,9 +305,8 @@ const BookForm = ({ cart, onAddToCart, formatDate }) => {
                         </div>
                         <button
                           className="btn-delete d-flex justify-content-end align-items-end"
-                          style={{ height: "96px" }}
-                          onClick={() => onAddToCart(null, index)}
-                        >
+                          style={{ height: "144px" }}
+                          onClick={() => onRemoveFromCart(index)}>
                           <RiDeleteBin5Line size={18} />
                         </button>
                       </div>

@@ -170,10 +170,12 @@ const InformationFormStep2 = ({ onNext, onBack, formData }) => {
                 .padStart(2, "0")
             : null,
           price: ticket.price + 1000,
-          payment_status: "Pending",
+          payment_status: "Paid",
           refund_status: "None",
           passenger_type: passengerInfo[`passengerType-${index}`] || "0", // dạng chuỗi số
-          journey_segments: `${ticket.departureStation} - ${ticket.arrivalStation}`,
+          journey_segments: JSON.stringify([ticket.departureStation, ticket.arrivalStation]),
+          tripType: ticket.tripType || "oneway",
+           is_return: ticket.tripType === "return"
         };
       });
 
@@ -191,7 +193,7 @@ const InformationFormStep2 = ({ onNext, onBack, formData }) => {
             ? "Momo"
             : "Khác",
         payment_amount: totalAmount,
-        payment_status: "Pending",
+        payment_status: "Success",
         payment_date: new Date().toISOString(),
       };
 

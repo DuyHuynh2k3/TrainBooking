@@ -116,7 +116,7 @@ const SeatSelect = ({
                     title={`Toa số ${car.id === 0 ? "Đầu máy" : car.id} - ${
                       seatTypeLabels[selectedSeatType]
                     } điều hòa`}
-                     placement="top"
+                    placement="top"
                   >
                     <img
                       src={car.id === 0 ? headtrain : train}
@@ -175,6 +175,7 @@ const SeatSelect = ({
                     >
                       <div className="et-bed-router">
                         <div className="et-bed-illu">
+                          
                           {seat ? (
                             <Button
                               className={`seat ${
@@ -197,6 +198,32 @@ const SeatSelect = ({
                           ) : (
                             <div className="seat-empty"></div>
                           )}
+                          {seat ? (
+                            <Button
+                              className={`seat ${
+                                !seat.is_available ? "booked" : ""
+                              }`}
+                              onClick={() =>
+                                !seat.is_available
+                                  ? null
+                                  : handleSeatSelect(seat.seat_number)
+                              }
+                              disabled={!seat.is_available}
+                              style={{
+                                backgroundColor: !seat.is_available
+                                  ? "#ffcdd2"
+                                  : "#fff",
+                                cursor: !seat.is_available
+                                  ? "not-allowed"
+                                  : "pointer",
+                              }}
+                            >
+                              {seat.seat_number}
+                              {!seat.is_available && (
+                                <span className="booked-badge">Đã đặt</span>
+                              )}
+                            </Button>
+                          ) : null}
                         </div>
                       </div>
                     </div>
