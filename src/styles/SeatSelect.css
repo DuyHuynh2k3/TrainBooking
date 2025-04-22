@@ -50,7 +50,7 @@
     font-size: 70%;
 }
 .et-full-width {
-    width: 99%;
+    width: 100%;
 }
 .et-col-8-9 {
     width: 88.88888889%;
@@ -143,3 +143,121 @@
     pointer-events: none; /* Đảm bảo không cản trở việc hover vào các phần tử khác */
   }
   
+
+  .seat-empty {
+    width: 45px;
+    height: 45px;
+    margin: 2px;
+    visibility: hidden;
+  }
+
+  .seat.selected {
+    background-color: orange;
+    color: white;
+    font-weight: bold;
+  }
+ /* Ngoi mem */
+.et-car-door {
+    width: 1%;
+    float: left;
+    border-radius: 10px;
+    height: 158px;
+}
+
+.et-car-nm-64-half-block {
+    width: 47%;
+    float: left;
+    min-height: 1px;
+}
+
+.et-full-width-seat {
+    width: 90%;  
+}
+
+/* Container cho mỗi hàng ghế */
+.et-car-nm-64-sit {
+    width: 100%;
+    display: flex;
+    min-height: 1px;
+    height: 35px;
+}
+
+.et-seat-h-35 {
+    height: 35px;
+    line-height: 30px;
+}
+
+.et-car-seat, .et-car-seat-left, .et-car-seat-right {
+    display: flex;
+    height: inherit;
+    flex: 1; /* Các ghế chia đều không gian */
+}
+
+.et-col-16 {
+    width: 16%;
+    min-height: 1px;
+}
+
+.et-sit-side {
+    height: 100%;
+    background-color: #948a54;
+    border-radius: 2px;
+}
+
+.et-col-84 {
+    width: 84%;
+    min-height: 1px;
+}
+
+.et-sit-sur-outer {
+    height: 100%;
+    padding: 2px 2px 2px 0;
+}
+
+.et-sit-bought {
+    background-color: #df5327;
+    color: #fff;
+}
+
+.et-sit-empty {
+    background-color: #fff;
+}
+
+.et-sit-sur {
+    height: 100%;
+    border-radius: 5px;
+    border-top: 1px solid #888;
+    border-right: 1px solid #888;
+    border-bottom: 1px solid #888;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1em;
+    cursor: pointer;
+    width: 35px;
+}
+
+.et-car-way {
+    height: 20px;
+    width: 100%;
+    clear: both;
+}
+
+.et-car-seperator {
+    width: 4%;
+    float: left;
+    height: 158px;
+    padding: 0 5px;
+}
+
+.et-car-seperator>div:first-child {
+    margin-bottom: 32px;
+    margin-top: -5px;
+}
+
+.et-car-seperator>div {
+    height: 69px;
+    width: 100%;
+    background-color: #888;
+    border-radius: 5px;
+}

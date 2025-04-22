@@ -101,17 +101,13 @@ const TicketPrint = () => {
                     "Không xác định"}
                 </td>
                 <td>
-                  Tàu: {ticket.train?.train_name} <br />
-                  Đi từ:{" "}
-                  {ticket.journey_segments
-                    ? JSON.parse(ticket.journey_segments)?.[0]?.segment ||
-                      "Không xác định"
-                    : ticket.station_ticket_from_station_idTostation
-                        ?.station_name || "Không xác định"}{" "}
+                  Tàu: {ticket.trainName || "Không xác định"} <br />
+                  Đi từ: {ticket.fromStationName || "Không xác định"}{" "}
                   {ticket.departTime || "Không xác định"} đến{" "}
+                  {ticket.toStationName || "Không xác định"}{" "}
                   {ticket.arrivalTime || "Không xác định"}
                   <br />
-                  Toa - Ghế: {ticket.coach_seat}
+                  Toa - Ghế: {ticket.coach_seat || "Không xác định"}
                 </td>
                 <td>{ticket.price}</td>
                 <td>

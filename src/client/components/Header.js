@@ -19,7 +19,7 @@ const Header = () => {
             TÌM VÉ
           </a>
           <a href="/infoseat" className="text-white text-decoration-none mx-3">
-            THÔNG TIN ĐẶT CHỔ
+            THÔNG TIN ĐẶT VÉ
           </a>
           <a
             href="/returnticket"
@@ -45,11 +45,6 @@ const Header = () => {
               <li>
                 <a className="dropdown-item text-white" href="/atgt-duong-sat">
                   ATGT Đường Sắt
-                </a>
-              </li>
-              <li>
-                <a className="dropdown-item text-white" href="/noi-bo">
-                  Nội Bộ
                 </a>
               </li>
               <li>
@@ -85,11 +80,6 @@ const Header = () => {
                 </a>
               </li>
               <li>
-                <a className="dropdown-item text-white" href="/timetickettrain">
-                  GIỜ TÀU - GIÁ VÉ
-                </a>
-              </li>
-              <li>
                 <a className="dropdown-item text-white" href="/">
                   HƯỚNG DẪN
                 </a>
@@ -103,9 +93,6 @@ const Header = () => {
           </div>
           <a href="/findbill" className="text-white text-decoration-none mx-3">
             TRA CỨU HÓA ĐƠN
-          </a>
-          <a href="/" className="text-white text-decoration-none mx-3">
-            ENGLISH
           </a>
         </nav>
       </div>

@@ -5,6 +5,7 @@ const ForgetInfoSeat = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState(null);
 
+  // Trong handleSubmit
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
@@ -27,7 +28,7 @@ const ForgetInfoSeat = () => {
       if (response.ok) {
         setMessage({
           type: "success",
-          text: "Danh sách mã đặt chỗ đã được gửi đến email của bạn! Vui lòng kiểm tra hộp thư đến hoặc thư rác.",
+          text: "Mã đặt chỗ đã được gửi đến email của bạn!",
         });
       } else {
         throw new Error(data.error || "Có lỗi xảy ra");
@@ -51,8 +52,8 @@ const ForgetInfoSeat = () => {
       >
         <h2 className="mb-4">LẤY LẠI MÃ ĐẶT CHỖ</h2>
         <p className="mb-4">
-          Nhập email để nhận lại danh sách mã đặt chỗ của bạn. Kiểm tra email
-          (bao gồm thư rác) để xem thông tin vé.
+          Nhận tin theo cú pháp VTBC gửi tới 8200 hoặc nhập email để lấy lại Mã
+          đặt chỗ.
         </p>
 
         <form onSubmit={handleSubmit}>

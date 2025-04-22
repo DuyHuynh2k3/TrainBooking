@@ -38,7 +38,7 @@ export default function Breadcrumb() {
             {currentCategory && (
               <Link
                 to={currentCategory.path}
-                style={{ textDecoration: "none", color: "blue", fontSize: "18px", fontWeight: "bold" }}
+                style={{ textDecoration: "none", color: "inherit", fontSize: "18px", fontWeight: "bold" }}
               >
                 {currentCategory.name}
               </Link>

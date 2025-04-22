@@ -173,19 +173,11 @@ const InfoSeat = ({ cart, onAddToCart }) => {
                             "Không xác định"}
                         </td>
                         <td>
-                          Tàu:{" "}
-                          {ticketInfo.train?.train_name || "Không xác định"}{" "}
+                          {ticketInfo.train?.train_name} {ticketInfo.departTime}{" "}
+                          - {ticketInfo.arrivalTime}
                           <br />
-                          Đi từ:{" "}
-                          {ticketInfo.journey_segments
-                            ? JSON.parse(ticketInfo.journey_segments)?.[0]
-                                ?.segment || "Không xác định"
-                            : ticketInfo.station_ticket_from_station_idTostation
-                                ?.station_name || "Không xác định"}{" "}
-                          {ticketInfo.departTime || "Không xác định"} đến{" "}
-                          {ticketInfo.arrivalTime || "Không xác định"}
-                          <br />
-                          Toa - Ghế: {ticketInfo.coach_seat || "Không xác định"}
+                          Toa: {ticketInfo.seattrain?.coach} Chỗ số:{" "}
+                          {ticketInfo.seattrain?.seat_number}
                         </td>
                         <td>{ticketInfo.price.toLocaleString()} VNĐ</td>
                         <td>

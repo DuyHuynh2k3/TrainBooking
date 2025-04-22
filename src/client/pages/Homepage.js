@@ -5,6 +5,7 @@ import Policies from "../components/Policies";
 import Footer from "../components/Footer";
 import Carousel from "../components/Carousel";
 import "bootstrap/dist/css/bootstrap.min.css";
+import ChatbaseWidget from "../components/ChatbaseWidget";
 
 const HomePage = () => {
   return (
@@ -16,6 +17,7 @@ const HomePage = () => {
         <Policies />
       </main>
       <Footer />
+      <ChatbaseWidget />
     </div>
   );
 };
