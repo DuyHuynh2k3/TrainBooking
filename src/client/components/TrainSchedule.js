@@ -31,7 +31,8 @@ const TrainSchedule = ({
   const [selectedSeatPricesReturn, setSelectedSeatPricesReturn] = useState({});
   const [selectedCarDeparture, setSelectedCarDeparture] = useState(null);
   const [selectedCarReturn, setSelectedCarReturn] = useState(null);
-  const [selectedSeatTypeDeparture, setSelectedSeatTypeDeparture] = useState(null);
+  const [selectedSeatTypeDeparture, setSelectedSeatTypeDeparture] =
+    useState(null);
   const [selectedSeatTypeReturn, setSelectedSeatTypeReturn] = useState(null);
 
   const [enrichedTrains, setEnrichedTrains] = useState([]);
@@ -72,7 +73,7 @@ const TrainSchedule = ({
       }
 
       const data = await res.json();
-      console.log(data);
+      console.log("Seat Availability Data:", data);
 
       return data.map((seatType) => ({
         ...seatType,
@@ -82,7 +83,6 @@ const TrainSchedule = ({
             ...seat,
             is_available:
               typeof seat.is_available === "boolean" ? seat.is_available : true,
-            // Mặc định là 1 nếu không có giá trị
           })),
         })),
       }));
@@ -206,53 +206,53 @@ const TrainSchedule = ({
     }
   }, [trainsReturn, station]);
 
-  // Tải dữ liệu tàu chiều đi
   console.log(departureDate, departureStation, arrivalStation);
   console.log("hii", trains);
 
- // Thay thế hàm handleSeatClick trong TrainSchedule.js với hàm này:
+  const handleSeatClick = (trainId, seatType, seatPrice, e, tripType) => {
+    e.preventDefault();
 
-const handleSeatClick = (trainId, seatType, seatPrice, e, tripType) => {
-  e.preventDefault();
-  
-  // Chuẩn hóa tripType để đảm bảo các giá trị nhất quán
-  const normalizedTripType = tripType === "return" ? "return" : "oneway";
+    const normalizedTripType = tripType === "return" ? "return" : "oneway";
 
-  if (normalizedTripType === "return") {
-    setSelectedSeatsReturn(prev => ({
-      ...prev,
-      [trainId]: prev[trainId] === seatType ? null : seatType,
-    }));
-    setSelectedSeatPricesReturn(prev => ({
-      ...prev,
-      [trainId]: seatPrice,
-    }));
-    setSelectedSeatTypeReturn(seatType);
-  } else {
-    setSelectedSeats(prev => ({
-      ...prev,
-      [trainId]: prev[trainId] === seatType ? null : seatType,
-    }));
-    setSelectedSeatPrices(prev => ({
-      ...prev,
-      [trainId]: seatPrice,
-    }));
-    setSelectedSeatTypeDeparture(seatType);
-  }
-  
-  console.log(`Đã chọn ghế loại ${seatType} cho ${normalizedTripType === "return" ? "chiều về" : "chiều đi"}`);
-};
+    if (normalizedTripType === "return") {
+      setSelectedSeatsReturn((prev) => ({
+        ...prev,
+        [trainId]: prev[trainId] === seatType ? null : seatType,
+      }));
+      setSelectedSeatPricesReturn((prev) => ({
+        ...prev,
+        [trainId]: seatPrice,
+      }));
+      setSelectedSeatTypeReturn(seatType);
+    } else {
+      setSelectedSeats((prev) => ({
+        ...prev,
+        [trainId]: prev[trainId] === seatType ? null : seatType,
+      }));
+      setSelectedSeatPrices((prev) => ({
+        ...prev,
+        [trainId]: seatPrice,
+      }));
+      setSelectedSeatTypeDeparture(seatType);
+    }
 
-// Cập nhật những nơi gọi handleSeatClick cho chiều đi
-// Thay đổi từ "departure" thành "oneway"
-// Ví dụ:
-// onClick={(e) => handleSeatClick(train.trainID, seat.seat_type, seat.price, e, "oneway")}
-  
+    console.log(
+      `Đã chọn ghế loại ${seatType} cho ${
+        normalizedTripType === "return" ? "chiều về" : "chiều đi"
+      }`
+    );
+  };
 
   console.log("Dữ liệu cho chiều đi:", enrichedTrains);
-  console.log("Dữ liệu cho chiều về:", enrichedTrainsReturn); // Kiểm tra dữ liệu chiều về
+  console.log("Dữ liệu cho chiều về:", enrichedTrainsReturn);
 
   const renderSeatComponent = (train, stationtype = "Chiều Đi") => {
+    console.log("Train Seats in renderSeatComponent:", train.seats);
+
+    if (!Array.isArray(train.seats) || train.seats.length === 0) {
+      return <p>Không có ghế khả dụng cho chuyến tàu này.</p>;
+    }
+
     const dynamicCars = [];
     if (Array.isArray(train.seats)) {
       train.seats.forEach((seatType) => {
@@ -269,21 +269,24 @@ const handleSeatClick = (trainId, seatType, seatPrice, e, tripType) => {
         }
       });
     }
-  
+
+    if (dynamicCars.length === 0) {
+      return <p>Không có toa nào khả dụng cho loại ghế này.</p>;
+    }
+
     dynamicCars.sort((a, b) => b.id.localeCompare(a.id));
-  
+
     const schedule = train.schedule?.[0];
     const departTime = schedule?.departTime;
     const arrivalTime = schedule?.arrivalTime;
-  
+
     const isReturn = stationtype === "Chiều Về";
     const tripType = isReturn ? "return" : "oneway";
-  
-    // State tương ứng
+
     const selectedSeat = isReturn
       ? selectedSeatsReturn[train.trainID]
       : selectedSeats[train.trainID];
-  
+
     const setSelectedSeat = (seat) => {
       if (isReturn) {
         setSelectedSeatsReturn((prev) => ({
@@ -303,14 +306,18 @@ const handleSeatClick = (trainId, seatType, seatPrice, e, tripType) => {
     const seatPrice = isReturn
       ? selectedSeatPricesReturn[train.trainID]
       : selectedSeatPrices[train.trainID];
-  
-      const seatTypeToRender =
+
+    const seatTypeToRender =
       stationtype === "Chiều Về"
         ? selectedSeatTypeReturn
         : selectedSeatTypeDeparture;
-    
-      const selectedCar = isReturn ? selectedCarReturn : selectedCarDeparture;
-      const setSelectedCar = isReturn ? setSelectedCarReturn : setSelectedCarDeparture;
+    console.log("Seat Type to Render:", seatTypeToRender);
+
+    const selectedCar = isReturn ? selectedCarReturn : selectedCarDeparture;
+    const setSelectedCar = isReturn
+      ? setSelectedCarReturn
+      : setSelectedCarDeparture;
+
     const componentProps = {
       trainid,
       stationtype,
@@ -319,7 +326,7 @@ const handleSeatClick = (trainId, seatType, seatPrice, e, tripType) => {
       seatPrice,
       selectedCar,
       setSelectedCar,
-      selectedSeatType: seatTypeToRender, // ✅ sửa ở đây
+      selectedSeatType: seatTypeToRender,
       cars: dynamicCars,
       trainName: train.train_name,
       departTime,
@@ -330,10 +337,17 @@ const handleSeatClick = (trainId, seatType, seatPrice, e, tripType) => {
           ...ticketData,
           tripType,
           price: seatPrice,
-          departureDate: tripType === "return" ? station.returnDate : station.departureDate,
-          departureStation: tripType === "return" ? station.arrivalStation : station.departureStation,
-          arrivalStation: tripType === "return" ? station.departureStation : station.arrivalStation,
-          selectedSeatType: seatTypeToRender, // ✅ sửa ở đây
+          departureDate:
+            tripType === "return" ? station.returnDate : station.departureDate,
+          departureStation:
+            tripType === "return"
+              ? station.arrivalStation
+              : station.departureStation,
+          arrivalStation:
+            tripType === "return"
+              ? station.departureStation
+              : station.arrivalStation,
+          selectedSeatType: seatTypeToRender,
           departTime,
           arrivalTime,
         };
@@ -342,7 +356,7 @@ const handleSeatClick = (trainId, seatType, seatPrice, e, tripType) => {
       },
       allSeats: train.seats,
     };
-  
+
     switch (seatTypeToRender) {
       case "hard_sleeper_6":
         return <SeatSelectHardSleeper6 {...componentProps} />;
@@ -354,9 +368,7 @@ const handleSeatClick = (trainId, seatType, seatPrice, e, tripType) => {
         return <SeatSelect {...componentProps} />;
     }
   };
-  
 
-  // Hiển thị spinner nếu đang tải dữ liệu
   if (loading || loadingReturn) {
     return (
       <div className="text-center mt-5">
@@ -371,11 +383,11 @@ const handleSeatClick = (trainId, seatType, seatPrice, e, tripType) => {
     return <div>{error}</div>;
   }
   console.log(trains);
-  console.log("Dữ liệu trains:", trains); // Kiểm tra cấu trúc dữ liệu
+  console.log("Dữ liệu trains:", trains);
   console.log(
     "Dữ liệu từng tàu:",
     trains.map((train) => train.schedule)
-  ); // Kiểm tra thông tin schedule của từng tàu
+  );
 
   return (
     <div className="container-fluid mt-2">
@@ -396,7 +408,6 @@ const handleSeatClick = (trainId, seatType, seatPrice, e, tripType) => {
                   enrichedTrains.map((train) => (
                     <div key={train.trainID} className="card shadow-sm mb-4">
                       <div className="card-body shadow-lg">
-                        {/* Nội dung tàu chiều đi */}
                         <div className="d-flex align-items-center border-bottom mt-1">
                           <div style={{ position: "relative" }}>
                             <img
@@ -417,7 +428,7 @@ const handleSeatClick = (trainId, seatType, seatPrice, e, tripType) => {
                                 borderRadius: "5px",
                               }}
                             >
-                              {train.train_name} {/* Tên tàu từ dữ liệu */}
+                              {train.train_name}
                             </div>
                           </div>
                           <div className="flex-grow-1">
@@ -426,11 +437,9 @@ const handleSeatClick = (trainId, seatType, seatPrice, e, tripType) => {
                                 {train.duration}
                               </p>
                               <p className="text-warning giamgia">
-                                {train.discount || "Không có giảm giá"}{" "}
-                                {/* Giảm giá (nếu có) */}
+                                {train.discount || "Không có giảm giá"}
                               </p>
                             </div>
-                            {/* Duyệt qua từng lịch trình trong mảng schedule */}
                             {train.schedule && train.schedule.length > 0 ? (
                               train.schedule.map((schedule, index) => (
                                 <div
@@ -458,7 +467,7 @@ const handleSeatClick = (trainId, seatType, seatPrice, e, tripType) => {
                                         ).toLocaleTimeString([], {
                                           hour: "2-digit",
                                           minute: "2-digit",
-                                          timeZone: "UTC", // ⭐ Quan trọng: Giữ nguyên giờ UTC
+                                          timeZone: "UTC",
                                         })
                                       : "Giờ đến không hợp lệ"}
                                   </div>
@@ -469,11 +478,9 @@ const handleSeatClick = (trainId, seatType, seatPrice, e, tripType) => {
                             )}
 
                             <div className="d-flex justify-content-between text-muted mt-1">
-                              {/* Kiểm tra sự tồn tại của schedule */}
                               <div className="gadi1">
                                 {train.schedule && train.schedule.length > 0
-                                  ? // Lấy ngày đi từ departTime của schedule
-                                    isValidDate(train.schedule[0]?.departTime)
+                                  ? isValidDate(train.schedule[0]?.departTime)
                                     ? `${new Date(
                                         train.schedule[0]?.departTime
                                       ).toLocaleDateString("en-GB", {
@@ -489,8 +496,7 @@ const handleSeatClick = (trainId, seatType, seatPrice, e, tripType) => {
                               </div>
                               <div className="gaden1">
                                 {train.schedule && train.schedule.length > 0
-                                  ? // Lấy ngày đến từ arrivalTime của schedule
-                                    isValidDate(train.schedule[0]?.arrivalTime)
+                                  ? isValidDate(train.schedule[0]?.arrivalTime)
                                     ? `${new Date(
                                         train.schedule[0]?.arrivalTime
                                       ).toLocaleDateString("en-GB", {
@@ -524,76 +530,69 @@ const handleSeatClick = (trainId, seatType, seatPrice, e, tripType) => {
                           </div>
                         </div>
                         <div className="row mt-4">
-                          {enrichedTrains.map((train) => (
-                            <div key={train.trainID}>
-                              {/* Các info về tàu */}
-                              <div className="row">
-                                {Array.isArray(train.seats) &&
-                                train.seats.length > 0 ? (
-                                  train.seats.map((seat, index) => (
-                                    <div
-                                      className="col p-0"
-                                      key={index}
-                                      style={{
-                                        border: "1px solid orange",
-                                        height: "70px",
-                                      }}
-                                    >
-                                      <button
-                                        className="btn border-0 seattype p-0"
-                                        onClick={(e) =>
-                                          handleSeatClick(
-                                            train.trainID,
-                                            seat.seat_type,
-                                            seat.price,
-                                            e,
-                                            "oneway"
-                                          )
-                                        }
-                                      >
-                                        {seatTypeDisplayName[seat.seat_type] ||
-                                          seat.seat_type}
-                                      </button>
-                                      <button
-                                        className="btn border-0 seatprice p-0"
-                                        onClick={(e) =>
-                                          handleSeatClick(
-                                            train.trainID,
-                                            seat.seat_type,
-                                            seat.price,
-                                            e,
-                                            "oneway"
-                                          )
-                                        }
-                                      >
-                                        Từ {seat.price.toLocaleString()}đ
-                                      </button>
-                                      <button
-                                        className="btn border-0 seatavailabel p-0"
-                                        onClick={(e) =>
-                                          handleSeatClick(
-                                            train.trainID,
-                                            seat.seat_type,
-                                            seat.price,
-                                            e,
-                                            "oneway"
-                                          )
-                                        }
-                                        style={{
-                                          backgroundColor: "#f5f5f5",
-                                          height: "68px",
-                                        }}
-                                      >
-                                        {seat.available} Chỗ còn
-                                      </button>
-                                    </div>
-                                  ))
-                                ) : (
-                                  <p>Không có dữ liệu ghế</p>
-                                )}
+                          {Array.isArray(train.seats) &&
+                          train.seats.length > 0 ? (
+                            train.seats.map((seat, index) => (
+                              <div
+                                className="col p-0"
+                                key={index}
+                                style={{
+                                  border: "1px solid orange",
+                                  height: "70px",
+                                }}
+                              >
+                                <button
+                                  className="btn border-0 seattype p-0"
+                                  onClick={(e) =>
+                                    handleSeatClick(
+                                      train.trainID,
+                                      seat.seat_type,
+                                      seat.price,
+                                      e,
+                                      "oneway"
+                                    )
+                                  }
+                                >
+                                  {seatTypeDisplayName[seat.seat_type] ||
+                                    seat.seat_type}
+                                </button>
+                                <button
+                                  className="btn border-0 seatprice p-0"
+                                  onClick={(e) =>
+                                    handleSeatClick(
+                                      train.trainID,
+                                      seat.seat_type,
+                                      seat.price,
+                                      e,
+                                      "oneway"
+                                    )
+                                  }
+                                >
+                                  Từ {seat.price.toLocaleString()}đ
+                                </button>
+                                <button
+                                  className="btn border-0 seatavailabel p-0"
+                                  onClick={(e) =>
+                                    handleSeatClick(
+                                      train.trainID,
+                                      seat.seat_type,
+                                      seat.price,
+                                      e,
+                                      "oneway"
+                                    )
+                                  }
+                                  style={{
+                                    backgroundColor: "#f5f5f5",
+                                    height: "68px",
+                                  }}
+                                >
+                                  {seat.available} Chỗ còn
+                                </button>
                               </div>
-                            </div>
-                          ))}
+                            ))
+                          ) : (
+                            <p>Không có dữ liệu ghế</p>
+                          )}
                         </div>
                         {selectedSeats[train.trainID] && (
                           <div className="row mt-4">
@@ -606,7 +605,7 @@ const handleSeatClick = (trainId, seatType, seatPrice, e, tripType) => {
                     </div>
                   ))
                 ) : (
-                  <p></p>
+                  <p>Không có tàu nào khả dụng cho chiều đi.</p>
                 )}
               </form>
             </div>
@@ -630,7 +629,6 @@ const handleSeatClick = (trainId, seatType, seatPrice, e, tripType) => {
                     enrichedTrainsReturn.map((train) => (
                       <div key={train.trainID} className="card shadow-sm mb-4">
                         <div className="card-body shadow-lg">
-                          {/* Thông tin tàu tương tự chiều đi */}
                           <div className="d-flex align-items-center border-bottom mt-1">
                             <div style={{ position: "relative" }}>
                               <img
@@ -753,7 +751,6 @@ const handleSeatClick = (trainId, seatType, seatPrice, e, tripType) => {
                             </div>
                           </div>
 
-                          {/* Danh sách ghế chiều về */}
                           <div className="row mt-4">
                             {Array.isArray(train.seats) &&
                             train.seats.length > 0 ? (

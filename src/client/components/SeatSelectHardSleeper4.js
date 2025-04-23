@@ -1,4 +1,3 @@
-// components/SeatSelectHardSleeper4.jsx
 import React, { useEffect, useState } from "react";
 import Tooltip from "@mui/material/Tooltip";
 import "../../styles/SeatSelect.css";
@@ -40,13 +39,12 @@ const SeatSelectHardSleeper4 = ({
 
   useEffect(() => {
     if (
-      (!selectedCar || !filteredCars.some((car) => car.id === selectedCar)) &&
-      filteredCars.length > 0
+      filteredCars.length > 0 &&
+      !filteredCars.some((car) => car.id === selectedCar)
     ) {
       setSelectedCar(filteredCars[0].id);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedSeatType, filteredCars, selectedCar]);
+  }, [selectedSeatType, filteredCars, setSelectedCar]);
 
   useEffect(() => {
     if (selectedCar && allSeats) {
@@ -57,11 +55,18 @@ const SeatSelectHardSleeper4 = ({
         (c) => c.coach === selectedCar
       );
 
-      const seats = Array(48)
+      if (!coachData || !coachData.seat_numbers) {
+        console.log("No seats available for this coach or seat type");
+        setSeatsData([]);
+        return;
+      }
+
+      const maxSeats = coachData.seat_numbers.length || 32;
+      const seats = Array(maxSeats)
         .fill(null)
         .map((_, index) => {
           const seatNumber = (index + 1).toString().padStart(2, "0");
-          const realSeat = coachData?.seat_numbers?.find(
+          const realSeat = coachData.seat_numbers.find(
             (s) => s.seat_number === seatNumber
           );
           return realSeat || null;
@@ -78,7 +83,6 @@ const SeatSelectHardSleeper4 = ({
 
     if (selectedSeat === seatNumber) {
       setSelectedSeat(null);
-      // Gửi null để xóa vé khỏi giỏ hàng
       onAddToCart(null);
     } else {
       setSelectedSeat(seatNumber);
@@ -109,9 +113,15 @@ const SeatSelectHardSleeper4 = ({
     }
   };
 
+  const seatsPerRow = 16;
+  const numRows = Math.ceil(seatsData.length / seatsPerRow);
   const seatRows = [];
-  for (let i = 0; i < 2; i++) {
-    seatRows.push(seatsData.slice(i * 16, (i + 1) * 16)); // 16 ghế mỗi tầng
+  for (let i = 0; i < numRows; i++) {
+    seatRows.push(seatsData.slice(i * seatsPerRow, (i + 1) * seatsPerRow));
+  }
+
+  if (seatsData.length === 0) {
+    return <p>Không có ghế khả dụng trong toa này.</p>;
   }
 
   return (
@@ -175,9 +185,9 @@ const SeatSelectHardSleeper4 = ({
 
           <div className="et-col-8-9">
             <div className="et-bed-way et-full-width et-text-sm">
-              {[1, 2, 3, 4, 5, 6, 7, 8].map((comp) => (
-                <div key={comp} className="et-col-1-8 text-center ng-binding">
-                  Khoang {comp}
+              {[...Array(Math.ceil(seatsData.length / 4))].map((_, index) => (
+                <div key={index} className="et-col-1-8 text-center ng-binding">
+                  Khoang {index + 1}
                 </div>
               ))}
             </div>

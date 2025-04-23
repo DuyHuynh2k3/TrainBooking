@@ -1,6 +1,4 @@
-// components/SeatSelectHardSleeper6.jsx
 import React, { useEffect, useState } from "react";
-import { Button } from "react-bootstrap";
 import Tooltip from "@mui/material/Tooltip";
 import "../../styles/SeatSelect.css";
 import headtrain from "../../assets/img/train1.png";
@@ -40,13 +38,12 @@ const SeatSelectSoftSeat = ({
 
   useEffect(() => {
     if (
-      (!selectedCar || !filteredCars.some((car) => car.id === selectedCar)) &&
-      filteredCars.length > 0
+      filteredCars.length > 0 &&
+      !filteredCars.some((car) => car.id === selectedCar)
     ) {
       setSelectedCar(filteredCars[0].id);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedSeatType, filteredCars, selectedCar]);
+  }, [selectedSeatType, filteredCars, setSelectedCar]);
 
   useEffect(() => {
     if (selectedCar && allSeats) {
@@ -57,11 +54,18 @@ const SeatSelectSoftSeat = ({
         (c) => c.coach === selectedCar
       );
 
-      const seats = Array(48)
+      if (!coachData || !coachData.seat_numbers) {
+        console.log("No seats available for this coach or seat type");
+        setSeatsData([]);
+        return;
+      }
+
+      const maxSeats = coachData.seat_numbers.length || 48;
+      const seats = Array(maxSeats)
         .fill(null)
         .map((_, index) => {
           const seatNumber = (index + 1).toString().padStart(2, "0");
-          const realSeat = coachData?.seat_numbers?.find(
+          const realSeat = coachData.seat_numbers.find(
             (s) => s.seat_number === seatNumber
           );
           return realSeat || null;
@@ -78,7 +82,6 @@ const SeatSelectSoftSeat = ({
 
     if (selectedSeat === seatNumber) {
       setSelectedSeat(null);
-      // Gửi null để xóa vé khỏi giỏ hàng
       onAddToCart(null);
     } else {
       setSelectedSeat(seatNumber);
@@ -108,6 +111,14 @@ const SeatSelectSoftSeat = ({
       onAddToCart(ticket);
     }
   };
+
+  const seatsPerSide = Math.ceil(seatsData.length / 2);
+  const seatsPerRow = 6;
+  const numRowsPerSide = Math.ceil(seatsPerSide / seatsPerRow);
+
+  if (seatsData.length === 0) {
+    return <p>Không có ghế khả dụng trong toa này.</p>;
+  }
 
   return (
     <div className="container mt-2">
@@ -160,15 +171,17 @@ const SeatSelectSoftSeat = ({
         <div className="col-12 text-center et-car-floor">
           <div className="et-car-door"></div>
 
-          {/* Left side: 24 seats (4 rows, 6 seats each) */}
+          {/* Left side */}
           <div className="et-car-nm-64-half-block">
             <div className="et-full-width">
-              {[...Array(4)].map((_, rowIndex) => (
+              {[...Array(numRowsPerSide)].map((_, rowIndex) => (
                 <React.Fragment key={`left-row-${rowIndex}`}>
                   <div className="et-car-nm-64-sit">
                     {seatsData
-                      .filter((_, index) => index < 24) // Lấy các ghế chẵn cho bên trái
-                      .slice(rowIndex * 6, (rowIndex + 1) * 6)
+                      .slice(
+                        rowIndex * seatsPerRow,
+                        (rowIndex + 1) * seatsPerRow
+                      )
                       .map((seat, index) => (
                         <div
                           key={index}
@@ -186,9 +199,7 @@ const SeatSelectSoftSeat = ({
                                   }`}
                                   onClick={() =>
                                     seat.is_available &&
-                                    selectedSeat !== seat.seat_number
-                                      ? handleSeatSelect(seat.seat_number)
-                                      : null
+                                    handleSeatSelect(seat.seat_number)
                                   }
                                   style={{
                                     backgroundColor:
@@ -229,7 +240,7 @@ const SeatSelectSoftSeat = ({
                         </div>
                       ))}
                   </div>
-                  {rowIndex === 1 && ( // Chỉ thêm lối đi sau hàng 1 (index 1)
+                  {rowIndex === 1 && (
                     <div className="et-car-way et-full-width-seat"></div>
                   )}
                 </React.Fragment>
@@ -242,15 +253,17 @@ const SeatSelectSoftSeat = ({
             <div></div>
           </div>
 
-          {/* Right side: 24 seats (4 rows, 6 seats each) */}
+          {/* Right side */}
           <div className="et-car-nm-64-half-block">
             <div className="et-full-width" style={{ marginLeft: "30px" }}>
-              {[...Array(4)].map((_, rowIndex) => (
+              {[...Array(numRowsPerSide)].map((_, rowIndex) => (
                 <React.Fragment key={`right-row-${rowIndex}`}>
                   <div className="et-car-nm-64-sit">
                     {seatsData
-                      .filter((_, index) => index >= 24) // Lấy các ghế lẻ cho bên phải
-                      .slice(rowIndex * 6, (rowIndex + 1) * 6)
+                      .slice(
+                        seatsPerSide + rowIndex * seatsPerRow,
+                        seatsPerSide + (rowIndex + 1) * seatsPerRow
+                      )
                       .map((seat, index) => (
                         <div
                           key={index}
@@ -268,9 +281,7 @@ const SeatSelectSoftSeat = ({
                                   }`}
                                   onClick={() =>
                                     seat.is_available &&
-                                    selectedSeat !== seat.seat_number
-                                      ? handleSeatSelect(seat.seat_number)
-                                      : null
+                                    handleSeatSelect(seat.seat_number)
                                   }
                                   style={{
                                     backgroundColor:
@@ -311,7 +322,7 @@ const SeatSelectSoftSeat = ({
                         </div>
                       ))}
                   </div>
-                  {rowIndex === 1 && ( // Chỉ thêm lối đi sau hàng 1 (index 1)
+                  {rowIndex === 1 && (
                     <div className="et-car-way et-full-width"></div>
                   )}
                 </React.Fragment>
