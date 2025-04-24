@@ -34,7 +34,7 @@ const HomePageResult = () => {
       console.log("🔎 Đang fetch dữ liệu với params:", params);
 
       // Sử dụng axios với baseURL đã cấu hình
-      const response = await axios.get("/api/trains/search", { params });
+      const response = await axios.get("api/trains/search", { params });
 
       console.log("✅ Dữ liệu trả về từ API:", response.data);
 
