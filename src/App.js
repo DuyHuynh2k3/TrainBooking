@@ -9,7 +9,7 @@ const App = () => {
 
   useEffect(() => {
     // Gọi API từ Next.js backend
-    fetch(`${getApiBaseUrl()}/api/hello`)
+    fetch(`${getApiBaseUrl()}api/hello`)
       .then((response) => {
         if (!response.ok) {
           throw new Error("Lỗi khi gọi API");
