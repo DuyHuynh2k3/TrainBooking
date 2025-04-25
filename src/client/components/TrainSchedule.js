@@ -1,3 +1,4 @@
+// src/components/TrainSchedule.js
 import React, { useEffect, useState } from "react";
 import icon from "../../assets/img/train-icon.png";
 import "../../styles/TrainSchedule.css";
@@ -18,25 +19,25 @@ const TrainSchedule = ({
   error,
 }) => {
   const { station } = useStore();
-
   const { departureStation, arrivalStation, departureDate, returnDate } =
     station;
   const isRoundTrip = station.ticketType === "roundTrip";
-  console.log(isRoundTrip);
 
   // Trạng thái lưu thông tin ghế đang được chọn cho từng chuyến tàu
-  const [selectedSeats, setSelectedSeats] = useState({}); // Lưu trạng thái ghế đã chọn
+  const [selectedSeats, setSelectedSeats] = useState({});
   const [selectedSeatsReturn, setSelectedSeatsReturn] = useState({});
-  const [selectedSeatPrices, setSelectedSeatPrices] = useState({}); // Lưu giá ghế đã chọn
+  const [selectedSeatPrices, setSelectedSeatPrices] = useState({});
   const [selectedSeatPricesReturn, setSelectedSeatPricesReturn] = useState({});
   const [selectedCarDeparture, setSelectedCarDeparture] = useState(null);
   const [selectedCarReturn, setSelectedCarReturn] = useState(null);
   const [selectedSeatTypeDeparture, setSelectedSeatTypeDeparture] =
     useState(null);
   const [selectedSeatTypeReturn, setSelectedSeatTypeReturn] = useState(null);
-
   const [enrichedTrains, setEnrichedTrains] = useState([]);
   const [enrichedTrainsReturn, setEnrichedTrainsReturn] = useState([]);
+
+  const backendUrl =
+    process.env.REACT_APP_BACKEND_URL || "https://next-admin-train2.vercel.app";
 
   const seatTypeDisplayName = {
     soft: "Ngồi mềm",
@@ -44,13 +45,10 @@ const TrainSchedule = ({
     hard_sleeper_6: "Nằm khoang 6",
   };
 
-  console.log("aa", trains);
-  console.log("bb", trainsReturn);
-  console.log(enrichedTrains);
-
   function isValidDate(date) {
-    return date && !isNaN(new Date(date).getTime()); // Kiểm tra ngày hợp lệ
+    return date && !isNaN(new Date(date).getTime());
   }
+
   const fetchSeatAvailability = async ({
     trainID,
     travelDate,
@@ -65,11 +63,23 @@ const TrainSchedule = ({
         to_station_id: toStationID,
       });
 
-      const res = await fetch(`/api/seats?${query.toString()}`);
+      const url = `${backendUrl}/api/seats?${query.toString()}`;
+      console.log("Fetching seat availability from:", url);
+
+      const res = await fetch(url);
+      console.log("Response status:", res.status);
 
       if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.error || "Lỗi khi lấy dữ liệu ghế");
+        let errorData;
+        try {
+          errorData = await res.json();
+        } catch (jsonError) {
+          console.error("Failed to parse error response as JSON:", jsonError);
+          throw new Error(`HTTP ${res.status}: Không thể lấy dữ liệu ghế`);
+        }
+        throw new Error(
+          errorData.error || `HTTP ${res.status}: Lỗi khi lấy dữ liệu ghế`
+        );
       }
 
       const data = await res.json();
@@ -87,7 +97,10 @@ const TrainSchedule = ({
         })),
       }));
     } catch (error) {
-      console.error("Lỗi khi fetch seat availability:", error.message);
+      console.error("Lỗi khi fetch seat availability:", {
+        message: error.message,
+        stack: error.stack,
+      });
       return [];
     }
   };
@@ -206,9 +219,6 @@ const TrainSchedule = ({
     }
   }, [trainsReturn, station]);
 
-  console.log(departureDate, departureStation, arrivalStation);
-  console.log("hii", trains);
-
   const handleSeatClick = (trainId, seatType, seatPrice, e, tripType) => {
     e.preventDefault();
 
@@ -243,12 +253,7 @@ const TrainSchedule = ({
     );
   };
 
-  console.log("Dữ liệu cho chiều đi:", enrichedTrains);
-  console.log("Dữ liệu cho chiều về:", enrichedTrainsReturn);
-
   const renderSeatComponent = (train, stationtype = "Chiều Đi") => {
-    console.log("Train Seats in renderSeatComponent:", train.seats);
-
     if (!Array.isArray(train.seats) || train.seats.length === 0) {
       return <p>Không có ghế khả dụng cho chuyến tàu này.</p>;
     }
@@ -300,18 +305,15 @@ const TrainSchedule = ({
         }));
       }
     };
-    console.log("Selected Seats (Departure): ", selectedSeats);
-    console.log("Selected Seats (Return): ", selectedSeatsReturn);
+
     const trainid = train.trainID;
     const seatPrice = isReturn
       ? selectedSeatPricesReturn[train.trainID]
       : selectedSeatPrices[train.trainID];
 
-    const seatTypeToRender =
-      stationtype === "Chiều Về"
-        ? selectedSeatTypeReturn
-        : selectedSeatTypeDeparture;
-    console.log("Seat Type to Render:", seatTypeToRender);
+    const seatTypeToRender = isReturn
+      ? selectedSeatTypeReturn
+      : selectedSeatTypeDeparture;
 
     const selectedCar = isReturn ? selectedCarReturn : selectedCarDeparture;
     const setSelectedCar = isReturn
@@ -351,7 +353,6 @@ const TrainSchedule = ({
           departTime,
           arrivalTime,
         };
-        console.log("Ticket to Add: ", ticketWithTripType);
         onAddToCart(ticketWithTripType);
       },
       allSeats: train.seats,
@@ -382,12 +383,6 @@ const TrainSchedule = ({
   if (error) {
     return <div>{error}</div>;
   }
-  console.log(trains);
-  console.log("Dữ liệu trains:", trains);
-  console.log(
-    "Dữ liệu từng tàu:",
-    trains.map((train) => train.schedule)
-  );
 
   return (
     <div className="container-fluid mt-2">
@@ -521,9 +516,7 @@ const TrainSchedule = ({
                             <a
                               href="/"
                               className="chitietkm text-primary"
-                              style={{
-                                textDecoration: "none",
-                              }}
+                              style={{ textDecoration: "none" }}
                             >
                               Chi tiết khuyến mãi
                             </a>
