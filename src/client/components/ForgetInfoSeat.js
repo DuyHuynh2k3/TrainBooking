@@ -5,7 +5,6 @@ const ForgetInfoSeat = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState(null);
 
-  // Trong handleSubmit
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
@@ -14,7 +13,8 @@ const ForgetInfoSeat = () => {
     console.log("Gửi email:", email);
 
     try {
-      const response = await fetch("/api/send-booking-code", {
+      const backendUrl = "https://next-admin-train2.vercel.app"; // URL của backend
+      const response = await fetch(`${backendUrl}/api/send-booking-code`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
