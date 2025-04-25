@@ -1,3 +1,4 @@
+// src/components/InfoSeat.js
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { FiAlignJustify } from "react-icons/fi";
@@ -34,8 +35,12 @@ const InfoSeat = ({ cart, onAddToCart }) => {
     }
 
     try {
+      // Sử dụng URL tuyệt đối của backend Vercel
+      const backendUrl =
+        process.env.REACT_APP_API_BASE_URL ||
+        "https://next-admin-train2.vercel.app";
       const response = await fetch(
-        `/api/infoSeat?ticket_id=${ticketId}&email=${email}&phoneNumber=${phoneNumber}`
+        `${backendUrl}api/infoSeat?ticket_id=${ticketId}&email=${email}&phoneNumber=${phoneNumber}`
       );
 
       if (!response.ok) {
