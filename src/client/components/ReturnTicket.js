@@ -1,3 +1,4 @@
+// src/components/ReturnTicket.js
 import React, { useState } from "react";
 import { Steps, message } from "antd";
 import "../../styles/ReturnTicket.css";
@@ -17,6 +18,10 @@ const ReturnTicket = () => {
   const [phone, setPhone] = useState("");
   const [ticketInfo, setTicketInfo] = useState(null);
   const [loading, setLoading] = useState(false);
+
+  const backendUrl =
+    process.env.REACT_APP_API_BASE_URL ||
+    "https://next-admin-train2.vercel.app";
 
   const seatTypeDisplayName = {
     soft: "Ngồi mềm",
@@ -44,6 +49,18 @@ const ReturnTicket = () => {
       return false;
     }
 
+    // Validate email format
+    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      message.error("Email không hợp lệ");
+      return false;
+    }
+
+    // Validate phone format (ví dụ: 10 chữ số)
+    if (phone && !/^\d{10}$/.test(phone)) {
+      message.error("Số điện thoại không hợp lệ (phải có 10 chữ số)");
+      return false;
+    }
+
     return true;
   };
 
@@ -57,10 +74,10 @@ const ReturnTicket = () => {
     setLoading(true);
 
     try {
-      // Nếu có bookingCode (ticket_id), ưu tiên tìm kiếm bằng ticket_id
+      // Sử dụng URL tuyệt đối
       let query = bookingCode
-        ? `/api/infoSeat?ticket_id=${bookingCode}`
-        : `/api/infoSeat?email=${email}&phoneNumber=${phone}`;
+        ? `${backendUrl}/api/infoSeat?ticket_id=${bookingCode}`
+        : `${backendUrl}/api/infoSeat?email=${email}&phoneNumber=${phone}`;
 
       const response = await fetch(query);
       const data = await response.json();
@@ -73,6 +90,7 @@ const ReturnTicket = () => {
         message.error(data.error || "Có lỗi xảy ra");
       }
     } catch (error) {
+      console.error("Lỗi khi tra cứu thông tin vé:", error);
       message.error("Lỗi khi tra cứu thông tin vé: " + error.message);
     } finally {
       setLoading(false);
@@ -87,8 +105,10 @@ const ReturnTicket = () => {
       return;
     }
 
+    setLoading(true);
+
     try {
-      const response = await fetch("/api/return-ticket", {
+      const response = await fetch(`${backendUrl}/api/return-ticket`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -109,7 +129,10 @@ const ReturnTicket = () => {
         message.error(data.message || "Có lỗi xảy ra");
       }
     } catch (error) {
+      console.error("Lỗi khi gửi yêu cầu trả vé:", error);
       message.error("Lỗi khi gửi yêu cầu trả vé: " + error.message);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -252,7 +275,12 @@ const ReturnTicket = () => {
                       <br />
                       Toa - Ghế: {ticketInfo.coach_seat || "Không xác định"}
                     </td>
-                    <td>{ticketInfo.price.toLocaleString()} VNĐ</td>
+                    <td>
+                      {ticketInfo.price
+                        ? ticketInfo.price.toLocaleString()
+                        : "Không xác định"}{" "}
+                      VNĐ
+                    </td>
                     <td>
                       {ticketInfo.payment_status === "Paid"
                         ? "Đã thanh toán"
@@ -266,7 +294,11 @@ const ReturnTicket = () => {
             )}
             <div className="text-end">
               <strong>
-                Tổng tiền: {ticketInfo?.price.toLocaleString()} VNĐ
+                Tổng tiền:{" "}
+                {ticketInfo?.price
+                  ? ticketInfo.price.toLocaleString()
+                  : "Không xác định"}{" "}
+                VNĐ
               </strong>
             </div>
             <div className="mt-3">
