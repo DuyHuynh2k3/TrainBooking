@@ -1,3 +1,4 @@
+// src/components/InformationFormStep2.js
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "../../styles/InformationForm.css";
@@ -42,14 +43,43 @@ const InformationFormStep2 = ({ onNext, onBack, formData }) => {
   console.log(formData.passengerInfo.passengerType - 0);
   console.log("hahaha", cartTickets);
 
+  const backendUrl =
+    process.env.REACT_APP_BACKEND_URL || "https://next-admin-train2.vercel.app";
+
   useEffect(() => {
     const fetchStations = async () => {
       try {
-        const response = await fetch("/api/station");
+        const url = `${backendUrl}/api/station`;
+        console.log("Fetching stations from:", url);
+
+        const response = await fetch(url);
+        console.log("Response status:", response.status);
+
+        if (!response.ok) {
+          let errorData;
+          try {
+            errorData = await response.json();
+          } catch (jsonError) {
+            console.error("Failed to parse error response as JSON:", jsonError);
+            throw new Error(
+              `HTTP ${response.status}: Không thể tải danh sách ga`
+            );
+          }
+          throw new Error(
+            errorData.error ||
+              `HTTP ${response.status}: Lỗi khi tải danh sách ga`
+          );
+        }
+
         const data = await response.json();
+        console.log("Station List Data:", data);
         setStationList(data);
       } catch (error) {
-        console.error("Lỗi khi tải danh sách ga:", error);
+        console.error("Lỗi khi tải danh sách ga:", {
+          message: error.message,
+          stack: error.stack,
+        });
+        setStationList([]);
       }
     };
 
@@ -212,7 +242,7 @@ const InformationFormStep2 = ({ onNext, onBack, formData }) => {
         paymentData,
       });
 
-      const saveResponse = await fetch("/api/save-booking", {
+      const saveResponse = await fetch(`${backendUrl}/api/save-booking`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ customerData, ticketDataList, paymentData }),
@@ -246,7 +276,7 @@ const InformationFormStep2 = ({ onNext, onBack, formData }) => {
         endpoint = "/api/payment/napas";
       }
 
-      const paymentResponse = await fetch(endpoint, {
+      const paymentResponse = await fetch(`${backendUrl}${endpoint}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -674,8 +704,9 @@ const InformationFormStep2 = ({ onNext, onBack, formData }) => {
                 color="primary"
                 onClick={handleNextLocal}
                 sx={{ width: "165px" }}
+                disabled={isLoading}
               >
-                Đồng ý xác nhận
+                {isLoading ? "Đang xử lý..." : "Đồng ý xác nhận"}
               </Button>
             </Box>
           </React.Fragment>
