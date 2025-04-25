@@ -36,8 +36,11 @@ const TicketPrint = () => {
 
     const fetchTicket = async () => {
       try {
+        const backendUrl =
+          process.env.REACT_APP_API_BASE_URL ||
+          "https://next-admin-train2.vercel.app";
         const response = await fetch(
-          `/api/infoSeat?ticket_id=${ticketId}&email=${email}&phoneNumber=${phoneNumber}`
+          `${backendUrl}/api/infoSeat?ticket_id=${ticketId}&email=${email}&phoneNumber=${phoneNumber}`
         );
         if (!response.ok) {
           const errorData = await response.json();
