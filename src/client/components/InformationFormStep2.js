@@ -44,7 +44,7 @@ const InformationFormStep2 = ({ onNext, onBack, formData }) => {
   console.log("hahaha", cartTickets);
 
   const backendUrl =
-    process.env.REACT_APP_BACKEND_URL || "https://next-admin-train2.vercel.app";
+    process.env.REACT_APP_BACKEND_URL || "http://www.goticket.click";
 
   useEffect(() => {
     const fetchStations = async () => {

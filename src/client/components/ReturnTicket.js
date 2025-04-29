@@ -20,8 +20,7 @@ const ReturnTicket = () => {
   const [loading, setLoading] = useState(false);
 
   const backendUrl =
-    process.env.REACT_APP_API_BASE_URL ||
-    "https://next-admin-train2.vercel.app";
+    process.env.REACT_APP_API_BASE_URL || "http://www.goticket.click";
 
   const seatTypeDisplayName = {
     soft: "Ngồi mềm",

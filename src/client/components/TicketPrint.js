@@ -37,8 +37,7 @@ const TicketPrint = () => {
     const fetchTicket = async () => {
       try {
         const backendUrl =
-          process.env.REACT_APP_API_BASE_URL ||
-          "https://next-admin-train2.vercel.app";
+          process.env.REACT_APP_API_BASE_URL || "http://www.goticket.click";
         const response = await fetch(
           `${backendUrl}/api/infoSeat?ticket_id=${ticketId}&email=${email}&phoneNumber=${phoneNumber}`
         );

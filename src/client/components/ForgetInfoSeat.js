@@ -13,7 +13,7 @@ const ForgetInfoSeat = () => {
     console.log("Gửi email:", email);
 
     try {
-      const backendUrl = "https://next-admin-train2.vercel.app"; // URL của backend
+      const backendUrl = "http://www.goticket.click"; // URL của backend
       const response = await fetch(`${backendUrl}/api/send-booking-code`, {
         method: "POST",
         headers: {

@@ -8,7 +8,7 @@ const App = () => {
 
   useEffect(() => {
     // Gọi API từ Next.js backend
-    fetch(`https://next-admin-train2.vercel.app/api/hello`)
+    fetch(`http://www.goticket.click/api/hello`)
       .then((response) => {
         if (!response.ok) {
           throw new Error("Lỗi khi gọi API");

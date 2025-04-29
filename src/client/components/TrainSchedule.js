@@ -37,7 +37,7 @@ const TrainSchedule = ({
   const [enrichedTrainsReturn, setEnrichedTrainsReturn] = useState([]);
 
   const backendUrl =
-    process.env.REACT_APP_BACKEND_URL || "https://next-admin-train2.vercel.app";
+    process.env.REACT_APP_BACKEND_URL || "http://www.goticket.click";
 
   const seatTypeDisplayName = {
     soft: "Ngồi mềm",
