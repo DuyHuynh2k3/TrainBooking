@@ -8,7 +8,7 @@ const App = () => {
 
   useEffect(() => {
     // Gọi API từ Next.js backend
-    fetch(`http://localhost:3000/api/hello`)
+    fetch(`http://api.goticket.click/api/hello`)
       .then((response) => {
         if (!response.ok) {
           throw new Error("Lỗi khi gọi API");
