@@ -37,7 +37,7 @@ const TrainSchedule = ({
   const [enrichedTrainsReturn, setEnrichedTrainsReturn] = useState([]);
 
   const backendUrl =
-    process.env.REACT_APP_BACKEND_URL || "http://api.goticket.click";
+    process.env.REACT_APP_BACKEND_URL || "http://localhost:3000";
 
   const seatTypeDisplayName = {
     soft: "Ngồi mềm",
