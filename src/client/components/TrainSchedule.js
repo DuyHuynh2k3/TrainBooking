@@ -37,7 +37,11 @@ const TrainSchedule = ({
   const [enrichedTrainsReturn, setEnrichedTrainsReturn] = useState([]);
 
   const backendUrl =
+<<<<<<< Updated upstream
     process.env.REACT_APP_BACKEND_URL || "http://api.goticket.click";
+=======
+    process.env.REACT_APP_BACKEND_URL || "http://localhost:3000";
+>>>>>>> Stashed changes
 
   const seatTypeDisplayName = {
     soft: "Ngồi mềm",
@@ -352,6 +356,7 @@ const TrainSchedule = ({
           selectedSeatType: seatTypeToRender,
           departTime,
           arrivalTime,
+          train_stop: train.train_stop,
         };
         onAddToCart(ticketWithTripType);
       },
@@ -435,42 +440,64 @@ const TrainSchedule = ({
                                 {train.discount || "Không có giảm giá"}
                               </p>
                             </div>
-                            {train.schedule && train.schedule.length > 0 ? (
-                              train.schedule.map((schedule, index) => (
-                                <div
-                                  key={schedule.schedule_id}
-                                  className="d-flex justify-content-between"
-                                >
-                                  <div className="font-weight-bold gadi">
-                                    {isValidDate(schedule.departTime)
-                                      ? new Date(
-                                          schedule.departTime
-                                        ).toLocaleTimeString([], {
-                                          hour: "2-digit",
-                                          minute: "2-digit",
-                                          timeZone: "UTC",
-                                        })
-                                      : "Giờ xuất phát không hợp lệ"}
-                                  </div>
-                                  <span className="text-center">
-                                    <BsArrowRight className="muiten" />
-                                  </span>
-                                  <div className="font-weight-bold gaden">
-                                    {isValidDate(schedule.arrivalTime)
-                                      ? new Date(
-                                          schedule.arrivalTime
-                                        ).toLocaleTimeString([], {
-                                          hour: "2-digit",
-                                          minute: "2-digit",
-                                          timeZone: "UTC",
-                                        })
-                                      : "Giờ đến không hợp lệ"}
-                                  </div>
-                                </div>
-                              ))
-                            ) : (
-                              <p>Không có lịch trình tàu</p>
-                            )}
+                            {(() => {
+                              const departureStop = train.train_stop.find(
+                                (stop) =>
+                                  stop.station.station_name
+                                    .toLowerCase()
+                                    .trim() ===
+                                  station.departureStation.toLowerCase().trim()
+                              );
+                              const arrivalStop = train.train_stop.find(
+                                (stop) =>
+                                  stop.station.station_name
+                                    .toLowerCase()
+                                    .trim() ===
+                                  station.arrivalStation.toLowerCase().trim()
+                              );
+
+                              if (departureStop && arrivalStop) {
+                                return (
+                                  <>
+                                    <div className="d-flex justify-content-between">
+                                      <div className="font-weight-bold gadi">
+                                        {isValidDate(
+                                          departureStop.departure_time
+                                        )
+                                          ? new Date(
+                                              departureStop.departure_time
+                                            ).toLocaleTimeString([], {
+                                              hour: "2-digit",
+                                              minute: "2-digit",
+                                              timeZone: "UTC",
+                                            })
+                                          : "Giờ xuất phát không hợp lệ"}
+                                      </div>
+                                      <span className="text-center">
+                                        <BsArrowRight className="muiten" />
+                                      </span>
+                                      <div className="font-weight-bold gaden">
+                                        {isValidDate(arrivalStop.arrival_time)
+                                          ? new Date(
+                                              arrivalStop.arrival_time
+                                            ).toLocaleTimeString([], {
+                                              hour: "2-digit",
+                                              minute: "2-digit",
+                                              timeZone: "UTC",
+                                            })
+                                          : "Giờ đến không hợp lệ"}
+                                      </div>
+                                    </div>
+                                  </>
+                                );
+                              } else {
+                                return (
+                                  <>
+                                    <p>Không có lịch trình tàu</p>
+                                  </>
+                                );
+                              }
+                            })()}
 
                             <div className="d-flex justify-content-between text-muted mt-1">
                               <div className="gadi1">
@@ -483,7 +510,13 @@ const TrainSchedule = ({
                                         month: "2-digit",
                                       })} từ ${
                                         train.train_stop.find(
-                                          (stop) => stop.stop_order === 1
+                                          (stop) =>
+                                            stop.station.station_name
+                                              .toLowerCase()
+                                              .trim() ===
+                                            station.departureStation
+                                              .toLowerCase()
+                                              .trim()
                                         )?.station?.station_name
                                       }`
                                     : "Ngày xuất phát không hợp lệ"
@@ -500,19 +533,18 @@ const TrainSchedule = ({
                                       })} đến ${
                                         train.train_stop.find(
                                           (stop) =>
-                                            stop.stop_order ===
-                                            Math.max(
-                                              ...train.train_stop.map(
-                                                (stop) => stop.stop_order
-                                              )
-                                            )
+                                            stop.station.station_name
+                                              .toLowerCase()
+                                              .trim() ===
+                                            station.arrivalStation
+                                              .toLowerCase()
+                                              .trim()
                                         )?.station?.station_name
                                       }`
                                     : "Ngày đến không hợp lệ"
                                   : "Không có thông tin lịch trình đến"}
                               </div>
                             </div>
-
                             <a
                               href="/"
                               className="chitietkm text-primary"
@@ -654,43 +686,66 @@ const TrainSchedule = ({
                                   {train.discount || "Không có giảm giá"}
                                 </p>
                               </div>
-                              {train.schedule && train.schedule.length > 0 ? (
-                                train.schedule.map((schedule, index) => (
-                                  <div
-                                    key={schedule.schedule_id}
-                                    className="d-flex justify-content-between"
-                                  >
-                                    <div className="font-weight-bold gadi">
-                                      {isValidDate(schedule.departTime)
-                                        ? new Date(
-                                            schedule.departTime
-                                          ).toLocaleTimeString([], {
-                                            hour: "2-digit",
-                                            minute: "2-digit",
-                                            timeZone: "UTC",
-                                          })
-                                        : "Giờ xuất phát không hợp lệ"}
-                                    </div>
-                                    <span className="text-center">
-                                      <BsArrowRight className="muiten" />
-                                    </span>
-                                    <div className="font-weight-bold gaden">
-                                      {isValidDate(schedule.arrivalTime)
-                                        ? new Date(
-                                            schedule.arrivalTime
-                                          ).toLocaleTimeString([], {
-                                            hour: "2-digit",
-                                            minute: "2-digit",
-                                            timeZone: "UTC",
-                                          })
-                                        : "Giờ đến không hợp lệ"}
-                                    </div>
-                                  </div>
-                                ))
-                              ) : (
-                                <p>Không có lịch trình tàu</p>
-                              )}
+                              {(() => {
+                                const departureStop = train.train_stop.find(
+                                  (stop) =>
+                                    stop.station.station_name
+                                      .toLowerCase()
+                                      .trim() ===
+                                    station.arrivalStation.toLowerCase().trim()
+                                );
+                                const arrivalStop = train.train_stop.find(
+                                  (stop) =>
+                                    stop.station.station_name
+                                      .toLowerCase()
+                                      .trim() ===
+                                    station.departureStation
+                                      .toLowerCase()
+                                      .trim()
+                                );
 
+                                if (departureStop && arrivalStop) {
+                                  return (
+                                    <>
+                                      <div className="d-flex justify-content-between">
+                                        <div className="font-weight-bold gadi">
+                                          {isValidDate(
+                                            departureStop.departure_time
+                                          )
+                                            ? new Date(
+                                                departureStop.departure_time
+                                              ).toLocaleTimeString([], {
+                                                hour: "2-digit",
+                                                minute: "2-digit",
+                                                timeZone: "UTC",
+                                              })
+                                            : "Giờ xuất phát không hợp lệ"}
+                                        </div>
+                                        <span className="text-center">
+                                          <BsArrowRight className="muiten" />
+                                        </span>
+                                        <div className="font-weight-bold gaden">
+                                          {isValidDate(arrivalStop.arrival_time)
+                                            ? new Date(
+                                                arrivalStop.arrival_time
+                                              ).toLocaleTimeString([], {
+                                                hour: "2-digit",
+                                                minute: "2-digit",
+                                                timeZone: "UTC",
+                                              })
+                                            : "Giờ đến không hợp lệ"}
+                                        </div>
+                                      </div>
+                                    </>
+                                  );
+                                } else {
+                                  return (
+                                    <>
+                                      <p>Không có lịch trình tàu</p>
+                                    </>
+                                  );
+                                }
+                              })()}
                               <div className="d-flex justify-content-between text-muted mt-1">
                                 <div className="gadi1">
                                   {train.schedule && train.schedule.length > 0
@@ -702,7 +757,13 @@ const TrainSchedule = ({
                                           month: "2-digit",
                                         })} từ ${
                                           train.train_stop.find(
-                                            (stop) => stop.stop_order === 1
+                                            (stop) =>
+                                              stop.station.station_name
+                                                .toLowerCase()
+                                                .trim() ===
+                                              station.arrivalStation
+                                                .toLowerCase()
+                                                .trim()
                                           )?.station?.station_name
                                         }`
                                       : "Ngày xuất phát không hợp lệ"
@@ -721,19 +782,18 @@ const TrainSchedule = ({
                                         })} đến ${
                                           train.train_stop.find(
                                             (stop) =>
-                                              stop.stop_order ===
-                                              Math.max(
-                                                ...train.train_stop.map(
-                                                  (stop) => stop.stop_order
-                                                )
-                                              )
+                                              stop.station.station_name
+                                                .toLowerCase()
+                                                .trim() ===
+                                              station.departureStation
+                                                .toLowerCase()
+                                                .trim()
                                           )?.station?.station_name
                                         }`
                                       : "Ngày đến không hợp lệ"
                                     : "Không có thông tin lịch trình đến"}
                                 </div>
                               </div>
-
                               <a
                                 href="/"
                                 className="chitietkm text-primary"

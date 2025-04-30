@@ -1,30 +1,27 @@
 import React from "react";
 import Breadcrumbs from "@mui/material/Breadcrumbs";
-import { Link } from "react-router-dom";
+import { Link, useLocation, useParams } from "react-router-dom";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
-import { useLocation } from "react-router-dom";
 import "../../styles/Breadcrum.css";
 
 export default function Breadcrumb() {
   const location = useLocation();
+  const { category } = useParams();
 
-  // Danh sách các mục tin tức
-  const newsCategories = [
-    { path: "/homeblogpage", name: "Khuyến Mãi" },
-    { path: "/trong-nganh", name: "Trong Ngành" },
-    { path: "/noi-bo", name: "Nội Bộ" },
-    { path: "/atgt-duong-sat", name: "ATGT Đường Sắt" },
-  ];
+  // Map slug -> tên hiển thị
+  const categoryMap = {
+    "khuyen-mai": "Khuyến Mãi",
+    "trong-nganh": "Trong Ngành",
+    "noi-bo": "Nội Bộ",
+    "atgt-duong-sat": "ATGT Đường Sắt",
+  };
 
-  // Xác định mục tin tức hiện tại
-  const currentCategory = newsCategories.find(
-    (item) => item.path === location.pathname
-  );
+  const displayCategory = categoryMap[category] || null;
 
   return (
     <div className="container mt-2">
       <div className="row justify-content-center">
-        <div className="">
+        <div>
           <Breadcrumbs
             separator={<NavigateNextIcon fontSize="small" />}
             aria-label="breadcrumb"
@@ -32,16 +29,19 @@ export default function Breadcrumb() {
             <Link to="/" style={{ textDecoration: "none", color: "inherit", fontSize: "18px" }}>
               Trang chủ
             </Link>
-            <Link to="/homeblogpage" style={{ textDecoration: "none", color: "inherit", fontSize: "18px" }}>
-              Tin Tức
-            </Link>
-            {currentCategory && (
-              <Link
-                to={currentCategory.path}
-                style={{ textDecoration: "none", color: "inherit", fontSize: "18px", fontWeight: "bold" }}
-              >
-                {currentCategory.name}
+
+            {/* Nếu đang ở trang tin tức tổng hoặc trong từng mục tin tức */}
+            {location.pathname.startsWith("/blogs") && (
+              <Link to="/blogs" style={{ textDecoration: "none", color: "inherit", fontSize: "18px" }}>
+                Tin Tức
               </Link>
+            )}
+
+            {/* Nếu có category (chỉ khi vào từng mục con) */}
+            {displayCategory && (
+              <span style={{ fontSize: "18px", fontWeight: "bold", color: "#000" }}>
+                {displayCategory}
+              </span>
             )}
           </Breadcrumbs>
         </div>

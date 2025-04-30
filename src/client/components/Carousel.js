@@ -1,103 +1,53 @@
-import React from "react";
+import React, { useState } from "react";
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Autoplay } from "swiper/modules";
+
+import "swiper/css";
+import "../../styles/Carousel.css";
+
 import image1 from "../../assets/img/001.jpg";
 import image2 from "../../assets/img/002.jpg";
 import image3 from "../../assets/img/003.jpg";
 import bn1 from "../../assets/img/banner1.jpg";
 import bn2 from "../../assets/img/banner2.jpg";
-import "../../styles/Carousel.css";
 
 const Carousel = () => {
+  const [animate, setAnimate] = useState(false);
+
   return (
     <div className="container-fluid mt-2">
       <div className="row d-flex justify-content-center">
-        {/* Carousel on the left */}
+        {/* Carousel bên trái */}
         <div className="col-lg-7 p-0">
-          {" "}
-          {/* Giảm từ col-lg-7 xuống col-lg-6 */}
-          <div
-            id="carouselExampleIndicators"
-            className="carousel slide"
-            data-bs-ride="carousel"
+          <Swiper
+            modules={[Autoplay]}
+            autoplay={{
+              delay: 5000,
+              disableOnInteraction: false,
+            }}
+            loop={true}
+            speed={1000}  // Giảm thời gian chuyển slide xuống (800ms)
+            onSlideChange={() => {
+              setAnimate(false);
+              setTimeout(() => setAnimate(true), 50); // reset rồi bật lại animation
+            }}
+            className="mySwiper"
           >
-            <div className="carousel-indicators">
-              <button
-                type="button"
-                data-bs-target="#carouselExampleIndicators"
-                data-bs-slide-to="0"
-                className="active"
-                aria-current="true"
-                aria-label="Slide 1"
-              ></button>
-              <button
-                type="button"
-                data-bs-target="#carouselExampleIndicators"
-                data-bs-slide-to="1"
-                aria-label="Slide 2"
-              ></button>
-              <button
-                type="button"
-                data-bs-target="#carouselExampleIndicators"
-                data-bs-slide-to="2"
-                aria-label="Slide 3"
-              ></button>
-            </div>
-            <div className="carousel-inner">
-              <div className="carousel-item active">
+            {[image1, image2, image3].map((img, index) => (
+              <SwiperSlide key={index}>
                 <img
-                  src={image1}
-                  alt="Slide 1"
-                  className="img-fluid"
+                  src={img}
+                  alt={`Slide ${index + 1}`}
+                  className={`img-fluid ${animate ? "zoomOut" : ""}`}
                   style={{ height: "310px", width: "100%", objectFit: "cover" }}
                 />
-              </div>
-              <div className="carousel-item">
-                <img
-                  src={image2}
-                  alt="Slide 2"
-                  className="img-fluid"
-                  style={{ height: "310px", width: "100%", objectFit: "cover" }}
-                />
-              </div>
-              <div className="carousel-item">
-                <img
-                  src={image3}
-                  alt="Slide 3"
-                  className="img-fluid"
-                  style={{ height: "310px", width: "100%", objectFit: "cover" }}
-                />
-              </div>
-            </div>
-            <button
-              className="carousel-control-prev"
-              type="button"
-              data-bs-target="#carouselExampleIndicators"
-              data-bs-slide="prev"
-            >
-              <span
-                className="carousel-control-prev-icon"
-                aria-hidden="true"
-              ></span>
-              <span className="visually-hidden">Previous</span>
-            </button>
-            <button
-              className="carousel-control-next"
-              type="button"
-              data-bs-target="#carouselExampleIndicators"
-              data-bs-slide="next"
-            >
-              <span
-                className="carousel-control-next-icon"
-                aria-hidden="true"
-              ></span>
-              <span className="visually-hidden">Next</span>
-            </button>
-          </div>
+              </SwiperSlide>
+            ))}
+          </Swiper>
         </div>
 
-        {/* Banners on the right */}
+        {/* Banner bên phải */}
         <div className="col-lg-2 d-flex flex-column">
-          {" "}
-          {/* Giảm từ col-lg-3 xuống col-lg-2 */}
           <div className="mb-2">
             <img
               src={bn1}

@@ -10,6 +10,7 @@ const InfoSeat = ({ cart, onAddToCart }) => {
   const [phoneNumber, setPhoneNumber] = useState("");
   const [ticketInfo, setTicketInfo] = useState(null);
   const [error, setError] = useState("");
+  console.log("hah", ticketInfo);
 
   const seatTypeDisplayName = {
     soft: "Ngồi mềm",
@@ -37,7 +38,11 @@ const InfoSeat = ({ cart, onAddToCart }) => {
     try {
       // Sử dụng URL tuyệt đối của backend Vercel
       const backendUrl =
+<<<<<<< Updated upstream
         process.env.REACT_APP_API_BASE_URL || "http://api.goticket.click";
+=======
+        process.env.REACT_APP_API_BASE_URL || " http://localhost:3000";
+>>>>>>> Stashed changes
       const response = await fetch(
         `${backendUrl}/api/infoSeat?ticket_id=${ticketId}&email=${email}&phoneNumber=${phoneNumber}`
       );
@@ -177,11 +182,63 @@ const InfoSeat = ({ cart, onAddToCart }) => {
                             "Không xác định"}
                         </td>
                         <td>
-                          {ticketInfo.train?.train_name} {ticketInfo.departTime}{" "}
-                          - {ticketInfo.arrivalTime}
+                          {ticketInfo.train?.train_name || "Không xác định"}
                           <br />
-                          Toa: {ticketInfo.seattrain?.coach} Chỗ số:{" "}
-                          {ticketInfo.seattrain?.seat_number}
+                          {(() => {
+                            const departureStop = ticketInfo.train_stop?.find(
+                              (stop) =>
+                                stop.station.station_name
+                                  .toLowerCase()
+                                  .trim() ===
+                                (ticketInfo.tripType === "return"
+                                  ? ticketInfo.to_station?.station_name
+                                      .toLowerCase()
+                                      .trim()
+                                  : ticketInfo.from_station?.station_name
+                                      .toLowerCase()
+                                      .trim())
+                            );
+
+                            const arrivalStop = ticketInfo.train_stop?.find(
+                              (stop) =>
+                                stop.station.station_name
+                                  .toLowerCase()
+                                  .trim() ===
+                                (ticketInfo.tripType === "return"
+                                  ? ticketInfo.from_station?.station_name
+                                      .toLowerCase()
+                                      .trim()
+                                  : ticketInfo.to_station?.station_name
+                                      .toLowerCase()
+                                      .trim())
+                            );
+
+                            return (
+                              <>
+                                {departureStop && departureStop.departure_time
+                                  ? new Date(
+                                      departureStop.departure_time
+                                    ).toLocaleTimeString([], {
+                                      hour: "2-digit",
+                                      minute: "2-digit",
+                                      timeZone: "UTC",
+                                    })
+                                  : ticketInfo.departTime || "Không xác định"}
+                                {" - "}
+                                {arrivalStop && arrivalStop.arrival_time
+                                  ? new Date(
+                                      arrivalStop.arrival_time
+                                    ).toLocaleTimeString([], {
+                                      hour: "2-digit",
+                                      minute: "2-digit",
+                                      timeZone: "UTC",
+                                    })
+                                  : ticketInfo.arrivalTime || "Không xác định"}
+                              </>
+                            );
+                          })()}
+                          <br />
+                          Toa - Ghế: {ticketInfo.coach_seat || "Không xác định"}
                         </td>
                         <td>{ticketInfo.price.toLocaleString()} VNĐ</td>
                         <td>

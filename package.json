@@ -2,7 +2,11 @@
   "name": "sidebar",
   "version": "0.1.0",
   "private": true,
+<<<<<<< Updated upstream
   "proxy": "http://api.goticket.click",
+=======
+  "proxy": "http://localhost:3000",
+>>>>>>> Stashed changes
   "dependencies": {
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.0",
@@ -38,6 +42,7 @@
     "react-tooltip": "^5.28.1",
     "slick-carousel": "^1.8.1",
     "styled-components": "^6.1.15",
+    "swiper": "^11.2.6",
     "zustand": "^5.0.3"
   },
   "scripts": {

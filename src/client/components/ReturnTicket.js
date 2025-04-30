@@ -20,7 +20,11 @@ const ReturnTicket = () => {
   const [loading, setLoading] = useState(false);
 
   const backendUrl =
+<<<<<<< Updated upstream
     process.env.REACT_APP_API_BASE_URL || "http://api.goticket.click";
+=======
+    process.env.REACT_APP_API_BASE_URL || " http://localhost:3000";
+>>>>>>> Stashed changes
 
   const seatTypeDisplayName = {
     soft: "Ngồi mềm",
@@ -264,13 +268,54 @@ const ReturnTicket = () => {
                         ticketInfo.seatType ||
                         "Không xác định"}
                     </td>
+
                     <td>
                       Tàu: {ticketInfo.trainName || "Không xác định"} <br />
-                      Đi từ: {ticketInfo.fromStationName ||
-                        "Không xác định"}{" "}
-                      {ticketInfo.departTime || "Không xác định"} đến{" "}
-                      {ticketInfo.toStationName || "Không xác định"}{" "}
-                      {ticketInfo.arrivalTime || "Không xác định"}
+                      {(() => {
+                        const departureStop = ticketInfo.train_stop?.find(
+                          (stop) =>
+                            stop.station.station_name.toLowerCase().trim() ===
+                            (ticketInfo.tripType === "return"
+                              ? ticketInfo.toStationName.toLowerCase().trim()
+                              : ticketInfo.fromStationName.toLowerCase().trim())
+                        );
+
+                        const arrivalStop = ticketInfo.train_stop?.find(
+                          (stop) =>
+                            stop.station.station_name.toLowerCase().trim() ===
+                            (ticketInfo.tripType === "return"
+                              ? ticketInfo.fromStationName.toLowerCase().trim()
+                              : ticketInfo.toStationName.toLowerCase().trim())
+                        );
+
+                        return (
+                          <>
+                            Đi từ:{" "}
+                            {ticketInfo.fromStationName || "Không xác định"}
+                            {" "}
+                            {departureStop && departureStop.departure_time
+                              ? new Date(
+                                  departureStop.departure_time
+                                ).toLocaleTimeString([], {
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                  timeZone: "UTC",
+                                })
+                              : ticketInfo.departTime || "Không xác định"}
+                         {" "}   Đến: {ticketInfo.toStationName || "Không xác định"}
+                         {" "}
+                            {arrivalStop && arrivalStop.arrival_time
+                              ? new Date(
+                                  arrivalStop.arrival_time
+                                ).toLocaleTimeString([], {
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                  timeZone: "UTC",
+                                })
+                              : ticketInfo.arrivalTime || "Không xác định"}
+                          </>
+                        );
+                      })()}
                       <br />
                       Toa - Ghế: {ticketInfo.coach_seat || "Không xác định"}
                     </td>

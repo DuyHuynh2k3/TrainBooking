@@ -27,18 +27,10 @@ const AppRoutes = () => {
       <Route path="/gotrain" element={<GoTrain />} />
       <Route path="/bookingticket" element={<BookingTicket />} />
       {/* Routes cho Blog */}
-      <Route
-        path="/homeblogpage"
-        element={<HomeBlogPage category="khuyen-mai" />}
-      />
-      <Route
-        path="/trong-nganh"
-        element={<HomeBlogPage category="trong-nganh" />}
-      />
-      <Route
-        path="/atgt-duong-sat"
-        element={<HomeBlogPage category="atgt-duong-sat" />}
-      />
+      <Route path="/blogs/:category" element={<HomeBlogPage />} />
+       {/* Route mặc định (xem tất cả blog) */}
+       <Route path="/blogs" element={<HomeBlogPage />} />
+        {/* Route chi tiết blog */}
       <Route path="/blog/:id" element={<BlogDetailPage />} />
     </Routes>
   );

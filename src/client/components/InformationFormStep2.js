@@ -44,7 +44,11 @@ const InformationFormStep2 = ({ onNext, onBack, formData }) => {
   console.log("hahaha", cartTickets);
 
   const backendUrl =
+<<<<<<< Updated upstream
     process.env.REACT_APP_BACKEND_URL || "http://api.goticket.click";
+=======
+    process.env.REACT_APP_BACKEND_URL || " http://localhost:3000";
+>>>>>>> Stashed changes
 
   useEffect(() => {
     const fetchStations = async () => {
@@ -169,6 +173,22 @@ const InformationFormStep2 = ({ onNext, onBack, formData }) => {
           );
         }
 
+        const departureStop = ticket.train_stop?.find(
+          (stop) =>
+            stop.station.station_name.toLowerCase().trim() ===
+            (ticket.tripType === "return"
+              ? ticket.arrivalStation.toLowerCase().trim()
+              : ticket.departureStation.toLowerCase().trim())
+        );
+
+        const arrivalStop = ticket.train_stop?.find(
+          (stop) =>
+            stop.station.station_name.toLowerCase().trim() ===
+            (ticket.tripType === "return"
+              ? ticket.departureStation.toLowerCase().trim()
+              : ticket.arrivalStation.toLowerCase().trim())
+        );
+
         const ticketData = {
           fullName: passengerInfo[`passengerName-${index}`],
           passport: passport,
@@ -182,28 +202,24 @@ const InformationFormStep2 = ({ onNext, onBack, formData }) => {
           travel_date: ticket.departureDate,
           from_station_id: fromStation.station_id,
           to_station_id: toStation.station_id,
-          departTime: isValidDate(ticket.departTime)
-            ? new Date(ticket.departTime)
-                .getUTCHours()
-                .toString()
-                .padStart(2, "0") +
-              ":" +
-              new Date(ticket.departTime)
-                .getUTCMinutes()
-                .toString()
-                .padStart(2, "0")
-            : null,
-          arrivalTime: isValidDate(ticket.arrivalTime)
-            ? new Date(ticket.arrivalTime)
-                .getUTCHours()
-                .toString()
-                .padStart(2, "0") +
-              ":" +
-              new Date(ticket.arrivalTime)
-                .getUTCMinutes()
-                .toString()
-                .padStart(2, "0")
-            : null,
+          departTime:
+            departureStop && isValidDate(departureStop.departure_time)
+              ? new Date(departureStop.departure_time).toLocaleString("en-US", {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                  hour12: false,
+                  timeZone: "UTC",
+                })
+              : null,
+          arrivalTime:
+            arrivalStop && isValidDate(arrivalStop.arrival_time)
+              ? new Date(arrivalStop.arrival_time).toLocaleString("en-US", {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                  hour12: false,
+                  timeZone: "UTC",
+                })
+              : null,
           price: ticket.price + 1000,
           payment_status: "Paid",
           refund_status: "None",
@@ -551,25 +567,62 @@ const InformationFormStep2 = ({ onNext, onBack, formData }) => {
                                     style={{ fontSize: "16px" }}
                                   >
                                     Thời gian chạy:{" "}
-                                    {isValidDate(ticket.departTime)
-                                      ? new Date(
-                                          ticket.departTime
-                                        ).toLocaleTimeString([], {
-                                          hour: "2-digit",
-                                          minute: "2-digit",
-                                          timeZone: "UTC",
-                                        })
-                                      : "Giờ xuất phát không hợp lệ"}{" "}
-                                    -{" "}
-                                    {isValidDate(ticket.arrivalTime)
-                                      ? new Date(
-                                          ticket.arrivalTime
-                                        ).toLocaleTimeString([], {
-                                          hour: "2-digit",
-                                          minute: "2-digit",
-                                          timeZone: "UTC",
-                                        })
-                                      : "Giờ đến không hợp lệ"}
+                                    {(() => {
+                                      const fromStation =
+                                        ticket.departureStation
+                                          .toLowerCase()
+                                          .trim();
+                                      const toStation = ticket.arrivalStation
+                                        .toLowerCase()
+                                        .trim();
+
+                                      const departureStop =
+                                        ticket.train_stop?.find(
+                                          (stop) =>
+                                            stop.station.station_name
+                                              .toLowerCase()
+                                              .trim() === fromStation
+                                        );
+                                      const arrivalStop =
+                                        ticket.train_stop?.find(
+                                          (stop) =>
+                                            stop.station.station_name
+                                              .toLowerCase()
+                                              .trim() === toStation
+                                        );
+
+                                      if (departureStop && arrivalStop) {
+                                        return (
+                                          <>
+                                            {isValidDate(
+                                              departureStop.departure_time
+                                            )
+                                              ? new Date(
+                                                  departureStop.departure_time
+                                                ).toLocaleTimeString([], {
+                                                  hour: "2-digit",
+                                                  minute: "2-digit",
+                                                  timeZone: "UTC",
+                                                })
+                                              : "Giờ xuất phát không hợp lệ"}{" "}
+                                            -{" "}
+                                            {isValidDate(
+                                              arrivalStop.arrival_time
+                                            )
+                                              ? new Date(
+                                                  arrivalStop.arrival_time
+                                                ).toLocaleTimeString([], {
+                                                  hour: "2-digit",
+                                                  minute: "2-digit",
+                                                  timeZone: "UTC",
+                                                })
+                                              : "Giờ đến không hợp lệ"}
+                                          </>
+                                        );
+                                      } else {
+                                        return "Không có lịch trình tàu";
+                                      }
+                                    })()}
                                   </p>
                                 </div>
                               </div>

@@ -496,25 +496,45 @@ const InformationFormStep1 = ({ onNext, onBack, formData, updateFormData }) => {
                           </p>
                           <p className="m-0 text-dark fw-normal ms-1" style={{fontSize:"16px"}}>
                             Thời gian chạy:{" "}
-                              {isValidDate(ticket.departTime)
-                                ? new Date(
-                                    ticket.departTime
-                                  ).toLocaleTimeString([], {
-                                    hour: "2-digit",
-                                    minute: "2-digit",
-                                    timeZone: "UTC",
-                                  })
-                                : "Giờ xuất phát không hợp lệ"}{" "}
-                              -{" "}
-                              {isValidDate(ticket.arrivalTime)
-                                ? new Date(
-                                    ticket.arrivalTime
-                                  ).toLocaleTimeString([], {
-                                    hour: "2-digit",
-                                    minute: "2-digit",
-                                    timeZone: "UTC",
-                                  })
-                                : "Giờ đến không hợp lệ"}
+                            {(() => {
+                              const fromStation = ticket.departureStation.toLowerCase().trim();
+                              const toStation = ticket.arrivalStation.toLowerCase().trim();
+                            
+                              const departureStop = ticket.train_stop?.find(
+                                (stop) => stop.station.station_name.toLowerCase().trim() === fromStation
+                              );
+                              const arrivalStop = ticket.train_stop?.find(
+                                (stop) => stop.station.station_name.toLowerCase().trim() === toStation
+                              );
+                              
+                              if (departureStop && arrivalStop) {
+                                return (
+                                  <>
+                                    {isValidDate(departureStop.departure_time)
+                                      ? new Date(
+                                          departureStop.departure_time
+                                        ).toLocaleTimeString([], {
+                                          hour: "2-digit",
+                                          minute: "2-digit",
+                                          timeZone: "UTC",
+                                        })
+                                      : "Giờ xuất phát không hợp lệ"}{" "}
+                                    -{" "}
+                                    {isValidDate(arrivalStop.arrival_time)
+                                      ? new Date(
+                                          arrivalStop.arrival_time
+                                        ).toLocaleTimeString([], {
+                                          hour: "2-digit",
+                                          minute: "2-digit",
+                                          timeZone: "UTC",
+                                        })
+                                      : "Giờ đến không hợp lệ"}
+                                  </>
+                                );
+                              } else {
+                                return "Không có lịch trình tàu";
+                              }
+                            })()}
                           </p>
                         </div>
                       </div>

@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 import logo from "../../assets/logo.png";
 import "../../styles/Header.css";
 
@@ -7,93 +8,104 @@ const Header = () => {
     <header className="bg-primary text-white py-3">
       <div className="container d-flex justify-content-center align-items-center">
         <div className="d-flex align-items-center">
-          <img
-            src={logo}
-            alt="Logo"
-            className="img-fluid"
-            style={{ height: "50px", marginRight: "20px" }}
-          />
+          <Link to="/">
+            <img
+              src={logo}
+              alt="Logo"
+              className="img-fluid"
+              style={{ height: "50px", marginRight: "20px" }}
+            />
+          </Link>
         </div>
         <nav className="d-flex">
-          <a href="/" className="text-white text-decoration-none mx-3">
+          <Link to="/" className="text-white text-decoration-none mx-3">
             TÌM VÉ
-          </a>
-          <a href="/infoseat" className="text-white text-decoration-none mx-3">
+          </Link>
+          <Link to="/infoseat" className="text-white text-decoration-none mx-3">
             THÔNG TIN ĐẶT VÉ
-          </a>
-          <a
-            href="/returnticket"
+          </Link>
+          <Link
+            to="/returnticket"
             className="text-white text-decoration-none mx-3"
           >
             TRẢ VÉ
-          </a>
-        
+          </Link>
+
           <div className="dropdown">
-            <a
-              href="/"
+            <Link
+              to="#"
               className="text-white text-decoration-none mx-3 dropdown-toggle"
               id="dropdownMenuLink"
               data-bs-toggle="dropdown"
               aria-expanded="false"
             >
               TIN TỨC
-            </a>
+            </Link>
             <ul
               className="dropdown-menu bg-primary border-0"
               aria-labelledby="dropdownMenuLink"
             >
               <li>
-                <a className="dropdown-item text-white" href="/atgt-duong-sat">
+                <Link
+                  className="dropdown-item text-white"
+                  to="/blogs/atgt-duong-sat"
+                >
                   ATGT Đường Sắt
-                </a>
+                </Link>
               </li>
               <li>
-                <a className="dropdown-item text-white" href="/trong-nganh">
-                 Trong Ngành
-                </a>
+                <Link
+                  className="dropdown-item text-white"
+                  to="/blogs/trong-nganh"
+                >
+                  Trong Ngành
+                </Link>
               </li>
               <li>
-                <a className="dropdown-item text-white" href="/homeblogpage">
-                  Khuyễn Mãi
-                </a>
+                <Link
+                  className="dropdown-item text-white"
+                  to="/blogs/khuyen-mai"
+                >
+                  Khuyến Mãi
+                </Link>
               </li>
             </ul>
           </div>
 
           <div className="dropdown">
-            <a
-              href="/"
+            <Link
+              to="#"
               className="text-white text-decoration-none mx-3 dropdown-toggle"
               id="dropdownMenuLink"
               data-bs-toggle="dropdown"
               aria-expanded="false"
             >
               THÔNG TIN
-            </a>
+            </Link>
             <ul
               className="dropdown-menu bg-primary border-0"
               aria-labelledby="dropdownMenuLink"
             >
               <li>
-                <a className="dropdown-item text-white" href="/rules">
+                <Link className="dropdown-item text-white" to="/rules">
                   CÁC QUY ĐỊNH
-                </a>
+                </Link>
               </li>
               <li>
-                <a className="dropdown-item text-white" href="/">
+                <Link className="dropdown-item text-white" to="/">
                   HƯỚNG DẪN
-                </a>
+                </Link>
               </li>
               <li>
-                <a className="dropdown-item text-white" href="/contact">
+                <Link className="dropdown-item text-white" to="/contact">
                   LIÊN HỆ
-                </a>
+                </Link>
               </li>
             </ul>
           </div>
-          <a href="/findbill" className="text-white text-decoration-none mx-3">
+          <Link to="/findbill" className="text-white text-decoration-none mx-3">
             TRA CỨU HÓA ĐƠN
-          </a>
+          </Link>
         </nav>
       </div>
     </header>

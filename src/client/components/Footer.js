@@ -7,7 +7,7 @@ import "../../styles/Footer.css";
 
 const Footer = () => {
   return (
-    <footer className="footer mt-5">
+    <footer className="footer mt-5 ">
       <div className="container">
         <div className="row text-light">
           {/* Cột Tra cứu */}

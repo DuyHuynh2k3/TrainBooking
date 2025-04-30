@@ -46,7 +46,7 @@ const stations = [
   { title: "Sài Gòn" },
 ];
 
-const BookForm = ({ cart, onAddToCart, formatDate,onRemoveFromCart }) => {
+const BookForm = ({ cart, onAddToCart, formatDate, onRemoveFromCart }) => {
   const [departureStation, setDepartureStation] = useState("");
   const [arrivalStation, setArrivalStation] = useState("");
   const [departureDate, setDepartureDate] = useState("");
@@ -55,18 +55,18 @@ const BookForm = ({ cart, onAddToCart, formatDate,onRemoveFromCart }) => {
   const [ticketType, setTicketType] = useState(
     localStorage.getItem("ticketType") || ""
   ); // Mặc định là "Khứ hồi"
-  
+
   const { station, setStation } = useStore();
 
   const handleTicketTypeChange = (e) => {
     const selectedTicketType = e.target.value;
     setTicketType(selectedTicketType);
     localStorage.setItem("ticketType", selectedTicketType);
-  
+
     if (selectedTicketType === "oneWay") {
-      setArrivalDate(""); 
+      setArrivalDate("");
     }
-  
+
     // ✅ Đồng bộ với zustand store
     setStation({
       ...station,
@@ -74,7 +74,6 @@ const BookForm = ({ cart, onAddToCart, formatDate,onRemoveFromCart }) => {
       returnDate: selectedTicketType === "oneWay" ? "" : station.returnDate,
     });
   };
-  
 
   const isValidDate = (date) => {
     return !isNaN(Date.parse(date));
@@ -86,6 +85,7 @@ const BookForm = ({ cart, onAddToCart, formatDate,onRemoveFromCart }) => {
     hard_sleeper_6: "Nằm khoang 6",
   };
 
+  const today = new Date().toISOString().split("T")[0];
 
   const handleSearchClick = (event) => {
     event.preventDefault();
@@ -121,7 +121,10 @@ const BookForm = ({ cart, onAddToCart, formatDate,onRemoveFromCart }) => {
                 Thông tin hành trình
               </h5>
             </div>
-            <div className="card-body" style={{ maxHeight: "400px", overflowY: "auto" }}>
+            <div
+              className="card-body"
+              style={{ maxHeight: "400px", overflowY: "auto" }}
+            >
               <form>
                 <div className="row mb-3">
                   <div className="col-md-4">
@@ -201,6 +204,7 @@ const BookForm = ({ cart, onAddToCart, formatDate,onRemoveFromCart }) => {
                     <input
                       type="date"
                       className="form-control"
+                      min={today}
                       value={departureDate || station.departureDate}
                       onChange={(e) => setDepartureDate(e.target.value)}
                     />
@@ -212,6 +216,7 @@ const BookForm = ({ cart, onAddToCart, formatDate,onRemoveFromCart }) => {
                       type="date"
                       className="form-control"
                       value={arrivalDate || station.returnDate}
+                      min={today}
                       onChange={(e) => setArrivalDate(e.target.value)}
                       disabled={ticketType === "oneWay"} // Vô hiệu hóa thay vì ẩn đi
                       style={{
@@ -237,7 +242,10 @@ const BookForm = ({ cart, onAddToCart, formatDate,onRemoveFromCart }) => {
           </div>
         </div>
         <div className="col-lg-3 d-flex flex-column">
-          <div className="card mb-3 shadow" style={{ maxHeight: "350px", overflowY: "auto" }}>
+          <div
+            className="card mb-3 shadow"
+            style={{ maxHeight: "350px", overflowY: "auto" }}
+          >
             <div className="card-header text-white">
               <h5
                 className="card-title text-primary text-main m-0"
@@ -266,7 +274,9 @@ const BookForm = ({ cart, onAddToCart, formatDate,onRemoveFromCart }) => {
                       <div className="ticket-info d-flex justify-content-between align-items-start">
                         <div className="d-flex flex-column flex-grow-1 mt-2 text-start ">
                           <strong className="w-100 ms-4">Tàu:</strong>
-                          <strong className="w-100 ms-4">Thời gian chạy:</strong>
+                          <strong className="w-100 ms-4">
+                            Thời gian chạy:
+                          </strong>
                           <strong className="w-100 ms-4">Toa:</strong>
                           <strong className="w-100 ms-4">Loại:</strong>
                           <strong className="w-100 ms-4">Ghế:</strong>
@@ -276,28 +286,48 @@ const BookForm = ({ cart, onAddToCart, formatDate,onRemoveFromCart }) => {
                         <div className="d-flex flex-column flex-grow-1 align-items-start mt-2">
                           <span>{ticket.trainName}</span>
                           <span>
-                            {isValidDate(ticket.departTime)
-                              ? new Date(ticket.departTime).toLocaleTimeString(
-                                  [],
-                                  {
-                                    hour: "2-digit",
-                                    minute: "2-digit",
-                                    timeZone: "UTC",
-                                  }
-                                )
-                              : "Giờ xuất phát không hợp lệ"}{" "}
-                            -{" "}
-                            {isValidDate(ticket.arrivalTime)
-                              ? new Date(ticket.arrivalTime).toLocaleTimeString(
-                                  [],
-                                  {
-                                    hour: "2-digit",
-                                    minute: "2-digit",
-                                    timeZone: "UTC",
-                                  }
-                                )
-                              : "Giờ đến không hợp lệ"}
-                          </span>
+  {(() => {
+    const fromStation = ticket.departureStation.toLowerCase().trim();
+    const toStation = ticket.arrivalStation.toLowerCase().trim();
+
+    const departureStop = ticket.train_stop?.find((stop) =>
+      stop.station.station_name.toLowerCase().trim() === fromStation
+    );
+
+    const arrivalStop = ticket.train_stop?.find((stop) =>
+      stop.station.station_name.toLowerCase().trim() === toStation
+    );
+
+    if (departureStop && arrivalStop) {
+      const formattedDeparture = isValidDate(departureStop.departure_time)
+        ? new Date(departureStop.departure_time).toLocaleTimeString([], {
+            hour: "2-digit",
+            minute: "2-digit",
+            timeZone: "UTC",
+          })
+        : "Giờ xuất phát không hợp lệ";
+
+      const formattedArrival = isValidDate(arrivalStop.arrival_time)
+        ? new Date(arrivalStop.arrival_time).toLocaleTimeString([], {
+            hour: "2-digit",
+            minute: "2-digit",
+            timeZone: "UTC",
+          })
+        : "Giờ đến không hợp lệ";
+
+      return (
+        <>
+          {formattedDeparture} - {formattedArrival}
+        </>
+      );
+    }
+
+    return "Không có lịch trình tàu";
+  })()}
+</span>
+
+
+
                           <span>{ticket.car}</span>
                           <span>{seatTypeLabels[ticket.seatType]}</span>
                           <span>{ticket.seat}</span>
@@ -306,7 +336,8 @@ const BookForm = ({ cart, onAddToCart, formatDate,onRemoveFromCart }) => {
                         <button
                           className="btn-delete d-flex justify-content-end align-items-end"
                           style={{ height: "144px" }}
-                          onClick={() => onRemoveFromCart(index)}>
+                          onClick={() => onRemoveFromCart(index)}
+                        >
                           <RiDeleteBin5Line size={18} />
                         </button>
                       </div>

@@ -13,7 +13,11 @@ const ForgetInfoSeat = () => {
     console.log("Gửi email:", email);
 
     try {
+<<<<<<< Updated upstream
       const backendUrl = "http://api.goticket.click"; // URL của backend
+=======
+      const backendUrl = " http://localhost:3000"; // URL của backend
+>>>>>>> Stashed changes
       const response = await fetch(`${backendUrl}/api/send-booking-code`, {
         method: "POST",
         headers: {
