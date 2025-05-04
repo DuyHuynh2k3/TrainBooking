@@ -38,11 +38,7 @@ const InfoSeat = ({ cart, onAddToCart }) => {
     try {
       // Sử dụng URL tuyệt đối của backend Vercel
       const backendUrl =
-<<<<<<< Updated upstream
-        process.env.REACT_APP_API_BASE_URL || "http://api.goticket.click";
-=======
-        process.env.REACT_APP_API_BASE_URL || " http://localhost:3000";
->>>>>>> Stashed changes
+        process.env.REACT_APP_API_BASE_URL || "http://localhost:3000";
       const response = await fetch(
         `${backendUrl}/api/infoSeat?ticket_id=${ticketId}&email=${email}&phoneNumber=${phoneNumber}`
       );

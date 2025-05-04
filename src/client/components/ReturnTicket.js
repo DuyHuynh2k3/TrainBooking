@@ -20,11 +20,7 @@ const ReturnTicket = () => {
   const [loading, setLoading] = useState(false);
 
   const backendUrl =
-<<<<<<< Updated upstream
-    process.env.REACT_APP_API_BASE_URL || "http://api.goticket.click";
-=======
-    process.env.REACT_APP_API_BASE_URL || " http://localhost:3000";
->>>>>>> Stashed changes
+    process.env.REACT_APP_API_BASE_URL || "http://localhost:3000";
 
   const seatTypeDisplayName = {
     soft: "Ngồi mềm",

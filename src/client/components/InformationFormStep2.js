@@ -44,11 +44,7 @@ const InformationFormStep2 = ({ onNext, onBack, formData }) => {
   console.log("hahaha", cartTickets);
 
   const backendUrl =
-<<<<<<< Updated upstream
-    process.env.REACT_APP_BACKEND_URL || "http://api.goticket.click";
-=======
-    process.env.REACT_APP_BACKEND_URL || " http://localhost:3000";
->>>>>>> Stashed changes
+    process.env.REACT_APP_BACKEND_URL || "http://localhost:3000";
 
   useEffect(() => {
     const fetchStations = async () => {
@@ -173,22 +169,18 @@ const InformationFormStep2 = ({ onNext, onBack, formData }) => {
           );
         }
 
+        const fromStationName = ticket.departureStation.toLowerCase().trim();
+        const toStationName = ticket.arrivalStation.toLowerCase().trim();
+
         const departureStop = ticket.train_stop?.find(
           (stop) =>
-            stop.station.station_name.toLowerCase().trim() ===
-            (ticket.tripType === "return"
-              ? ticket.arrivalStation.toLowerCase().trim()
-              : ticket.departureStation.toLowerCase().trim())
+            stop.station.station_name.toLowerCase().trim() === fromStationName
         );
-
         const arrivalStop = ticket.train_stop?.find(
           (stop) =>
-            stop.station.station_name.toLowerCase().trim() ===
-            (ticket.tripType === "return"
-              ? ticket.departureStation.toLowerCase().trim()
-              : ticket.arrivalStation.toLowerCase().trim())
+            stop.station.station_name.toLowerCase().trim() === toStationName
         );
-
+        
         const ticketData = {
           fullName: passengerInfo[`passengerName-${index}`],
           passport: passport,
@@ -204,22 +196,26 @@ const InformationFormStep2 = ({ onNext, onBack, formData }) => {
           to_station_id: toStation.station_id,
           departTime:
             departureStop && isValidDate(departureStop.departure_time)
-              ? new Date(departureStop.departure_time).toLocaleString("en-US", {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                  hour12: false,
-                  timeZone: "UTC",
-                })
+              ? new Date(departureStop.departure_time).toLocaleTimeString(
+                  "en-GB",
+                  {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    hour12: false,
+                    timeZone: "UTC",
+                  }
+                )
               : null,
-          arrivalTime:
-            arrivalStop && isValidDate(arrivalStop.arrival_time)
-              ? new Date(arrivalStop.arrival_time).toLocaleString("en-US", {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                  hour12: false,
-                  timeZone: "UTC",
-                })
-              : null,
+              arrivalTime:
+              arrivalStop && isValidDate(arrivalStop.arrival_time)
+                ? new Date(arrivalStop.arrival_time)
+                    .toLocaleTimeString("en-GB", {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                      hour12: false,
+                      timeZone: "UTC",
+                    })
+                : null,     
           price: ticket.price + 1000,
           payment_status: "Paid",
           refund_status: "None",

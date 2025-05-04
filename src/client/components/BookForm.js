@@ -286,47 +286,63 @@ const BookForm = ({ cart, onAddToCart, formatDate, onRemoveFromCart }) => {
                         <div className="d-flex flex-column flex-grow-1 align-items-start mt-2">
                           <span>{ticket.trainName}</span>
                           <span>
-  {(() => {
-    const fromStation = ticket.departureStation.toLowerCase().trim();
-    const toStation = ticket.arrivalStation.toLowerCase().trim();
+                            {(() => {
+                              const fromStation = ticket.departureStation
+                                .toLowerCase()
+                                .trim();
+                              const toStation = ticket.arrivalStation
+                                .toLowerCase()
+                                .trim();
 
-    const departureStop = ticket.train_stop?.find((stop) =>
-      stop.station.station_name.toLowerCase().trim() === fromStation
-    );
+                              const departureStop = ticket.train_stop?.find(
+                                (stop) =>
+                                  stop.station.station_name
+                                    .toLowerCase()
+                                    .trim() === fromStation
+                              );
 
-    const arrivalStop = ticket.train_stop?.find((stop) =>
-      stop.station.station_name.toLowerCase().trim() === toStation
-    );
+                              const arrivalStop = ticket.train_stop?.find(
+                                (stop) =>
+                                  stop.station.station_name
+                                    .toLowerCase()
+                                    .trim() === toStation
+                              );
 
-    if (departureStop && arrivalStop) {
-      const formattedDeparture = isValidDate(departureStop.departure_time)
-        ? new Date(departureStop.departure_time).toLocaleTimeString([], {
-            hour: "2-digit",
-            minute: "2-digit",
-            timeZone: "UTC",
-          })
-        : "Giờ xuất phát không hợp lệ";
+                              if (departureStop && arrivalStop) {
+                                const formattedDeparture = isValidDate(
+                                  departureStop.departure_time
+                                )
+                                  ? new Date(
+                                      departureStop.departure_time
+                                    ).toLocaleTimeString([], {
+                                      hour: "2-digit",
+                                      minute: "2-digit",
+                                      timeZone: "UTC",
+                                    })
+                                  : "Giờ xuất phát không hợp lệ";
 
-      const formattedArrival = isValidDate(arrivalStop.arrival_time)
-        ? new Date(arrivalStop.arrival_time).toLocaleTimeString([], {
-            hour: "2-digit",
-            minute: "2-digit",
-            timeZone: "UTC",
-          })
-        : "Giờ đến không hợp lệ";
+                                const formattedArrival = isValidDate(
+                                  arrivalStop.arrival_time
+                                )
+                                  ? new Date(
+                                      arrivalStop.arrival_time
+                                    ).toLocaleTimeString([], {
+                                      hour: "2-digit",
+                                      minute: "2-digit",
+                                      timeZone: "UTC",
+                                    })
+                                  : "Giờ đến không hợp lệ";
 
-      return (
-        <>
-          {formattedDeparture} - {formattedArrival}
-        </>
-      );
-    }
+                                return (
+                                  <>
+                                    {formattedDeparture} - {formattedArrival}
+                                  </>
+                                );
+                              }
 
-    return "Không có lịch trình tàu";
-  })()}
-</span>
-
-
+                              return "Không có lịch trình tàu";
+                            })()}
+                          </span>
 
                           <span>{ticket.car}</span>
                           <span>{seatTypeLabels[ticket.seatType]}</span>

@@ -1,12 +1,11 @@
 import React from "react";
 import Breadcrumbs from "@mui/material/Breadcrumbs";
-import { Link, useLocation, useParams } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import "../../styles/Breadcrum.css";
 
-export default function Breadcrumb() {
+export default function Breadcrumb({ category, title }) {
   const location = useLocation();
-  const { category } = useParams();
 
   // Map slug -> tên hiển thị
   const categoryMap = {
@@ -16,7 +15,7 @@ export default function Breadcrumb() {
     "atgt-duong-sat": "ATGT Đường Sắt",
   };
 
-  const displayCategory = categoryMap[category] || null;
+  const displayCategory = category ? categoryMap[category] || category : null;
 
   return (
     <div className="container mt-2">
@@ -30,17 +29,27 @@ export default function Breadcrumb() {
               Trang chủ
             </Link>
 
-            {/* Nếu đang ở trang tin tức tổng hoặc trong từng mục tin tức */}
+            {/* Luôn hiển thị "Tin Tức" nếu URL bắt đầu bằng /blogs */}
             {location.pathname.startsWith("/blogs") && (
               <Link to="/blogs" style={{ textDecoration: "none", color: "inherit", fontSize: "18px" }}>
                 Tin Tức
               </Link>
             )}
 
-            {/* Nếu có category (chỉ khi vào từng mục con) */}
+            {/* Hiển thị category nếu có */}
             {displayCategory && (
-              <span style={{ fontSize: "18px", fontWeight: "bold", color: "#000" }}>
+              <Link 
+                to={`/blogs/${category}`} 
+                style={{ textDecoration: "none", color: "inherit", fontSize: "18px" }}
+              >
                 {displayCategory}
+              </Link>
+            )}
+
+            {/* Hiển thị title nếu có */}
+            {title && (
+              <span style={{ fontSize: "18px", fontWeight: "bold", color: "inherit" }}>
+                {title}
               </span>
             )}
           </Breadcrumbs>

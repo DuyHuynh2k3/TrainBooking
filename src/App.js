@@ -8,11 +8,7 @@ const App = () => {
 
   useEffect(() => {
     // Gọi API từ Next.js backend
-<<<<<<< Updated upstream
-    fetch(`http://api.goticket.click/api/hello`)
-=======
     fetch(`http://localhost:3000/api/hello`)
->>>>>>> Stashed changes
       .then((response) => {
         if (!response.ok) {
           throw new Error("Lỗi khi gọi API");
