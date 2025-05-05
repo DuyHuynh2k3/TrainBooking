@@ -13,7 +13,9 @@ function BlogDetailPage() {
   useEffect(() => {
     const fetchBlog = async () => {
       try {
-        const response = await fetch(`http://localhost:3000/api/blogs/${id}`);
+        const response = await fetch(
+          `http://api.goticket.click/api/blogs/${id}`
+        );
         if (!response.ok) {
           throw new Error(`HTTP error! Status: ${response.status}`);
         }
@@ -62,7 +64,11 @@ function BlogDetailPage() {
                   src={section.imageUrl || "/default.jpg"}
                   alt={`Ảnh ${index + 1}`}
                   className="img-fluid rounded mb-3"
-                  style={{ maxHeight: "400px", objectFit: "cover", width: "100%" }}
+                  style={{
+                    maxHeight: "400px",
+                    objectFit: "cover",
+                    width: "100%",
+                  }}
                 />
                 <div
                   className="blog-content"

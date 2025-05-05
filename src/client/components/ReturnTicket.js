@@ -20,7 +20,7 @@ const ReturnTicket = () => {
   const [loading, setLoading] = useState(false);
 
   const backendUrl =
-    process.env.REACT_APP_API_BASE_URL || "http://localhost:3000";
+    process.env.REACT_APP_API_BASE_URL || "http://api.goticket.click";
 
   const seatTypeDisplayName = {
     soft: "Ngồi mềm",
@@ -287,8 +287,7 @@ const ReturnTicket = () => {
                         return (
                           <>
                             Đi từ:{" "}
-                            {ticketInfo.fromStationName || "Không xác định"}
-                            {" "}
+                            {ticketInfo.fromStationName || "Không xác định"}{" "}
                             {departureStop && departureStop.departure_time
                               ? new Date(
                                   departureStop.departure_time
@@ -297,9 +296,8 @@ const ReturnTicket = () => {
                                   minute: "2-digit",
                                   timeZone: "UTC",
                                 })
-                              : ticketInfo.departTime || "Không xác định"}
-                         {" "}   Đến: {ticketInfo.toStationName || "Không xác định"}
-                         {" "}
+                              : ticketInfo.departTime || "Không xác định"}{" "}
+                            Đến: {ticketInfo.toStationName || "Không xác định"}{" "}
                             {arrivalStop && arrivalStop.arrival_time
                               ? new Date(
                                   arrivalStop.arrival_time

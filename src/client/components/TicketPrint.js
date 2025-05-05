@@ -37,7 +37,7 @@ const TicketPrint = () => {
     const fetchTicket = async () => {
       try {
         const backendUrl =
-          process.env.REACT_APP_API_BASE_URL || "http://localhost:3000";
+          process.env.REACT_APP_API_BASE_URL || "http://api.goticket.click";
         const response = await fetch(
           `${backendUrl}/api/infoSeat?ticket_id=${ticketId}&email=${email}&phoneNumber=${phoneNumber}`
         );

@@ -44,7 +44,7 @@ const InformationFormStep2 = ({ onNext, onBack, formData }) => {
   console.log("hahaha", cartTickets);
 
   const backendUrl =
-    process.env.REACT_APP_BACKEND_URL || "http://localhost:3000";
+    process.env.REACT_APP_BACKEND_URL || "http://api.goticket.click";
 
   useEffect(() => {
     const fetchStations = async () => {
@@ -180,7 +180,7 @@ const InformationFormStep2 = ({ onNext, onBack, formData }) => {
           (stop) =>
             stop.station.station_name.toLowerCase().trim() === toStationName
         );
-        
+
         const ticketData = {
           fullName: passengerInfo[`passengerName-${index}`],
           passport: passport,
@@ -206,16 +206,15 @@ const InformationFormStep2 = ({ onNext, onBack, formData }) => {
                   }
                 )
               : null,
-              arrivalTime:
-              arrivalStop && isValidDate(arrivalStop.arrival_time)
-                ? new Date(arrivalStop.arrival_time)
-                    .toLocaleTimeString("en-GB", {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                      hour12: false,
-                      timeZone: "UTC",
-                    })
-                : null,     
+          arrivalTime:
+            arrivalStop && isValidDate(arrivalStop.arrival_time)
+              ? new Date(arrivalStop.arrival_time).toLocaleTimeString("en-GB", {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                  hour12: false,
+                  timeZone: "UTC",
+                })
+              : null,
           price: ticket.price + 1000,
           payment_status: "Paid",
           refund_status: "None",
