@@ -251,12 +251,18 @@ const InformationFormStep2 = ({ onNext, onBack, formData }) => {
         customerData,
         ticketDataList,
         paymentData,
+        sendEmail: false, // Thêm vào log
       });
 
       const saveResponse = await fetch(`${backendUrl}/api/save-booking`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ customerData, ticketDataList, paymentData }),
+        body: JSON.stringify({
+          customerData,
+          ticketDataList,
+          paymentData,
+          sendEmail: false,
+        }), // Thêm sendEmail
       });
 
       if (!saveResponse.ok) {
