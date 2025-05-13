@@ -427,9 +427,7 @@ const InformationFormStep1 = ({ onNext, onBack, formData, updateFormData }) => {
                             <option value="">Chọn đối tượng</option>
                             <option value="0">Người lớn</option>
                             <option value="1">Trẻ em</option>
-                            <option value="2">
-                              Người cao tuổi
-                            </option>
+                            <option value="2">Người cao tuổi</option>
                             <option value="3">Sinh viên</option>
                           </select>
                           {errors[`passengerType-${index}`] && (
@@ -485,28 +483,60 @@ const InformationFormStep1 = ({ onNext, onBack, formData, updateFormData }) => {
                         />
                         <div className="text-start">
                           {" "}
-                          <p className="m-0 text-dark fw-normal ms-1" style={{fontSize:"16px"}}>Tàu: {ticket.trainName}</p>
-                          <p className="m-0 text-dark fw-normal ms-1" style={{fontSize:"16px"}}>Toa: {ticket.car}</p>
-                          <p className="m-0 text-dark fw-normal ms-1" style={{fontSize:"16px"}}> Ghế: {ticket.seat}</p>
-                          <p className="m-0 text-dark fw-normal ms-1" style={{fontSize:"16px"}}>
+                          <p
+                            className="m-0 text-dark fw-normal ms-1"
+                            style={{ fontSize: "16px" }}
+                          >
+                            Tàu: {ticket.trainName}
+                          </p>
+                          <p
+                            className="m-0 text-dark fw-normal ms-1"
+                            style={{ fontSize: "16px" }}
+                          >
+                            Toa: {ticket.car}
+                          </p>
+                          <p
+                            className="m-0 text-dark fw-normal ms-1"
+                            style={{ fontSize: "16px" }}
+                          >
+                            {" "}
+                            Ghế: {ticket.seat}
+                          </p>
+                          <p
+                            className="m-0 text-dark fw-normal ms-1"
+                            style={{ fontSize: "16px" }}
+                          >
                             Loại:{" "}
                             {seatTypeDisplayName[ticket.seatType] ||
                               ticket.seatType}
                             .
                           </p>
-                          <p className="m-0 text-dark fw-normal ms-1" style={{fontSize:"16px"}}>
+                          <p
+                            className="m-0 text-dark fw-normal ms-1"
+                            style={{ fontSize: "16px" }}
+                          >
                             Thời gian chạy:{" "}
                             {(() => {
-                              const fromStation = ticket.departureStation.toLowerCase().trim();
-                              const toStation = ticket.arrivalStation.toLowerCase().trim();
-                            
+                              const fromStation = ticket.departureStation
+                                .toLowerCase()
+                                .trim();
+                              const toStation = ticket.arrivalStation
+                                .toLowerCase()
+                                .trim();
+
                               const departureStop = ticket.train_stop?.find(
-                                (stop) => stop.station.station_name.toLowerCase().trim() === fromStation
+                                (stop) =>
+                                  stop.station.station_name
+                                    .toLowerCase()
+                                    .trim() === fromStation
                               );
                               const arrivalStop = ticket.train_stop?.find(
-                                (stop) => stop.station.station_name.toLowerCase().trim() === toStation
+                                (stop) =>
+                                  stop.station.station_name
+                                    .toLowerCase()
+                                    .trim() === toStation
                               );
-                              
+
                               if (departureStop && arrivalStop) {
                                 return (
                                   <>
@@ -792,98 +822,6 @@ const InformationFormStep1 = ({ onNext, onBack, formData, updateFormData }) => {
                         <div style={{ fontSize: "14px", color: "#666" }}>
                           - Nhập mã MOMODSVN giảm đến 100k tại mục Ưu đãi
                         </div>
-                      </div>
-                    </div>
-                  }
-                />
-              </div>
-              <div className="payment-method-container">
-                <FormControlLabel
-                  value="napas"
-                  control={<Radio />}
-                  label={
-                    <div style={{ display: "flex", alignItems: "center" }}>
-                      <img
-                        src={bankLogo}
-                        alt="Bank Logo"
-                        style={{ marginRight: "10px" }}
-                      />
-                      <div>
-                        <div>
-                          Thanh toán trực tuyến qua cổng thanh toán Napas
-                        </div>
-                        <span
-                          style={{
-                            fontSize: "14px",
-                            color: "#666",
-                          }}
-                        >
-                          -Bằng thẻ nội địa, thẻ quốc tế qua cổng của công ty cổ
-                          phần thanh toán quốc gia Việt Nam - Napas
-                          <br />
-                          <div
-                            className="d-flex"
-                            style={{
-                              marginTop: "10px",
-                            }}
-                          >
-                            <div
-                              style={{
-                                fontSize: "14px",
-                                padding: "10px",
-                                background: "#FAFAFA",
-                                width: "380px",
-                                marginRight: "20px",
-                                cursor: "pointer",
-                              }}
-                              className="buttonn-check"
-                              onClick={() => handleCardClick("atm")}
-                            >
-                              <img
-                                src={
-                                  selectedCard === "atm"
-                                    ? checkLogo
-                                    : uncheckLogo
-                                }
-                                alt="checked"
-                                style={{ width: "13px", borderRadius: "13px" }}
-                              />
-                              <img
-                                src={atmLogo}
-                                alt="ATM Logo"
-                                style={{ width: "30px" }}
-                              />
-                              Thẻ ATM nội địa (Hỗ trợ Internet Banking)
-                            </div>
-                            <div
-                              style={{
-                                fontSize: "14px",
-                                padding: "10px",
-                                background: "#FAFAFA",
-                                width: "380px",
-                                cursor: "pointer",
-                              }}
-                              className="buttonn-check"
-                              onClick={() => handleCardClick("visa")}
-                            >
-                              <img
-                                src={
-                                  selectedCard === "visa"
-                                    ? checkLogo
-                                    : uncheckLogo
-                                }
-                                alt="checked"
-                                style={{ width: "13px", borderRadius: "13px" }}
-                              />
-                              <img
-                                src={visaLogo}
-                                alt="visaLogo"
-                                style={{ width: "30px" }}
-                              />
-                              Thẻ quốc tế Visa, Master
-                            </div>
-                          </div>
-                        </span>
                       </div>
                     </div>
                   }

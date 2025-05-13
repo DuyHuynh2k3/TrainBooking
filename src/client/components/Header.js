@@ -103,9 +103,6 @@ const Header = () => {
               </li>
             </ul>
           </div>
-          <Link to="/findbill" className="text-white text-decoration-none mx-3">
-            TRA CỨU HÓA ĐƠN
-          </Link>
         </nav>
       </div>
     </header>

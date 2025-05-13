@@ -5,11 +5,11 @@ import { Autoplay } from "swiper/modules";
 import "swiper/css";
 import "../../styles/Carousel.css";
 
-import image1 from "../../assets/img/001.jpg";
-import image2 from "../../assets/img/002.jpg";
-import image3 from "../../assets/img/003.jpg";
-import bn1 from "../../assets/img/banner1.jpg";
-import bn2 from "../../assets/img/banner2.jpg";
+import image1 from "../../assets/img/8.jpg";
+import image2 from "../../assets/img/9.jpg";
+import image3 from "../../assets/img/10.jpg";
+import bn1 from "../../assets/img//4.jpg";
+import bn2 from "../../assets/img/5.jpg";
 
 const Carousel = () => {
   const [animate, setAnimate] = useState(false);
@@ -26,7 +26,7 @@ const Carousel = () => {
               disableOnInteraction: false,
             }}
             loop={true}
-            speed={1000}  // Giảm thời gian chuyển slide xuống (800ms)
+            speed={1000} // Giảm thời gian chuyển slide xuống (800ms)
             onSlideChange={() => {
               setAnimate(false);
               setTimeout(() => setAnimate(true), 50); // reset rồi bật lại animation
