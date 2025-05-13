@@ -32,7 +32,7 @@ function HomeBlogPage() {
   useEffect(() => {
     const fetchBlogs = async () => {
       try {
-        let apiUrl = "http://api.goticket.click/api/blogs";
+        let apiUrl = "https://api.goticket.click/api/blogs";
 
         // Thêm param category nếu có
         if (category) {

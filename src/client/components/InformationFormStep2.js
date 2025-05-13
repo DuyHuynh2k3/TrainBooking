@@ -44,7 +44,7 @@ const InformationFormStep2 = ({ onNext, onBack, formData }) => {
   console.log("hahaha", cartTickets);
 
   const backendUrl =
-    process.env.REACT_APP_BACKEND_URL || "http://api.goticket.click";
+    process.env.REACT_APP_BACKEND_URL || "https://api.goticket.click";
 
   useEffect(() => {
     const fetchStations = async () => {

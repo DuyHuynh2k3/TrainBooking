@@ -20,7 +20,7 @@ const ReturnTicket = () => {
   const [loading, setLoading] = useState(false);
 
   const backendUrl =
-    process.env.REACT_APP_API_BASE_URL || "http://api.goticket.click";
+    process.env.REACT_APP_API_BASE_URL || "https://api.goticket.click";
 
   const seatTypeDisplayName = {
     soft: "Ngồi mềm",

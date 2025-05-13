@@ -14,7 +14,7 @@ function BlogDetailPage() {
     const fetchBlog = async () => {
       try {
         const response = await fetch(
-          `http://api.goticket.click/api/blogs/${id}`
+          `https://api.goticket.click/api/blogs/${id}`
         );
         if (!response.ok) {
           throw new Error(`HTTP error! Status: ${response.status}`);
